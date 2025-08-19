@@ -25,36 +25,36 @@
         <q-btn flat round dense icon="notifications" class="gt-sm neon-icon" />
         <q-btn flat round dense icon="account_circle" class="gt-sm neon-icon" />
 
-        <!-- Log In & Sign Up -->
-        <q-btn outline color="white" label="Log In" class="q-ml-sm btn-glow" @click="showLogin = true" />
-        <q-btn unelevated color="secondary" label="Sign Up" class="q-ml-sm btn-gradient" @click="showRegister = true" />
+        <!-- Instead of dialogs → use routing -->
+        <q-btn
+          outline
+          color="white"
+          label="Log In"
+          class="q-ml-sm btn-glow"
+          @click="goToLogin"
+        />
+        <q-btn
+          unelevated
+          color="secondary"
+          label="Sign Up"
+          class="q-ml-sm btn-gradient"
+          @click="goToRegister"
+        />
       </div>
     </q-toolbar>
-
-    <!-- Login Modal -->
-    <q-dialog v-model="showLogin">
-      <LoginForm @logged-in="showLogin = false" />
-    </q-dialog>
-
-    <!-- Register Modal -->
-    <q-dialog v-model="showRegister">
-      <RegisterForm @registered="showRegister = false" />
-    </q-dialog>
   </q-header>
 </template>
 
 <script>
-import LoginForm from "../forms/LoginForm.vue";
-import RegisterForm from "../forms/RegisterForm.vue";
-
 export default {
   name: "MainNavbar",
-  components: { LoginForm, RegisterForm },
-  data() {
-    return {
-      showLogin: false,
-      showRegister: false,
-    };
+  methods: {
+    goToLogin() {
+      this.$router.push("/auth/login");
+    },
+    goToRegister() {
+      this.$router.push("/auth/register");
+    },
   },
 };
 </script>
