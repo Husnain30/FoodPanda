@@ -1,228 +1,184 @@
 <template>
   <q-page class="home-page">
     <!-- Hero Section -->
-    <section class="hero-section">
-      <div class="hero-content">
-        <h1 class="hero-title">
-          <span class="title-line">Craving something</span>
-          <span class="title-line accent-text">delicious?</span>
+    <section class="hero-section text-white text-center">
+      <div class="hero-content q-pa-xl animate-fade">
+        <h1 class="text-h2 text-bold q-mb-md animate-slide">
+          Craving something delicious?
         </h1>
-        <p class="hero-subtitle">Get food delivered from your favorite restaurants in minutes</p>
-        
-        <div class="search-container">
+        <p class="text-h6 q-mb-xl animate-fade-delay">
+          Get food delivered right to your door from your favorite restaurants
+        </p>
+
+        <!-- Search -->
+        <div class="search-container q-mb-xl">
           <q-input
-            filled
             v-model="search"
-            placeholder="What are you craving today?"
+            placeholder="Enter your delivery address"
+            rounded
+            outlined
+            bg-color="white"
             class="search-input"
-            @keyup.enter="performSearch"
           >
             <template v-slot:append>
-              <q-icon name="search" class="cursor-pointer" @click="performSearch" />
+              <q-btn round color="primary" icon="search" @click="findFood" />
             </template>
           </q-input>
-          <q-btn 
-            color="primary" 
-            label="Find Food" 
-            class="search-btn" 
-            @click="performSearch"
-          />
         </div>
-        
-        <div class="popular-searches">
-          <span>Popular: </span>
-          <q-btn 
-            v-for="(item, index) in popularSearches" 
-            :key="index"
-            flat 
-            dense 
-            :label="item" 
-            class="popular-tag"
-            @click="search = item; performSearch()"
-          />
-        </div>
-      </div>
-      
-      <div class="hero-image">
-        <img src="https://cdn.quasar.dev/img/food-delivery.svg" alt="Food Delivery" class="floating-image">
-      </div>
-    </section>
 
-    <!-- How It Works Section -->
-    <section class="how-it-works">
-      <div class="container">
-        <h2 class="section-title">How It Works</h2>
-        <div class="steps-container">
-          <div v-for="(step, index) in howItWorks" :key="index" class="step-card">
-            <div class="step-number">{{ index + 1 }}</div>
-            <q-icon :name="step.icon" class="step-icon" />
-            <h3>{{ step.title }}</h3>
-            <p>{{ step.description }}</p>
+        <!-- Stats -->
+        <div class="hero-stats row justify-center items-center q-gutter-xl">
+          <div class="stat-item animate-zoom">
+            <div class="text-h3 text-bold">500+</div>
+            <div class="text-subtitle1">Restaurants</div>
+          </div>
+          <div class="stat-item animate-zoom">
+            <div class="text-h3 text-bold">10K+</div>
+            <div class="text-subtitle1">Happy Customers</div>
+          </div>
+          <div class="stat-item animate-zoom">
+            <div class="text-h3 text-bold">24/7</div>
+            <div class="text-subtitle1">Delivery Service</div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Featured Restaurants -->
-    <section class="featured-restaurants">
+    <section class="featured-section q-pa-xl">
       <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">Featured Restaurants</h2>
-          <q-btn flat label="View All" color="primary" to="/restaurants" />
+        <h2 class="text-h4 text-bold text-center q-mb-lg">Featured Restaurants</h2>
+
+        <div class="restaurant-grid q-mt-lg">
+          <q-card
+            v-for="restaurant in featuredRestaurants"
+            :key="restaurant.id"
+            class="restaurant-card animate-fade-up"
+          >
+            <q-img :src="restaurant.image" :alt="restaurant.name" height="200px" />
+
+            <q-card-section>
+              <div class="text-h6">{{ restaurant.name }}</div>
+              <div class="text-caption text-grey">{{ restaurant.cuisine }}</div>
+              <q-rating v-model="restaurant.rating" size="sm" readonly />
+              <div class="text-caption">
+                • {{ restaurant.deliveryTime }} min • {{ restaurant.distance }} km
+              </div>
+            </q-card-section>
+
+            <q-card-actions>
+              <q-btn color="primary" label="Order Now" class="full-width" />
+            </q-card-actions>
+          </q-card>
         </div>
-        
-        <div class="restaurants-grid">
-          <div v-for="restaurant in featuredRestaurants" :key="restaurant.id" class="restaurant-card">
-            <div class="restaurant-image">
-              <img :src="restaurant.image" :alt="restaurant.name" />
-              <div class="rating-badge">
-                <q-icon name="star" />
-                <span>{{ restaurant.rating }}</span>
-              </div>
-              <div class="delivery-time">{{ restaurant.deliveryTime }}</div>
-            </div>
-            <div class="restaurant-details">
-              <h3>{{ restaurant.name }}</h3>
-              <p class="cuisine">{{ restaurant.cuisine }}</p>
-              <div class="restaurant-meta">
-                <span class="delivery-fee">{{ restaurant.deliveryFee }}</span>
-                <span class="min-order">{{ restaurant.minOrder }}</span>
-              </div>
-            </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works-section q-pa-xl bg-grey-2">
+      <div class="container">
+        <h2 class="text-h4 text-bold text-center q-mb-xl">How It Works</h2>
+
+        <div class="steps row justify-between">
+          <div class="step col-12 col-md-3 text-center animate-fade-up">
+            <q-icon name="place" size="xl" color="primary" class="step-icon" />
+            <h3 class="text-h6 q-mt-md">1. Choose location</h3>
+            <p class="text-body1">Enter your address or use your current location</p>
+          </div>
+
+          <div class="step col-12 col-md-3 text-center animate-fade-up">
+            <q-icon name="restaurant_menu" size="xl" color="primary" class="step-icon" />
+            <h3 class="text-h6 q-mt-md">2. Select food</h3>
+            <p class="text-body1">Browse hundreds of restaurants and menus</p>
+          </div>
+
+          <div class="step col-12 col-md-3 text-center animate-fade-up">
+            <q-icon name="delivery_dining" size="xl" color="primary" class="step-icon" />
+            <h3 class="text-h6 q-mt-md">3. Delivery</h3>
+            <p class="text-body1">Get your food delivered right to your door</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Popular Categories -->
-    <section class="categories-section">
-      <div class="container">
-        <h2 class="section-title">Popular Categories</h2>
-        <div class="categories-grid">
-          <div v-for="(category, index) in categories" :key="index" class="category-card">
-            <div class="category-icon" :style="{ backgroundColor: category.color }">
-              <q-icon :name="category.icon" />
-            </div>
-            <h3>{{ category.name }}</h3>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- Download App -->
+    <section class="download-section q-pa-xl text-center">
+      <div class="container animate-fade">
+        <h2 class="text-h4 text-bold q-mb-md">Download Our App</h2>
+        <p class="text-h6 q-mb-xl">Get the best experience with our mobile app</p>
 
-    <!-- App Download CTA -->
-    <section class="app-download">
-      <div class="container">
-        <div class="app-content">
-          <div class="app-text">
-            <h2>Get the app</h2>
-            <p>Order food from your favorite restaurants with just a few taps</p>
-            <div class="download-buttons">
-              <q-btn unelevated color="dark" icon="mdi-apple" label="App Store" />
-              <q-btn unelevated color="dark" icon="mdi-google-play" label="Google Play" />
-            </div>
-          </div>
-          <div class="app-image">
-            <img src="https://cdn.quasar.dev/img/app-prview.png" alt="Mobile App" />
-          </div>
+        <div class="download-buttons q-gutter-md">
+          <q-btn color="black" icon="android" label="Google Play" size="lg" />
+          <q-btn color="black" icon="apple" label="App Store" size="lg" />
         </div>
       </div>
     </section>
   </q-page>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import { useQuasar } from 'quasar';
+<script>
+import { ref } from "vue";
 
-const $q = useQuasar();
-const search = ref('');
+export default {
+  name: "HomePage",
+  setup() {
+    const search = ref("");
 
-const popularSearches = ['Pizza', 'Burger', 'Sushi', 'Chinese', 'Indian', 'Thai'];
+    const featuredRestaurants = ref([
+      {
+        id: 1,
+        name: "Burger Palace",
+        cuisine: "American • Burgers",
+        rating: 4.5,
+        deliveryTime: 25,
+        distance: 1.2,
+        image:
+          "https://images.unsplash.com/photo-1571091718767-18b5b1457add?auto=format&fit=crop&w=500&q=60",
+      },
+      {
+        id: 2,
+        name: "Pizza Heaven",
+        cuisine: "Italian • Pizza",
+        rating: 4.7,
+        deliveryTime: 30,
+        distance: 2.1,
+        image:
+          "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=500&q=60",
+      },
+      {
+        id: 3,
+        name: "Sushi Master",
+        cuisine: "Japanese • Sushi",
+        rating: 4.8,
+        deliveryTime: 35,
+        distance: 3.5,
+        image:
+          "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=500&q=60",
+      },
+      {
+        id: 4,
+        name: "Curry House",
+        cuisine: "Indian • Curry",
+        rating: 4.6,
+        deliveryTime: 40,
+        distance: 1.8,
+        image:
+          "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=500&q=60",
+      },
+    ]);
 
-const howItWorks = [
-  {
-    icon: 'location_on',
-    title: 'Choose location',
-    description: 'Enter your address or use your current location'
-  },
-  {
-    icon: 'restaurant',
-    title: 'Select food',
-    description: 'Browse hundreds of restaurants and menus'
-  },
-  {
-    icon: 'payments',
-    title: 'Pay online',
-    description: 'Secure payment with credit card or cash on delivery'
-  },
-  {
-    icon: 'delivery_dining',
-    title: 'Enjoy food',
-    description: 'Food is prepared and delivered to your doorstep'
-  }
-];
+    const findFood = () => {
+      if (search.value) {
+        console.log("Searching for:", search.value);
+      }
+    };
 
-const featuredRestaurants = [
-  {
-    id: 1,
-    name: 'Pizza Paradise',
-    cuisine: 'Italian, Pizza',
-    rating: 4.7,
-    deliveryTime: '25-35 min',
-    deliveryFee: '$2.99 delivery',
-    minOrder: '$15 min',
-    image: 'https://cdn.quasar.dev/img/restaurant-pizza.jpg'
+    return {
+      search,
+      featuredRestaurants,
+      findFood,
+    };
   },
-  {
-    id: 2,
-    name: 'Burger Kingdom',
-    cuisine: 'American, Fast Food',
-    rating: 4.5,
-    deliveryTime: '20-30 min',
-    deliveryFee: '$1.99 delivery',
-    minOrder: '$10 min',
-    image: 'https://cdn.quasar.dev/img/restaurant-burger.jpg'
-  },
-  {
-    id: 3,
-    name: 'Sushi Sensei',
-    cuisine: 'Japanese, Sushi',
-    rating: 4.8,
-    deliveryTime: '30-40 min',
-    deliveryFee: '$3.99 delivery',
-    minOrder: '$20 min',
-    image: 'https://cdn.quasar.dev/img/restaurant-sushi.jpg'
-  },
-  {
-    id: 4,
-    name: 'Curry House',
-    cuisine: 'Indian, Curry',
-    rating: 4.6,
-    deliveryTime: '35-45 min',
-    deliveryFee: '$2.49 delivery',
-    minOrder: '$12 min',
-    image: 'https://cdn.quasar.dev/img/restaurant-curry.jpg'
-  }
-];
-
-const categories = [
-  { name: 'Pizza', icon: 'mdi-pizza', color: '#FF6B6B' },
-  { name: 'Burgers', icon: 'mdi-hamburger', color: '#F9A826' },
-  { name: 'Sushi', icon: 'mdi-sushi', color: '#06D6A0' },
-  { name: 'Chinese', icon: 'mdi-noodles', color: '#118AB2' },
-  { name: 'Mexican', icon: 'mdi-taco', color: '#9A6EE0' },
-  { name: 'Desserts', icon: 'mdi-cupcake', color: '#EF476F' }
-];
-
-const performSearch = () => {
-  if (search.value.trim()) {
-    $q.notify({
-      message: `Searching for: ${search.value}`,
-      color: 'positive',
-      icon: 'search'
-    });
-    // In a real app, you would navigate to search results
-  }
 };
 </script>
 
@@ -231,426 +187,124 @@ const performSearch = () => {
   padding: 0;
 }
 
-/* Hero Section */
+/* Modern Gradient */
 .hero-section {
-  display: flex;
-  align-items: center;
-  min-height: 80vh;
-  padding: 2rem;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  position: relative;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  padding-top: 100px;
+  padding-bottom: 100px;
   overflow: hidden;
 }
-
-.hero-section::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 100%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 60%);
-}
-
-.hero-content {
-  flex: 1;
-  max-width: 600px;
-  z-index: 1;
-}
-
-.hero-title {
-  font-size: 3.5rem;
-  font-weight: 800;
-  margin-bottom: 1.5rem;
-  line-height: 1.2;
-}
-
-.title-line {
-  display: block;
-}
-
-.accent-text {
-  color: #ff0080;
-  background: linear-gradient(45deg, #ff0080, #7928ca);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.hero-subtitle {
-  font-size: 1.2rem;
-  color: #5a5a5a;
-  margin-bottom: 2rem;
-}
-
 .search-container {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .search-input {
-  flex: 1;
+  font-size: 1.1rem;
 }
 
-.search-btn {
-  padding: 0 2rem;
+.hero-stats {
+  margin-top: 60px;
 }
 
-.popular-searches {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+.stat-item {
+  padding: 20px;
+  transition: transform 0.3s ease;
+}
+.stat-item:hover {
+  transform: scale(1.1);
 }
 
-.popular-tag {
-  color: #666;
-  font-size: 0.9rem;
+.featured-section {
+  background: white;
 }
 
-.hero-image {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1;
-}
-
-.floating-image {
-  max-width: 100%;
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
-}
-
-/* How It Works */
-.how-it-works {
-  padding: 5rem 2rem;
-  background-color: #fff;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.section-title {
-  text-align: center;
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 3rem;
-  position: relative;
-}
-
-.section-title::after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 4px;
-  background: linear-gradient(45deg, #ff0080, #7928ca);
-  border-radius: 2px;
-}
-
-.steps-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-}
-
-.step-card {
-  text-align: center;
-  padding: 2rem;
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  position: relative;
-}
-
-.step-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-}
-
-.step-number {
-  position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(45deg, #ff0080, #7928ca);
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-.step-icon {
-  font-size: 3rem;
-  color: #ff0080;
-  margin-bottom: 1rem;
-}
-
-.step-card h3 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.step-card p {
-  color: #666;
-  line-height: 1.6;
-}
-
-/* Featured Restaurants */
-.featured-restaurants {
-  padding: 5rem 2rem;
-  background-color: #f8f9fa;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.restaurants-grid {
+.restaurant-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;
+  gap: 24px;
 }
 
 .restaurant-card {
-  background: #fff;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
 }
-
 .restaurant-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-.restaurant-image {
-  position: relative;
-  height: 200px;
-  overflow: hidden;
+.how-it-works-section {
+  padding: 80px 0;
 }
 
-.restaurant-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.restaurant-card:hover .restaurant-image img {
-  transform: scale(1.05);
-}
-
-.rating-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 0.3rem 0.6rem;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.9rem;
-}
-
-.delivery-time {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 0.3rem 0.6rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-}
-
-.restaurant-details {
-  padding: 1.5rem;
-}
-
-.restaurant-details h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.2rem;
-}
-
-.cuisine {
-  color: #666;
-  margin: 0 0 1rem 0;
-}
-
-.restaurant-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.9rem;
-  color: #888;
-}
-
-/* Categories */
-.categories-section {
-  padding: 5rem 2rem;
-  background-color: #fff;
-}
-
-.categories-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 2rem;
-}
-
-.category-card {
-  text-align: center;
-  padding: 1.5rem 1rem;
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
-}
-
-.category-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-}
-
-.category-icon {
-  width: 70px;
-  height: 70px;
+.step-icon {
+  background: #f5f5f5;
+  padding: 20px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1rem;
-  font-size: 2rem;
+}
+
+.download-section {
+  background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
   color: white;
 }
 
-.category-card h3 {
-  font-size: 1.1rem;
-  margin: 0;
-  color: #333;
-}
-
-/* App Download */
-.app-download {
-  padding: 5rem 2rem;
-  background: linear-gradient(135deg, #ff0080 0%, #7928ca 100%);
-  color: white;
-}
-
-.app-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.app-text h2 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-}
-
-.app-text p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-}
-
-.download-buttons {
-  display: flex;
-  gap: 1rem;
-}
-
-.app-image {
-  max-width: 300px;
-}
-
-.app-image img {
-  width: 100%;
-  animation: pulse 2s ease-in-out infinite alternate;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.05); }
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .hero-title {
-    font-size: 2.8rem;
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes zoomIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-fade {
+  animation: fadeIn 1s ease forwards;
+}
+.animate-fade-delay {
+  animation: fadeIn 1.2s ease forwards;
+}
+.animate-slide {
+  animation: slideIn 1s ease forwards;
+}
+.animate-zoom {
+  animation: zoomIn 1.2s ease forwards;
+}
+.animate-fade-up {
+  animation: fadeIn 1.3s ease forwards;
 }
 
 @media (max-width: 768px) {
-  .hero-section {
-    flex-direction: column;
-    text-align: center;
-    padding: 2rem 1rem;
+  .hero-content {
+    padding: 40px 20px;
   }
-  
-  .hero-title {
-    font-size: 2.2rem;
-  }
-  
-  .search-container {
-    flex-direction: column;
-  }
-  
-  .app-content {
-    flex-direction: column;
-    text-align: center;
-    gap: 2rem;
-  }
-  
-  .download-buttons {
-    justify-content: center;
-  }
-}
 
-@media (max-width: 480px) {
-  .hero-title {
-    font-size: 1.8rem;
-  }
-  
-  .section-title {
-    font-size: 2rem;
-  }
-  
-  .steps-container {
-    grid-template-columns: 1fr;
-  }
-  
-  .restaurants-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .categories-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .steps {
+    flex-direction: column;
+    gap: 40px;
   }
 }
 </style>
