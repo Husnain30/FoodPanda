@@ -1,7 +1,9 @@
 // src/router/routes.js
+
 import MainLayout from '../layouts/MainLayout.vue'
 import AuthLayout from '../layouts/AuthLayout.vue'
-import AdminLayout from '../layouts/AdminLayout.vue'
+
+
 
 export default [
   // Public / Customer Routes
@@ -34,75 +36,67 @@ export default [
     ],
   },
 
-  // Admin Routes
-  {
-    path: '/admin',
-    component: AdminLayout,
-    children: [
-      { 
-        path: '', 
-        component: () => import('../modules/admin/pages/AdminDashboard.vue'),
-        meta: { requiresAuth: true, requiresAdmin: true }
-      },
-      { 
-        path: 'users', 
-        component: () => import('../modules/admin/pages/UsersPage.vue'),
-        meta: { requiresAuth: true, requiresAdmin: true }
-      },
-      { 
-        path: 'restaurants', 
-        component: () => import('../modules/admin/pages/RestaurantsPage.vue'),
-        meta: { requiresAuth: true, requiresAdmin: true }
-      },
-      { 
-        path: 'riders', 
-        component: () => import('../modules/admin/pages/RidersPage.vue'),
-        meta: { requiresAuth: true, requiresAdmin: true }
-      },
-      { 
-        path: 'orders', 
-        component: () => import('../modules/admin/pages/OrdersMonitor.vue'),
-        meta: { requiresAuth: true, requiresAdmin: true }
-      },
-      { 
-        path: 'payments', 
-        component: () => import('../modules/admin/pages/PaymentsPage.vue'),
-        meta: { requiresAuth: true, requiresAdmin: true }
-      },
-    ],
-  },
 
+
+// Admin Routes
+{
+  path: '/admin',
+  component: () => import('../layouts/AdminLayout.vue'), // 👈 parent layout
+  children: [
+    { 
+      path: 'dashboard', 
+      component: () => import('../modules/admin/pages/AdminDashboard.vue')
+    },
+    { 
+      path: 'users', 
+      component: () => import('../modules/admin/pages/UsersPage.vue')
+    },
+    { 
+      path: 'restaurants', 
+      component: () => import('../modules/admin/pages/RestaurantsPage.vue')
+    },
+    { 
+      path: 'riders', 
+      component: () => import('../modules/admin/pages/RidersPage.vue')
+    },
+    { 
+      path: 'orders', 
+      component: () => import('../modules/admin/pages/OrdersMonitor.vue')
+    },
+    { 
+      path: 'payments', 
+      component: () => import('../modules/admin/pages/PaymentsPage.vue')
+    },
+  ],
+}
+
+,
   // Restaurant Owner Routes
-  {
+{
     path: '/restaurant',
-    component: MainLayout, // swap later with RestaurantLayout if you create one
+    component: () => import('../layouts/RestaurantLayout.vue'),
     children: [
-      { 
-        path: '', 
-        component: () => import('../modules/restaurant/pages/RestaurantDashboard.vue'),
-        meta: { requiresAuth: true, requiresRestaurant: true }
+      {
+        path: 'dashboard',
+        component: () => import('../modules/restaurant/pages/RestaurantDashboard.vue')
       },
-      { 
-        path: 'menu', 
-        component: () => import('../modules/restaurant/pages/MenuManager.vue'),
-        meta: { requiresAuth: true, requiresRestaurant: true }
+      {
+        path: 'menu',
+        component: () => import('../modules/restaurant/pages/MenuManager.vue')
       },
-      { 
-        path: 'orders', 
-        component: () => import('../modules/restaurant/pages/OrdersPage.vue'),
-        meta: { requiresAuth: true, requiresRestaurant: true }
+      {
+        path: 'orders',
+        component: () => import('../modules/restaurant/pages/OrdersPage.vue')
       },
-      { 
-        path: 'earnings', 
-        component: () => import('../modules/restaurant/pages/EarningsPage.vue'),
-        meta: { requiresAuth: true, requiresRestaurant: true }
+      {
+        path: 'earnings',
+        component: () => import('../modules/restaurant/pages/EarningsPage.vue')
       },
-      { 
-        path: 'promotions', 
-        component: () => import('../modules/restaurant/pages/PromotionsPage.vue'),
-        meta: { requiresAuth: true, requiresRestaurant: true }
-      },
-    ],
+      {
+        path: 'promotions',
+        component: () => import('../modules/restaurant/pages/PromotionsPage.vue')
+      }
+    ]
   },
 
   // Rider Routes

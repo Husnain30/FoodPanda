@@ -1,15 +1,11 @@
-// src/main.js
-import { createApp } from 'vue'
-import { Quasar } from 'quasar'
-import quasarUserOptions from './quasar-user-options'
-import App from './App.vue'
-import router from './router'
-import store from './store' // Make sure this path is correct
+import { createApp } from "vue"
+import App from "./App.vue"
+import router from "./router"
+import store from "./store"
 
 const app = createApp(App)
 
-app.use(Quasar, quasarUserOptions)
+app.use(store)   // ✅ vuex inject hoga
 app.use(router)
-app.use(store) // This should be after Quasar but before mounting
 
-app.mount('#app')
+app.mount("#app")
