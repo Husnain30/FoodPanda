@@ -2,7 +2,7 @@
 
 import MainLayout from '../layouts/MainLayout.vue'
 import AuthLayout from '../layouts/AuthLayout.vue'
-
+import RiderLayout from '../layouts/RiderLayout.vue'
 
 
 export default [
@@ -100,30 +100,14 @@ export default [
   },
 
   // Rider Routes
-  {
+    {
     path: '/rider',
-    component: MainLayout, // swap later with RiderLayout if needed
+    component: RiderLayout,
     children: [
-      { 
-        path: '', 
-        component: () => import('../modules/rider/pages/RiderDashboard.vue'),
-        meta: { requiresAuth: true, requiresRider: true }
-      },
-      { 
-        path: 'deliveries', 
-        component: () => import('../modules/rider/pages/OrderAssignment.vue'),
-        meta: { requiresAuth: true, requiresRider: true }
-      },
-      { 
-        path: 'navigation', 
-        component: () => import('../modules/rider/pages/NavigationPage.vue'),
-        meta: { requiresAuth: true, requiresRider: true }
-      },
-      { 
-        path: 'earnings', 
-        component: () => import('../modules/rider/pages/EarningsPage.vue'),
-        meta: { requiresAuth: true, requiresRider: true }
-      },
+      { path: '', component: () => import('../modules/rider/pages/RiderDashboard.vue') },
+      { path: 'deliveries', component: () => import('../modules/rider/pages/OrderAssignment.vue') },
+      { path: 'navigation', component: () => import('../modules/rider/pages/NavigationPage.vue') },
+      { path: 'earnings', component: () => import('../modules/rider/pages/EarningsPage.vue') },
     ],
   },
 
