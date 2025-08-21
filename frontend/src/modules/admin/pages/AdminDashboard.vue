@@ -14,12 +14,16 @@
       </div>
     </div>
     
-    <q-card class="q-pa-md">
-      <q-card-section>
-        <div class="text-h6">Welcome, {{ user.name || user.email }}</div>
-        <div>Role: {{ user.role }}</div>
-      </q-card-section>
-    </q-card>
+   <q-card-section>
+  <div v-if="user">
+    <div class="text-h6">Welcome, {{ user.name || user.email }}</div>
+    <div>Role: {{ user.role }}</div>
+  </div>
+  <div v-else>
+    <q-spinner size="sm" /> Loading user info...
+  </div>
+</q-card-section>
+
     
     <div class="row q-col-gutter-md q-mt-md">
       <div class="col-12 col-md-6">
