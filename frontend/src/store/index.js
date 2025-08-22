@@ -1,8 +1,11 @@
+// src/store/index.js
 import { createStore } from "vuex"
 import auth from "./modules/auth"
+import admin from "./modules/admin"
 
 export default createStore({
   modules: {
-    auth
-  }
+    auth,
+    admin,
+  },
 })

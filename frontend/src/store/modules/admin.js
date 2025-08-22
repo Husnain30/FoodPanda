@@ -1,9 +1,14 @@
 // src/store/modules/admin.js
-import api from "boot/axios";
-
 const state = {
-  stats: {},
-  users: [],
+  stats: {
+    totalUsers: 120,
+    totalBookings: 340,
+    revenue: 56000,
+  },
+  users: [
+    { id: 1, name: "Ali", email: "ali@test.com" },
+    { id: 2, name: "Sara", email: "sara@test.com" },
+  ],
 };
 
 const mutations = {
@@ -17,21 +22,21 @@ const mutations = {
 
 const actions = {
   async fetchStats({ commit }) {
-    try {
-      const res = await api.get("/api/admin/stats");
-      commit("SET_STATS", res.data);
-    } catch (e) {
-      console.error("Failed to fetch stats:", e);
-    }
+    // ⚡ Abhi backend nahi hai, dummy data se hi update karwa dete hain
+    const fakeStats = {
+      totalUsers: 150,
+      totalBookings: 400,
+      revenue: 75000,
+    };
+    commit("SET_STATS", fakeStats);
   },
 
   async fetchUsers({ commit }) {
-    try {
-      const res = await api.get("/api/admin/users");
-      commit("SET_USERS", res.data);
-    } catch (e) {
-      console.error("Failed to fetch users:", e);
-    }
+    const fakeUsers = [
+      { id: 3, name: "Usman", email: "usman@test.com" },
+      { id: 4, name: "Ayesha", email: "ayesha@test.com" },
+    ];
+    commit("SET_USERS", fakeUsers);
   },
 };
 
