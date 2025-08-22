@@ -1,25 +1,13 @@
 <template>
-  <div>
-    <!-- Rider Layout Header -->
-    <header>
-      <h2>Rider Panel</h2>
-      <nav>
-        <router-link to="/rider">Dashboard</router-link> |
-        <router-link to="/rider/deliveries">Deliveries</router-link> |
-        <router-link to="/rider/navigation">Navigation</router-link> |
-        <router-link to="/rider/earnings">Earnings</router-link>
-      </nav>
-    </header>
-
-    <!-- Rider specific pages render here -->
-    <main>
+  <q-layout view="hHh lpR fFf" class="bg-grey-1">
+    <!-- Shared Rider Navbar -->
+    <RiderNavbar />
+    <q-page-container>
       <router-view />
-    </main>
-  </div>
+    </q-page-container>
+  </q-layout>
 </template>
 
-<script>
-export default {
-  name: "RiderLayout"
-}
+<script setup>
+import RiderNavbar from '/src/modules/rider/components/RiderNavbar.vue';
 </script>

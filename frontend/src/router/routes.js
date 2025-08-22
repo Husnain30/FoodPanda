@@ -3,28 +3,35 @@
 import MainLayout from '../layouts/MainLayout.vue'
 import AuthLayout from '../layouts/AuthLayout.vue'
 import RiderLayout from '../layouts/RiderLayout.vue'
+import CustomerLayout from '../layouts/CustomerLayout.vue'
 
 
 export default [
   // Public / Customer Routes
-  {
+ {
     path: '/',
     component: MainLayout,
     children: [
       { path: '', component: () => import('../pages/HomePage.vue') },
       { path: 'about', component: () => import('../pages/AboutPage.vue') },
       { path: 'contact', component: () => import('../pages/ContactPage.vue') },
-
-      // Customer pages (under modules/customer/pages)
-      { path: 'restaurants', component: () => import('../modules/customer/pages/BrowseRestaurants.vue') },
-      { path: 'restaurants/:id', component: () => import('../modules/customer/pages/MenuPage.vue') },
-      { path: 'cart', component: () => import('../modules/customer/pages/CartPage.vue') },
-      { path: 'checkout', component: () => import('../modules/customer/pages/CheckoutPage.vue') },
-      { path: 'orders', component: () => import('../modules/customer/pages/OrderHistory.vue') },
-      { path: 'track/:id', component: () => import('../modules/customer/pages/OrderTracking.vue') },
-      { path: 'review/:id', component: () => import('../modules/customer/pages/ReviewPage.vue') },
-    ],
+    ]
   },
+
+  {
+  path: '/customer',
+  component: CustomerLayout,
+  children: [
+    { path: '', redirect: '/customer/restaurants' }, // 👈 redirect first page
+    { path: 'restaurants', component: () => import('../modules/customer/pages/BrowseRestaurants.vue') },
+    { path: 'restaurants/:id', component: () => import('../modules/customer/pages/MenuPage.vue') },
+    { path: 'cart', component: () => import('../modules/customer/pages/CartPage.vue') },
+    { path: 'checkout', component: () => import('../modules/customer/pages/CheckoutPage.vue') },
+    { path: 'orders', component: () => import('../modules/customer/pages/OrderHistory.vue') },
+    { path: 'track/:id', component: () => import('../modules/customer/pages/OrderTracking.vue') },
+    { path: 'review/:id', component: () => import('../modules/customer/pages/ReviewPage.vue') },
+  ]
+},
 
   // Auth Routes (Login/Register use AuthLayout + forms inside)
   {
@@ -105,7 +112,7 @@ export default [
     component: RiderLayout,
     children: [
       { path: '', component: () => import('../modules/rider/pages/RiderDashboard.vue') },
-      { path: 'deliveries', component: () => import('../modules/rider/pages/OrderAssignment.vue') },
+      { path: 'order-assignment', component: () => import('../modules/rider/pages/OrderAssignment.vue') },
       { path: 'navigation', component: () => import('../modules/rider/pages/NavigationPage.vue') },
       { path: 'earnings', component: () => import('../modules/rider/pages/EarningsPage.vue') },
     ],
