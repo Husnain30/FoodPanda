@@ -40,37 +40,42 @@ export default [
 
 // Admin Routes
 {
-  path: '/admin',
-  component: () => import('../layouts/AdminLayout.vue'), // 👈 parent layout
-  children: [
-    { 
-      path: 'dashboard', 
-      component: () => import('../modules/admin/pages/AdminDashboard.vue')
-    },
-    { 
-      path: 'users', 
-      component: () => import('../modules/admin/pages/UsersPage.vue')
-    },
-    { 
-      path: 'restaurants', 
-      component: () => import('../modules/admin/pages/RestaurantsPage.vue')
-    },
-    { 
-      path: 'riders', 
-      component: () => import('../modules/admin/pages/RidersPage.vue')
-    },
-    { 
-      path: 'orders', 
-      component: () => import('../modules/admin/pages/OrdersMonitor.vue')
-    },
-    { 
-      path: 'payments', 
-      component: () => import('../modules/admin/pages/PaymentsPage.vue')
-    },
-  ],
-}
+    path: '/admin',
+    component: () => import('../layouts/AdminLayout.vue'), // parent layout
+    children: [
+      { 
+        path: 'dashboard', 
+        name: 'AdminDashboard',
+        component: () => import('../modules/admin/pages/AdminDashboard.vue')
+      },
+      { 
+        path: 'users', 
+        name: 'AdminUsers',
+        component: () => import('../modules/admin/pages/UsersPage.vue')
+      },
+      { 
+        path: 'restaurants', 
+        name: 'AdminRestaurants',
+        component: () => import('../modules/admin/pages/RestaurantsPage.vue')
+      },
+      { 
+        path: 'riders', 
+        name: 'AdminRiders',
+        component: () => import('../modules/admin/pages/RidersPage.vue')
+      },
+      { 
+        path: 'orders', 
+        name: 'AdminOrders',
+        component: () => import('../modules/admin/pages/OrdersMonitor.vue')
+      },
+      { 
+        path: 'payments', 
+        name: 'AdminPayments',
+        component: () => import('../modules/admin/pages/PaymentsPage.vue')
+      },
+    ],
+  },
 
-,
   // Restaurant Owner Routes
 {
     path: '/restaurant',

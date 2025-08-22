@@ -1,11 +1,8 @@
 <template>
-  <q-card class="q-pa-md q-mb-md">
+  <q-card class="q-pa-md q-mb-md text-center">
     <q-card-section>
       <div class="text-h6">{{ title }}</div>
-      <div v-if="value !== null">{{ value }}</div>
-      <div v-else>
-        <q-spinner size="sm" /> Loading...
-      </div>
+      <div class="text-h5 text-primary q-mt-sm">{{ value }}</div>
     </q-card-section>
   </q-card>
 </template>
@@ -15,7 +12,7 @@ export default {
   name: "StatsCard",
   props: {
     title: { type: String, required: true },
-    value: { type: [Number, String, null], default: null }
-  }
-}
+    value: { type: [String, Number], required: true },
+  },
+};
 </script>
