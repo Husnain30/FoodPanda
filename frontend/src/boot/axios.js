@@ -1,33 +1,48 @@
 // src/boot/axios.js
-import axios from "axios";
-import store from "src/store";
+import axios from "axios"
 
+// -------------------
+// Axios instance
+// -------------------
 const api = axios.create({
-  baseURL: "https://6ad2a42541ac.ngrok-free.app/",
+  baseURL: "https://7e65f87e42d7.ngrok-free.app/api/", // ✅ /api added
   timeout: 10000,
-});
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+})
 
-// Request → attach token
+// -------------------
+// Request Interceptor
+// -------------------
 api.interceptors.request.use(
   (config) => {
-    const token = store.getters["auth/getToken"];
+    const token = localStorage.getItem("token")
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`
     }
-    return config;
+    return config
   },
   (error) => Promise.reject(error)
-);
+)
 
-// Response → logout if unauthorized
+// -------------------
+// Response Interceptor
+// -------------------
 api.interceptors.response.use(
-  (res) => res,
+  (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      store.dispatch("auth/logout");
+    if (error.response) {
+      if (error.response.status === 401) {
+        // Unauthorized: clear localStorage and force login
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
+        window.location.href = "/auth/login"
+      }
     }
-    return Promise.reject(error);
+    return Promise.reject(error)
   }
-);
+)
 
-export default api;
+export default api

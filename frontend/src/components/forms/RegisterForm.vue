@@ -45,10 +45,9 @@
 
 <script setup>
 import { reactive, ref } from "vue"
-import { useStore } from "vuex"
 import { useRouter } from "vue-router"
+import api from "boot/axios" // Axios instance with /api baseURL
 
-const store = useStore()
 const router = useRouter()
 const error = ref("")
 
@@ -56,19 +55,25 @@ const form = reactive({
   name: "",
   email: "",
   password: "",
-  role: ""
+  role: "",
 })
 
 const onSubmit = async () => {
   error.value = ""
   try {
-    await store.dispatch("auth/register", form)
+    const res = await api.post("/auth/register", form) // ✅ relative path
+    console.log("✅ Registration Success:", res.data)
+
+    // Redirect user after register
     router.push("/auth/login")
   } catch (err) {
-    error.value = err
+    console.error("❌ Registration failed:", err)
+    error.value = err.response?.data?.message || "Something went wrong!"
   }
 }
 </script>
+
+
 
 <style scoped>
 /* Background with Purple-Blue Gradient */

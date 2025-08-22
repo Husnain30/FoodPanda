@@ -2,7 +2,7 @@
   <div class="login-page">
     <div class="login-container">
       <h2 class="login-title">Welcome Back 👋</h2>
-      <p class="login-subtitle">Sign in to continue your gourmet journey</p>
+      <p class="login-subtitle">Sign in to continue your journey</p>
 
       <form @submit.prevent="onSubmit" class="login-form">
         <input
@@ -20,7 +20,6 @@
           class="input-field"
         />
 
-        <!-- Role field -->
         <select v-model="form.role" required class="input-field">
           <option disabled value="">Select Role</option>
           <option value="admin">Admin</option>
@@ -38,51 +37,68 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+import { reactive, ref } from "vue"
+import { useStore } from "vuex"
+import { useRouter } from "vue-router"
 
-const store = useStore();
-const router = useRouter();
-const error = ref("");
+const store = useStore()
+const router = useRouter()
+const error = ref("")
 
 const form = reactive({
   email: "",
   password: "",
   role: "",
-});
+})
 
 const onSubmit = async () => {
-  error.value = "";
-
+  error.value = ""
   try {
-    const user = await store.dispatch("auth/login", form);
+    const res = await store.dispatch("auth/login", form)
+    let user = res.user
 
-    switch (user.role) {
+    if (!user) {
+      throw new Error("Invalid login response")
+    }
+
+    // Normalize role
+    let role = user.role
+    if (!role && user.roles && user.roles.length > 0) {
+      role = user.roles[0].name
+    }
+
+    if (!role) {
+      throw new Error("User role not found")
+    }
+
+    // Role-based redirect
+    switch (role) {
       case "admin":
-        router.push("/admin/dashboard");
-        break;
+        router.push("/admin/dashboard")
+        break
       case "restaurant":
-        router.push("/restaurant/dashboard");
-        break;
+        router.push("/restaurant/dashboard")
+        break
       case "rider":
-        router.push("/rider");
-        break;
+        router.push("/rider")
+        break
       case "customer":
-        router.push("/restaurants");
-        break;
+        router.push("/restaurants")
+        break
       default:
-        router.push("/");
+        router.push("/")
     }
   } catch (err) {
-    console.error("Login error:", err);
-    error.value = "Invalid login credentials";
+    console.error("Login error:", err)
+    error.value = "Invalid login credentials or role"
   }
-};
+}
 </script>
 
+
+
 <style scoped>
-/* Background with Purple-Blue Gradient */
+/* Background */
 .login-page {
   min-height: 100vh;
   display: flex;
@@ -92,7 +108,7 @@ const onSubmit = async () => {
   font-family: "Poppins", sans-serif;
 }
 
-/* Card container */
+/* Card */
 .login-container {
   background: #fff;
   padding: 2.5rem 2rem;
@@ -127,7 +143,6 @@ const onSubmit = async () => {
   transition: all 0.3s ease;
   outline: none;
 }
-
 .input-field:focus {
   border-color: #6a11cb;
   box-shadow: 0 0 8px rgba(106, 17, 203, 0.3);
@@ -147,13 +162,12 @@ const onSubmit = async () => {
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
 .login-btn:hover {
   opacity: 0.92;
   transform: translateY(-2px);
 }
 
-/* Error message */
+/* Error */
 .error-msg {
   margin-top: 1rem;
   color: red;
@@ -161,7 +175,7 @@ const onSubmit = async () => {
   font-weight: 500;
 }
 
-/* Smooth Fade-In */
+/* Animation */
 @keyframes fadeIn {
   from {
     opacity: 0;
