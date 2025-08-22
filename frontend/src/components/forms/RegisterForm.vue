@@ -39,6 +39,12 @@
       </form>
 
       <p v-if="error" class="error-msg">{{ error }}</p>
+
+      <!-- ✅ Login link -->
+      <p class="login-link">
+        Already have an account?
+        <router-link to="/auth/login" class="login-anchor">Login</router-link>
+      </p>
     </div>
   </div>
 </template>
@@ -72,8 +78,6 @@ const onSubmit = async () => {
   }
 }
 </script>
-
-
 
 <style scoped>
 /* Background with Purple-Blue Gradient */
@@ -153,6 +157,23 @@ const onSubmit = async () => {
   color: red;
   font-size: 0.9rem;
   font-weight: 500;
+}
+
+/* Login link */
+.login-link {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.login-anchor {
+  color: #2575fc;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-anchor:hover {
+  text-decoration: underline;
 }
 
 /* Smooth Fade-In */

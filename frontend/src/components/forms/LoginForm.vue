@@ -32,6 +32,11 @@
       </form>
 
       <p v-if="error" class="error-msg">{{ error }}</p>
+
+      <!-- 👇 Added link to go home -->
+      <p class="home-link">
+        <router-link to="/">🏠 Go back to Home</router-link>
+      </p>
     </div>
   </div>
 </template>
@@ -94,8 +99,6 @@ const onSubmit = async () => {
   }
 }
 </script>
-
-
 
 <style scoped>
 /* Background */
@@ -173,6 +176,20 @@ const onSubmit = async () => {
   color: red;
   font-size: 0.9rem;
   font-weight: 500;
+}
+
+/* Home Link */
+.home-link {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+.home-link a {
+  color: #2575fc;
+  font-weight: 600;
+  text-decoration: none;
+}
+.home-link a:hover {
+  text-decoration: underline;
 }
 
 /* Animation */
