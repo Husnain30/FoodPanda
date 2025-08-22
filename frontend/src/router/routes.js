@@ -77,32 +77,69 @@ export default [
   },
 
   // Restaurant Owner Routes
+// {
+//     path: '/restaurant',
+//     component: () => import('../layouts/RestaurantLayout.vue'),
+//     children: [
+//       {
+//         path: 'dashboard',
+//         component: () => import('../modules/restaurant/pages/RestaurantDashboard.vue')
+//       },
+//       {
+//         path: 'menu',
+//         component: () => import('../modules/restaurant/pages/MenuManager.vue')
+//       },
+//       {
+//         path: 'orders',
+//         component: () => import('../modules/restaurant/pages/OrdersPage.vue')
+//       },
+//       {
+//         path: 'earnings',
+//         component: () => import('../modules/restaurant/pages/EarningsPage.vue')
+//       },
+//       {
+//         path: 'promotions',
+//         component: () => import('../modules/restaurant/pages/PromotionsPage.vue')
+//       }
+//     ]
+//   },
+
 {
-    path: '/restaurant',
-    component: () => import('../layouts/RestaurantLayout.vue'),
-    children: [
-      {
-        path: 'dashboard',
-        component: () => import('../modules/restaurant/pages/RestaurantDashboard.vue')
-      },
-      {
-        path: 'menu',
-        component: () => import('../modules/restaurant/pages/MenuManager.vue')
-      },
-      {
-        path: 'orders',
-        component: () => import('../modules/restaurant/pages/OrdersPage.vue')
-      },
-      {
-        path: 'earnings',
-        component: () => import('../modules/restaurant/pages/EarningsPage.vue')
-      },
-      {
-        path: 'promotions',
-        component: () => import('../modules/restaurant/pages/PromotionsPage.vue')
-      }
-    ]
-  },
+  path: '/restaurant',
+  component: () => import('../layouts/RestaurantLayout.vue'),
+  children: [
+    {
+      path: 'dashboard',
+      name: 'RestaurantDashboard',
+      component: () => import('../modules/restaurant/pages/RestaurantDashboard.vue')
+    },
+    {
+      path: 'menu',
+      name: 'MenuManager',
+      component: () => import('../modules/restaurant/pages/MenuManager.vue')
+    },
+    {
+      path: 'orders',
+      name: 'OrdersPage',
+      component: () => import('../modules/restaurant/pages/OrdersPage.vue')
+    },
+    {
+      path: 'earnings',
+      name: 'EarningsPage',
+      component: () => import('../modules/restaurant/pages/EarningsPage.vue')
+    },
+    {
+      path: 'promotions',
+      name: 'PromotionsPage',
+      component: () => import('../modules/restaurant/pages/PromotionsPage.vue')
+    },
+    {
+      path: '',
+      redirect: { name: 'RestaurantDashboard' }
+    }
+  ]
+}
+,
 
   // Rider Routes
     {
