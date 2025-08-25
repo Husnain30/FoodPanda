@@ -12,7 +12,7 @@
           <i class="icon">🔍</i>
           {{ showFilters ? 'Hide Filters' : 'Show Filters' }}
         </button>
-        <button class="btn-primary" @click="showCreateModal = true">
+        <button class="btn-primary text-dark" @click="showCreateModal = true">
           <i class="icon">➕</i>
           Create New Promotion
         </button>
@@ -93,7 +93,7 @@
         <h2>All Promotions</h2>
         <div class="view-toggles">
           <button 
-            class="toggle-btn" 
+            class="toggle-btn text-black" 
             :class="{ active: viewMode === 'grid' }" 
             @click="viewMode = 'grid'"
           >
