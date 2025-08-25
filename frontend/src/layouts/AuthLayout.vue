@@ -2,11 +2,11 @@
   <q-layout view="lHh Lpr lFf">
 
     <!-- Optional: top header for auth pages -->
-    <q-header elevated class="bg-primary text-white">
+    <!-- <q-header elevated class="bg-primary text-white">
       <q-toolbar>
         <q-toolbar-title>Welcome to FoodApp</q-toolbar-title>
       </q-toolbar>
-    </q-header>
+    </q-header> -->
 
     <!-- Page container -->
     <q-page-container>
