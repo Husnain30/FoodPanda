@@ -1,24 +1,13 @@
 <template>
-  <div>
-    <!-- Example Customer Layout -->
-    <header>
-      <h2>Customer Panel</h2>
-      <!-- Navbar / Links -->
-      <nav>
-        <router-link to="/restaurants">Browse</router-link> |
-        <router-link to="/cart">Cart</router-link> |
-        <router-link to="/orders">Orders</router-link>
-      </nav>
-    </header>
-
-    <main>
-      <router-view /> <!-- customer pages render here -->
-    </main>
-  </div>
+  <q-layout view="hHh lpR fFf">
+    <CustomerNavbar />
+    <q-page-container>
+      <router-view />
+    </q-page-container>
+  </q-layout>
 </template>
 
-<script>
-export default {
-  name: "CustomerLayout"
-}
+<script setup>
+import CustomerNavbar from '/src/modules/customer/components/CustomerNavbar.vue';
 </script>
+
