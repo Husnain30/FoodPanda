@@ -5,7 +5,7 @@ import axios from "axios"
 // Axios instance
 // -------------------
 const api = axios.create({
-  baseURL: "https://b56e3faa3db9.ngrok-free.app/api/", // ✅ /api added
+  baseURL: "https://55b7daa23902.ngrok-free.app/api/", // ✅ /api added
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",

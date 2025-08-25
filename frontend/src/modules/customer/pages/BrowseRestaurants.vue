@@ -3,7 +3,7 @@
     <h1 class="page-title">🍽 Browse Restaurants</h1>
     <div class="restaurant-grid">
       <RestaurantCard
-        v-for="n in 6"
+        v-for="n in 10"
         :key="n"
         :name="'Restaurant ' + n"
         :cuisine="'Italian, Fast Food'"
