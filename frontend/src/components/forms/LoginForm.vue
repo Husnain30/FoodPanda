@@ -88,7 +88,7 @@ const onSubmit = async () => {
         router.push("/rider")
         break
       case "customer":
-        router.push("/customer/restaurants")
+        router.push("/restaurants")
         break
       default:
         router.push("/")

@@ -1,7 +1,7 @@
 <template>
   <q-card class="q-pa-md shadow-card">
     <h3 class="section-title">Delivery Address</h3>
-    <q-input filled v-model="address" label="Enter your address" class="input-field" />
+    <q-input filled v-model="address" label="Enter your Location" class="input-field" style="width: 90%;" />
     <q-btn 
       flat 
       class="location-btn q-mt-sm" 
