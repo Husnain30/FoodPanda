@@ -49,7 +49,14 @@ export default {
     const statusFilter = ref("")
 
     // Computed properties
-    const orders = computed(() => store.getters['restaurant/getAllOrders'])
+  const filteredOrders = computed(() => {
+  const orders = store.getters['restaurant/getAllOrders'] || []
+  return orders.filter((order) => {
+    const matchesSearch = order.customer.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const matchesStatus = statusFilter.value ? order.status === statusFilter.value : true
+    return matchesSearch && matchesStatus
+  })
+})
     const loading = computed(() => store.getters['restaurant/getOrdersLoading'])
 
     // Get restaurant ID
@@ -81,7 +88,7 @@ export default {
     onMounted(() => {
       loadOrders()
     })
-    
+  
 
     return {
       searchQuery,
