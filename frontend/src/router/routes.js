@@ -120,11 +120,11 @@ export default [
       name: 'RestaurantDashboard',
       component: () => import('../modules/restaurant/pages/RestaurantDashboard.vue')
     },
-    {
-      path: 'menu',
-      name: 'MenuManager',
-      component: () => import('../modules/restaurant/pages/MenuManager.vue')
-    },
+   {
+  path: 'menu',  // Remove the leading slash and /restaurant part
+  name: 'MenuManager',
+  component: () => import('../modules/restaurant/pages/MenuManager.vue')
+},
     {
       path: 'orders',
       name: 'OrdersPage',

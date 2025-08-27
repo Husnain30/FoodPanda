@@ -29,10 +29,10 @@
 
         <select v-model="form.role" required class="input-field">
           <option disabled value="">Select Role</option>
-          <option value="customer">Customer</option>
-          <option value="restaurant">Restaurant</option>
+          <option  value="customer">Customer</option>
+          <option disabled value="restaurant">Restaurant</option>
           <option value="rider">Rider</option>
-          <option value="admin">Admin</option>
+          <option disabled value="admin">Admin</option>
         </select>
 
         <button type="submit" class="register-btn">Register</button>

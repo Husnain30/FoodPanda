@@ -7,6 +7,13 @@
       </div>
       <div class="col-auto">
         <q-btn color="primary" label="Add Payment" @click="openAddDialog" />
+        <q-btn
+          color="secondary"
+          icon="refresh"
+          label="Refresh"
+          class="q-ml-sm"
+          @click="refreshPayments"
+        />
       </div>
     </div>
 
@@ -17,10 +24,11 @@
       row-key="id"
       flat
       bordered
+      :loading="loading"
       v-model:pagination="pagination"
     >
       <template v-slot:body-cell-status="props">
-        <q-td>
+        <q-td :props="props">
           <q-badge
             :color="props.row.status === 'Paid' ? 'green' : 'red'"
             align="center"
@@ -74,12 +82,7 @@
             label="Status"
             outlined
           />
-          <q-input
-            v-model="newPayment.date"
-            type="date"
-            label="Date"
-            outlined
-          />
+          <q-input v-model="newPayment.date" type="date" label="Date" outlined />
         </q-card-section>
 
         <q-card-actions align="right">
@@ -92,29 +95,27 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { useStore } from "vuex";
 
 export default {
   name: "PaymentsPage",
   setup() {
-    const payments = ref([
-      {
-        id: 1,
-        orderId: "ORD123",
-        customer: "Ali Khan",
-        amount: 1200,
-        status: "Paid",
-        date: "2025-08-01",
-      },
-      {
-        id: 2,
-        orderId: "ORD124",
-        customer: "Ahmed Raza",
-        amount: 800,
-        status: "Unpaid",
-        date: "2025-08-02",
-      },
-    ]);
+    const store = useStore();
+    const loading = ref(false);
+
+    // Get payments from store
+    const payments = computed(() => {
+      const rawPayments = store.getters["admin/payments"] || [];
+      return rawPayments.map((p) => ({
+        id: p.id,
+        orderId: p.order?.id || "Unknown",
+        customer: p.customer?.name || "Unknown",
+        amount: p.amount,
+        status: p.status === "paid" ? "Paid" : "Unpaid",
+        date: new Date(p.created_at).toLocaleDateString(),
+      }));
+    });
 
     const columns = [
       { name: "orderId", label: "Order ID", field: "orderId", align: "left" },
@@ -140,17 +141,10 @@ export default {
       addDialog.value = true;
     };
 
-    const savePayment = () => {
-      if (
-        newPayment.value.orderId &&
-        newPayment.value.customer &&
-        newPayment.value.amount &&
-        newPayment.value.date
-      ) {
-        payments.value.push({
-          id: payments.value.length + 1,
-          ...newPayment.value,
-        });
+    const savePayment = async () => {
+      try {
+        await store.dispatch("admin/createPayment", newPayment.value);
+        addDialog.value = false;
         newPayment.value = {
           orderId: "",
           customer: "",
@@ -158,7 +152,8 @@ export default {
           status: "Unpaid",
           date: "",
         };
-        addDialog.value = false;
+      } catch (error) {
+        console.error("Error saving payment:", error);
       }
     };
 
@@ -166,9 +161,28 @@ export default {
       alert(`Edit Payment for Order: ${payment.orderId}`);
     };
 
-    const deletePayment = (id) => {
-      payments.value = payments.value.filter((p) => p.id !== id);
+    const deletePayment = async (id) => {
+      try {
+        await store.dispatch("admin/deletePayment", id);
+      } catch (error) {
+        console.error("Error deleting payment:", error);
+      }
     };
+
+    const refreshPayments = async () => {
+      loading.value = true;
+      try {
+        await store.dispatch("admin/fetchPayments");
+      } catch (error) {
+        console.error("Error refreshing payments:", error);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    onMounted(() => {
+      refreshPayments();
+    });
 
     return {
       payments,
@@ -180,6 +194,8 @@ export default {
       savePayment,
       editPayment,
       deletePayment,
+      refreshPayments,
+      loading,
     };
   },
 };
