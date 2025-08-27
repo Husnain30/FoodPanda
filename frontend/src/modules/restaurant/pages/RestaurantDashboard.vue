@@ -235,19 +235,7 @@
       <!-- Left Column - Charts -->
       <div class="content-left">
         <!-- Earnings Chart -->
-        <div class="chart-container">
-          <div class="chart-header">
-            <h2>Revenue Analytics</h2>
-            <div class="chart-filters">
-              <button class="filter-btn active">7D</button>
-              <button class="filter-btn">30D</button>
-              <button class="filter-btn">90D</button>
-            </div>
-          </div>
-          <div class="chart-wrapper">
-            <EarningsChart />
-          </div>
-        </div>
+     
 
         <!-- Performance Metrics -->
         <div class="metrics-container">
@@ -294,7 +282,7 @@
         <div class="quick-actions">
           <h3>Quick Actions</h3>
           <div class="actions-grid">
-        <router-link to="/restaurant/menu" class="action-card">
+     <router-link :to="{ name: 'MenuManager' }" class="action-card">
   <div class="action-icon">🍽️</div>
   <span>Manage Menu</span>
 </router-link>
@@ -350,14 +338,12 @@
 </template>
 
 <script>
-import EarningsChart from "../components/EarningsChart.vue";
-import OrdersTable from "../components/OrdersTable.vue";
 
 export default {
   name: "RestaurantDashboard",
   components: {
-    EarningsChart,
-    OrdersTable,
+   
+  
   },
   data() {
     return {

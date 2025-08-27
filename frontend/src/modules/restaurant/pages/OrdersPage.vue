@@ -19,82 +19,80 @@
         </select>
       </div>
     </header>
-
+<div v-if="loading" style="text-align: center; padding: 40px;">
+  <div>Loading orders...</div>
+</div>
     <!-- Orders Table -->
-    <OrdersTable 
-      :orders="filteredOrders" 
-      @update-status="updateOrderStatus" 
-    />
+  <OrdersTable 
+  v-if="!loading"
+  :orders="filteredOrders" 
+  @update-status="updateOrderStatus" 
+/>
   </div>
 </template>
 
+
+
 <script>
+import { ref, computed, onMounted } from 'vue'
+import { useStore } from 'vuex'
 import OrdersTable from "../components/OrdersTable.vue";
 
 export default {
   name: "OrdersPage",
   components: { OrdersTable },
-  data() {
-    return {
-      searchQuery: "",
-      statusFilter: "",
-      orders: [
-        {
-          id: 101,
-          customer: "Ali Khan",
-          items: ["Burger", "Fries", "Coke"],
-          amount: 850,
-          status: "Pending",
-          time: "12:45 PM",
-        },
-        {
-          id: 102,
-          customer: "Sara Ahmed",
-          items: ["Pizza", "Garlic Bread"],
-          amount: 1200,
-          status: "Accepted",
-          time: "1:15 PM",
-        },
-        {
-          id: 103,
-          customer: "Bilal Hussain",
-          items: ["Biryani", "Raita"],
-          amount: 600,
-          status: "Delivered",
-          time: "2:05 PM",
-        },
-        {
-          id: 104,
-          customer: "Fatima Noor",
-          items: ["Pasta", "Lemonade"],
-          amount: 950,
-          status: "Rejected",
-          time: "3:20 PM",
-        },
-      ],
-    };
-  },
-  computed: {
-    filteredOrders() {
-      return this.orders.filter((order) => {
-        const matchesSearch =
-          order.customer.toLowerCase().includes(this.searchQuery.toLowerCase());
-        const matchesStatus = this.statusFilter
-          ? order.status === this.statusFilter
-          : true;
-        return matchesSearch && matchesStatus;
-      });
-    },
-  },
-  methods: {
-    updateOrderStatus(orderId, newStatus) {
-      const order = this.orders.find((o) => o.id === orderId);
-      if (order) order.status = newStatus;
-    },
-  },
-};
-</script>
+  setup() {
+    const store = useStore()
 
+    // Reactive data
+    const searchQuery = ref("")
+    const statusFilter = ref("")
+
+    // Computed properties
+    const orders = computed(() => store.getters['restaurant/getAllOrders'])
+    const loading = computed(() => store.getters['restaurant/getOrdersLoading'])
+
+    // Get restaurant ID
+    const getRestaurantId = () => {
+      const user = JSON.parse(localStorage.getItem('user') || '{}')
+      return user.restaurant_id || user.id || 1
+    }
+
+    // Load orders from API
+    const loadOrders = async () => {
+  try {
+    const restaurantId = getRestaurantId()
+    if (!restaurantId) {
+      console.error('No restaurant ID found')
+      return
+    }
+    await store.dispatch('restaurant/fetchRestaurantOrders', restaurantId)
+  } catch (error) {
+    console.error('Error loading orders:', error)
+    // You can add a notification here if needed
+  }
+}
+    // Update order status
+    const updateOrderStatus = async (orderId, newStatus) => {
+      await store.dispatch('restaurant/updateOrderStatus', { orderId, status: newStatus })
+    }
+
+    // Load orders on mount
+    onMounted(() => {
+      loadOrders()
+    })
+    
+
+    return {
+      searchQuery,
+      statusFilter,
+      filteredOrders,
+      loading,
+      updateOrderStatus
+    }
+  }
+}
+</script>
 <style scoped>
 .orders-page {
   padding: 20px;
