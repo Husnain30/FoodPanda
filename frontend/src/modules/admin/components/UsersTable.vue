@@ -88,39 +88,39 @@
         </q-inner-loading>
       </template>
       
-    <!-- No data slot -->
-<template v-slot:no-data>
-  <div class="full-width column flex-center q-pa-lg">
-    <q-icon 
-      :name="hasActiveFilters ? 'search_off' : 'people_outline'" 
-      size="3em" 
-      class="q-mb-md text-grey-5" 
-    />
-    <div class="text-h6 text-grey-6 q-mb-sm">
-      {{ hasActiveFilters ? 'No users match your filters' : 'No users found' }}
-    </div>
-    <div class="text-body2 text-grey-5 q-mb-lg">
-      {{ hasActiveFilters ? 'Try adjusting your search criteria' : 'Users will appear here when added to the system' }}
-    </div>
-    <div class="row q-gutter-sm">
-      <q-btn
-        v-if="hasActiveFilters"
-        flat
-        color="primary"
-        label="Clear Filters"
-        icon="filter_list_off"
-        @click="clearFilters"
-      />
-      <q-btn
-        outline
-        color="primary" 
-        label="Refresh Data"
-        icon="refresh"
-        @click="$emit('refresh')"
-      />
-    </div>
-  </div>
-</template>
+      <!-- No data slot -->
+      <template v-slot:no-data>
+        <div class="full-width column flex-center q-pa-lg">
+          <q-icon 
+            :name="hasActiveFilters ? 'search_off' : 'people_outline'" 
+            size="3em" 
+            class="q-mb-md text-grey-5" 
+          />
+          <div class="text-h6 text-grey-6 q-mb-sm">
+            {{ hasActiveFilters ? 'No users match your filters' : 'No users found' }}
+          </div>
+          <div class="text-body2 text-grey-5 q-mb-lg">
+            {{ hasActiveFilters ? 'Try adjusting your search criteria' : 'Users will appear here when added to the system' }}
+          </div>
+          <div class="row q-gutter-sm">
+            <q-btn
+              v-if="hasActiveFilters"
+              flat
+              color="primary"
+              label="Clear Filters"
+              icon="filter_list_off"
+              @click="clearFilters"
+            />
+            <q-btn
+              outline
+              color="primary" 
+              label="Refresh Data"
+              icon="refresh"
+              @click="$emit('refresh')"
+            />
+          </div>
+        </div>
+      </template>
 
       <!-- Custom column templates -->
       <template v-slot:body-cell-avatar="props">
@@ -270,6 +270,7 @@
 <script>
 import { ref, computed, watch } from 'vue'
 import { useQuasar, date } from 'quasar'
+import { useStore } from 'vuex'
 
 export default {
   name: 'UsersTable',
@@ -283,9 +284,10 @@ export default {
       default: false
     }
   },
-  emits: ['refresh', 'user-updated'],
+  emits: ['refresh', 'user-updated', 'edit-user'],
   setup(props, { emit }) {
     const $q = useQuasar()
+    const store = useStore()
 
     // Reactive data
     const searchQuery = ref('')
@@ -460,9 +462,9 @@ export default {
       // Implement view user logic
     }
 
+    // Fixed editUser function
     const editUser = (user) => {
-      console.log('Edit user:', user)
-      // Implement edit user logic
+      emit('edit-user', user)
     }
 
     const toggleUserStatus = async (user) => {
@@ -488,17 +490,27 @@ export default {
           [user.id]: true
         }
 
-        // Simulate API call - replace with actual API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Call store action to update user status
+        await store.dispatch('admin/updateUser', {
+          id: user.id,
+          userData: { status: newStatus }
+        })
         
-        // Update user status locally
-        user.status = newStatus
-
         $q.notify({
-          type: 'negative',
-          message: `Failed to ${action} user`,
+          type: 'positive',
+          message: `User ${action}d successfully`,
           position: 'top-right'
         })
+
+        emit('user-updated')
+
+      } catch {
+  $q.notify({
+    type: 'negative',
+    message: `Failed to ${action} user`,
+    position: 'top-right'
+  })
+
       } finally {
         // Clear loading state
         userActionLoading.value = {
@@ -527,14 +539,13 @@ export default {
 
         if (!confirmed) return
 
-        // Set loading state
         userActionLoading.value = {
           ...userActionLoading.value,
           [user.id]: true
         }
 
-        // Simulate API call - replace with actual API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Call store action to delete user
+        await store.dispatch('admin/deleteUser', user.id)
         
         $q.notify({
           type: 'positive',
@@ -545,14 +556,12 @@ export default {
         emit('user-updated')
 
       } catch (error) {
-        console.error('Failed to delete user:', error)
         $q.notify({
           type: 'negative',
-          message: 'Failed to delete user',
+          message: error.message,
           position: 'top-right'
         })
       } finally {
-        // Clear loading state
         userActionLoading.value = {
           ...userActionLoading.value,
           [user.id]: false
@@ -637,4 +646,4 @@ export default {
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(2px);
 }
-</style> 
+</style>

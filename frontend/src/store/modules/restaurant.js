@@ -12,10 +12,6 @@ const state = {
     completionRate: 0,
     returnRate: 0,
     peakHours: '',
-    menuItems: [], // This should be an empty array, not undefined
-  menuLoading: false, // This should be false, not undefined  
-  menuError: null, // This can be null
-  
   },
 
   // Orders Management
@@ -89,9 +85,6 @@ const mutations = {
   },
 
   // Menu Mutations
-  DELETE_MENU_ITEM(state, itemId) {
-  state.menuItems = state.menuItems.filter(item => item.id !== itemId)
-},
   SET_MENU_LOADING(state, loading) {
     state.menuLoading = loading
   },
@@ -101,75 +94,21 @@ const mutations = {
   SET_MENU_ITEMS(state, items) {
     state.menuItems = items
   },
-  ADD_MENU_ITEM(state, item) {
-    state.menuItems.push(item)
+  ADD_MENU_ITEM(state, menuItem) {
+    state.menuItems.push(menuItem)
   },
-  UPDATE_MENU_ITEM(state, { itemId, updatedItem }) {
-    const index = state.menuItems.findIndex(item => item.id === itemId)
+  UPDATE_MENU_ITEM(state, updatedItem) {
+    const index = state.menuItems.findIndex(item => item.id === updatedItem.id)
     if (index !== -1) {
       state.menuItems.splice(index, 1, updatedItem)
     }
   },
+  DELETE_MENU_ITEM(state, itemId) {
+    state.menuItems = state.menuItems.filter(item => item.id !== itemId)
+  },
 }
 
 const actions = {
-
-    // Add these missing actions to your restaurant.js store
-// Add this action to your restaurant.js store actions
-
-// Delete Menu Item
-async deleteMenuItem({ commit, state }, itemId) {
-  try {
-    await api.delete(`menu/${itemId}`)
-    
-    // Remove from state
-    const updatedItems = state.menuItems.filter(item => item.id !== itemId)
-    commit('SET_MENU_ITEMS', updatedItems)
-    
-    return true
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Failed to delete menu item'
-    console.error('❌ Error deleting menu item:', error)
-    throw new Error(errorMessage)
-  }
-},
-
-// Add Menu Item with FormData (for image upload)
-// Add this debug version to your addMenuItemWithImage action:
-async addMenuItemWithImage({ commit }, formData) {
-  console.log('Store action addMenuItemWithImage called') // Debug log
-  try {
-    console.log('Making API request to /api/menu') // Debug log
-    const response = await api.post('menu', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-    console.log('API response:', response.data) // Debug log
-    commit('ADD_MENU_ITEM', response.data)
-    return response.data
-  } catch (error) {
-    console.error('API Error:', error.response?.data || error) // Debug log
-    const errorMessage = error.response?.data?.message || 'Failed to add menu item'
-    console.error('❌ Error adding menu item with image:', error)
-    throw new Error(errorMessage)
-  }
-},
-
-// Replace your existing updateMenuItemWithImage action with this:
-async updateMenuItemWithImage({ commit }, { itemId, formData }) {
-  try {
-    const response = await api.patch(`menu/${itemId}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-    commit('UPDATE_MENU_ITEM', { itemId, updatedItem: response.data })
-    return response.data
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Failed to update menu item'
-    console.error('❌ Error updating menu item with image:', error)
-    throw new Error(errorMessage)
-  }
-},
   // Fetch Restaurant Stats
   async fetchRestaurantStats({ commit }, restaurantId) {
     commit('SET_STATS_LOADING', true)
@@ -234,7 +173,6 @@ async updateMenuItemWithImage({ commit }, { itemId, formData }) {
       commit('SET_ORDERS_LOADING', false)
     }
   },
-  
 
   // Update Order Status
   async updateOrderStatus({ commit }, { orderId, status }) {
@@ -251,47 +189,79 @@ async updateMenuItemWithImage({ commit }, { itemId, formData }) {
     }
   },
 
-  // Fetch Menu Items
- async fetchMenuItems({ commit }, restaurantId) {
-  commit('SET_MENU_LOADING', true)
-  commit('SET_MENU_ERROR', null)
+  // Fetch Menu Items (commented out since you don't have GET route yet)
+  async fetchMenuItems({ commit }, restaurantId) {
+    commit('SET_MENU_LOADING', true)
+    commit('SET_MENU_ERROR', null)
 
-  try {
-    const response = await api.get(`menu?restaurant_id=${restaurantId}`)
-    commit('SET_MENU_ITEMS', response.data)
-    return response.data
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Failed to fetch menu items'
-    commit('SET_MENU_ERROR', errorMessage)
-    console.error('❌ Error fetching menu items:', error)
-    throw error
-  } finally {
-    commit('SET_MENU_LOADING', false)
-  }
-},
-
-  // Add Menu Item
-  async addMenuItem({ commit }, menuItem) {
     try {
-      const response = await api.post('/menu', menuItem)
+      const response = await api.get(`menu?restaurant_id=${restaurantId}`)
+      commit('SET_MENU_ITEMS', response.data)
+      return response.data
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to fetch menu items'
+      commit('SET_MENU_ERROR', errorMessage)
+      console.error('❌ Error fetching menu items:', error)
+      throw error
+    } finally {
+      commit('SET_MENU_LOADING', false)
+    }
+  },
+
+  // Add Menu Item with Image
+  async addMenuItemWithImage({ commit }, formData) {
+    try {
+      console.log('Making API request to add menu item') // Debug log
+      
+      const response = await api.post('menu', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        timeout: 30000 // 30 second timeout for image upload
+      })
+      
+      console.log('Menu item added successfully:', response.data) // Debug log
       commit('ADD_MENU_ITEM', response.data)
       return response.data
     } catch (error) {
+      console.error('API Error:', error.response?.data || error) // Debug log
       const errorMessage = error.response?.data?.message || 'Failed to add menu item'
-      console.error('❌ Error adding menu item:', error)
+      console.error('❌ Error adding menu item with image:', error)
       throw new Error(errorMessage)
     }
   },
 
-  // Update Menu Item
-  async updateMenuItem({ commit }, { itemId, menuItem }) {
+  // Update Menu Item with Image
+  async updateMenuItemWithImage({ commit }, { itemId, formData }) {
     try {
-      const response = await api.patch(`/menu/${itemId}`, menuItem)
-      commit('UPDATE_MENU_ITEM', { itemId, updatedItem: response.data })
+      const response = await api.patch(`menu/${itemId}`, formData, {
+        headers: { 
+          'Content-Type': 'multipart/form-data' 
+        },
+        timeout: 30000 // 30 second timeout for image upload
+      })
+      
+      commit('UPDATE_MENU_ITEM', response.data)
       return response.data
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Failed to update menu item'
-      console.error('❌ Error updating menu item:', error)
+      console.error('❌ Error updating menu item with image:', error)
+      throw new Error(errorMessage)
+    }
+  },
+
+  // Delete Menu Item
+  async deleteMenuItem({ commit }, itemId) {
+    try {
+      await api.delete(`menu/${itemId}`)
+      
+      // Remove from state using mutation
+      commit('DELETE_MENU_ITEM', itemId)
+      
+      return true
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to delete menu item'
+      console.error('❌ Error deleting menu item:', error)
       throw new Error(errorMessage)
     }
   },
@@ -317,7 +287,7 @@ async updateMenuItemWithImage({ commit }, { itemId, formData }) {
 }
 
 export default {
-  namespaced: true,  // This is important!
+  namespaced: true,
   state,
   getters,
   mutations,

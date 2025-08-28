@@ -1,80 +1,3 @@
-// // src/store/modules/admin.js
-// import api from "src/boot/axios"
-
-// const state = {
-//   stats: {
-//     totalUsers: 0,
-//     totalBookings: 0,
-//     revenue: 0,
-//   },
-//   users: [],
-// }
-
-// const mutations = {
-//   SET_STATS(state, stats) {
-//     state.stats = stats
-//   },
-//   SET_USERS(state, users) {
-//     state.users = users
-//     state.stats.totalUsers = Array.isArray(users) ? users.length : 0
-//   },
-// }
-
-// const actions = {
-//   // Users list fetch
-//   async fetchUsers({ commit }) {
-//     try {
-//       const res = await api.get("admin/users")
-
-//       let usersData = []
-//       if (Array.isArray(res.data)) {
-//         usersData = res.data
-//       } else if (res.data?.data) {
-//         // In case paginated API
-//         usersData = res.data.data
-//       }
-
-//       commit("SET_USERS", usersData)
-//     } catch (err) {
-//       console.error("❌ Error fetching users:", err)
-//       commit("SET_USERS", [])
-//     }
-//   },
-
-//   // Example: stats fetch (expand later when API ready)
-//   async fetchStats({ commit, dispatch }) {
-//     try {
-//       // For now just reuse users count as part of stats
-//       await dispatch("fetchUsers")
-//       const stats = {
-//         totalUsers: state.stats.totalUsers,
-//         totalBookings: 0, // Replace when API available
-//         revenue: 0, // Replace when API available
-//       }
-//       commit("SET_STATS", stats)
-//     } catch (err) {
-//       console.error("❌ Error fetching stats:", err)
-//     }
-//   },
-// }
-
-// const getters = {
-//   stats: (state) => state.stats,
-//   users: (state) => state.users,
-//   totalUsers: (state) => state.stats.totalUsers,
-// }
-
-// export default {
-//   namespaced: true,
-//   state,
-//   mutations,
-//   actions,
-//   getters,
-// }
-
-
-
-//update 
 
 // src/store/modules/admin.js
 import api from "src/boot/axios"
@@ -163,9 +86,21 @@ const mutations = {
   CLEAR_ERROR(state, type) {
     delete state.errors[type]
   },
+  REMOVE_USER(state, userId) {
+  state.users = state.users.filter(user => user.id !== userId)
+}
 }
 
 const actions = {
+async deleteUser({ commit }, userId) {
+  try {
+    await api.delete(`admin/users/${userId}`)  // ✅ check backend route
+    commit('REMOVE_USER', userId)              // remove from state
+  } catch (error) {
+    console.error("❌ Error deleting user:", error)
+    throw error
+  }
+},
 
   
 // Add this action to your admin.js store actions:

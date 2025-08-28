@@ -215,6 +215,65 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <!-- Edit User Dialog -->
+<q-dialog v-model="showEditDialog">
+  <q-card style="min-width: 400px">
+    <q-card-section>
+      <div class="text-h6">Edit User</div>
+    </q-card-section>
+
+    <q-card-section class="q-pt-none">
+      <q-input
+        filled
+        v-model="editingUser.name"
+        label="Full Name"
+        lazy-rules
+        :rules="[val => val && val.length > 0 || 'Name is required']"
+      />
+
+      <q-input
+        filled
+        v-model="editingUser.email"
+        label="Email"
+        type="email"
+        class="q-mt-md"
+        lazy-rules
+        :rules="[
+          val => val && val.length > 0 || 'Email is required',
+          val => val && val.includes('@') || 'Please enter a valid email'
+        ]"
+      />
+
+      <q-input
+        filled
+        v-model="editingUser.phone"
+        label="Phone Number"
+        class="q-mt-md"
+      />
+
+      <q-select
+        filled
+        v-model="editingUser.role"
+        :options="roleOptions"
+        label="Role"
+        class="q-mt-md"
+        emit-value
+        map-options
+      />
+    </q-card-section>
+
+    <q-card-actions align="right">
+      <q-btn flat label="Cancel" color="grey" v-close-popup />
+      <q-btn 
+        label="Update User" 
+        color="primary" 
+        @click="updateUser"
+        :loading="isUpdatingUser"
+      />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
   </q-page>
 </template>
 
@@ -234,6 +293,7 @@ export default {
     const $q = useQuasar()
 
     // Reactive data
+    
     const showAddDialog = ref(false)
     const isAddingUser = ref(false)
     const newUser = ref({
@@ -242,6 +302,9 @@ export default {
       phone: '',
       role: 'customer'
     })
+    const showEditDialog = ref(false)
+const isUpdatingUser = ref(false)
+const editingUser = ref({})
 
     const roleOptions = [
       { label: 'Customer', value: 'customer' },
@@ -282,6 +345,48 @@ export default {
     })
 
     // Methods
+
+    const editUser = (user) => {
+  editingUser.value = { ...user }
+  showEditDialog.value = true
+}
+
+const updateUser = async () => {
+  if (!editingUser.value.name || !editingUser.value.email) {
+    $q.notify({
+      type: 'warning',
+      message: 'Please fill in all required fields',
+      position: 'top-right'
+    })
+    return
+  }
+
+  isUpdatingUser.value = true
+  
+  try {
+    await store.dispatch('admin/updateUser', {
+      id: editingUser.value.id,
+      userData: editingUser.value
+    })
+    
+    $q.notify({
+      type: 'positive',
+      message: 'User updated successfully',
+      position: 'top-right'
+    })
+    
+    showEditDialog.value = false
+    
+  } catch (error) {
+    $q.notify({
+      type: 'negative',
+      message: error.message,
+      position: 'top-right'
+    })
+  } finally {
+    isUpdatingUser.value = false
+  }
+}
     const loadUsers = async () => {
       try {
         await store.dispatch('admin/fetchUsers')
@@ -317,52 +422,44 @@ export default {
     }
 
     const addUser = async () => {
-      // Basic validation
-      if (!newUser.value.name || !newUser.value.email) {
-        $q.notify({
-          type: 'warning',
-          message: 'Please fill in all required fields',
-          position: 'top-right'
-        })
-        return
-      }
+  if (!newUser.value.name || !newUser.value.email) {
+    $q.notify({
+      type: 'warning',
+      message: 'Please fill in all required fields',
+      position: 'top-right'
+    })
+    return
+  }
 
-      isAddingUser.value = true
-      
-      try {
-        // Call API to add user (you'll need to implement this in store)
-        // await store.dispatch('admin/addUser', newUser.value)
-        
-        // For now, just show success message
-        $q.notify({
-          type: 'positive',
-          message: 'User added successfully',
-          position: 'top-right'
-        })
-        
-        // Reset form and close dialog
-        newUser.value = {
-          name: '',
-          email: '',
-          phone: '',
-          role: 'customer'
-        }
-        showAddDialog.value = false
-        
-        // Refresh users list
-        await refreshUsers()
-        
-      } catch (error) {
-        console.error('Failed to add user:', error)
-        $q.notify({
-          type: 'negative',
-          message: 'Failed to add user',
-          position: 'top-right'
-        })
-      } finally {
-        isAddingUser.value = false
-      }
+  isAddingUser.value = true
+  
+  try {
+    await store.dispatch('admin/addUser', newUser.value)
+    
+    $q.notify({
+      type: 'positive',
+      message: 'User added successfully',
+      position: 'top-right'
+    })
+    
+    newUser.value = {
+      name: '',
+      email: '',
+      phone: '',
+      role: 'customer'
     }
+    showAddDialog.value = false
+    
+  } catch (error) {
+    $q.notify({
+      type: 'negative', 
+      message: error.message,
+      position: 'top-right'
+    })
+  } finally {
+    isAddingUser.value = false
+  }
+}
 
     const handleUserUpdated = async () => {
       // Refresh users when a user is updated from the table
@@ -411,7 +508,12 @@ export default {
       loadUsers,
       refreshUsers,
       addUser,
-      handleUserUpdated
+      handleUserUpdated,
+        showEditDialog,
+  isUpdatingUser,
+  editingUser,
+  editUser,
+  updateUser
     }
   }
 }
