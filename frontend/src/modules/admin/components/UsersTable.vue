@@ -265,12 +265,14 @@
       </template>
     </q-table>
   </div>
+  
 </template>
 
 <script>
 import { ref, computed, watch } from 'vue'
 import { useQuasar, date } from 'quasar'
 import { useStore } from 'vuex'
+
 
 export default {
   name: 'UsersTable',
@@ -472,15 +474,13 @@ export default {
       const action = newStatus === 'active' ? 'activate' : 'suspend'
 
       try {
-        const confirmed = await new Promise((resolve) => {
-          $q.dialog({
-            title: `${action.charAt(0).toUpperCase() + action.slice(1)} User`,
-            message: `Are you sure you want to ${action} "${user.name}"?`,
-            cancel: true,
-            persistent: true
-          }).onOk(() => resolve(true))
-            .onCancel(() => resolve(false))
-        })
+     const confirmed = await new Promise((resolve) => {
+  if (confirm(`Are you sure you want to delete "${user.name}"?`)) {
+    resolve(true)
+  } else {
+    resolve(false)
+  }
+})
 
         if (!confirmed) return
 
@@ -520,54 +520,34 @@ export default {
       }
     }
 
-    const deleteUser = async (user) => {
-      try {
-        const confirmed = await new Promise((resolve) => {
-          $q.dialog({
-            title: 'Delete User',
-            message: `Are you sure you want to permanently delete "${user.name}"? This action cannot be undone.`,
-            cancel: true,
-            persistent: true,
-            color: 'negative',
-            ok: {
-              color: 'negative',
-              label: 'Delete'
-            }
-          }).onOk(() => resolve(true))
-            .onCancel(() => resolve(false))
-        })
+   const deleteUser = async (user) => {
+  try {
+    // $q.dialog ki jagah native confirm use kar do
+    const confirmed = confirm(`Are you sure you want to permanently delete "${user.name}"? This action cannot be undone.`)
+    
+    if (!confirmed) return
 
-        if (!confirmed) return
-
-        userActionLoading.value = {
-          ...userActionLoading.value,
-          [user.id]: true
-        }
-
-        // Call store action to delete user
-        await store.dispatch('admin/deleteUser', user.id)
-        
-        $q.notify({
-          type: 'positive',
-          message: 'User deleted successfully',
-          position: 'top-right'
-        })
-
-        emit('user-updated')
-
-      } catch (error) {
-        $q.notify({
-          type: 'negative',
-          message: error.message,
-          position: 'top-right'
-        })
-      } finally {
-        userActionLoading.value = {
-          ...userActionLoading.value,
-          [user.id]: false
-        }
-      }
+    userActionLoading.value = {
+      ...userActionLoading.value,
+      [user.id]: true
     }
+
+    await store.dispatch('admin/deleteUser', user.id)
+    
+    // $q.notify ki jagah console ya alert use kar do temporarily
+    console.log('User deleted successfully')
+    
+    emit('user-updated')
+
+  } catch (error) {
+    console.error('Failed to delete user:', error.message)
+  } finally {
+    userActionLoading.value = {
+      ...userActionLoading.value,
+      [user.id]: false
+    }
+  }
+}
 
     // Watch for search query changes to reset pagination
     watch(searchQuery, () => {

@@ -141,38 +141,16 @@ const actions = {
   },
 
   // Fetch Restaurant Orders
-  async fetchRestaurantOrders({ commit }, restaurantId) {
-    commit('SET_ORDERS_LOADING', true)
-    commit('SET_ORDERS_ERROR', null)
-
-    try {
-      const response = await api.get(`/orders/restaurant/${restaurantId}`)
-      
-      // Transform API response to match frontend structure
-      const ordersData = response.data.map(order => ({
-        id: order.id,
-        customer: order.customer?.name || 'Unknown Customer',
-        customer_phone: order.customer?.phone || '',
-        items: order.items || [],
-        amount: parseFloat(order.total_amount || 0),
-        status: order.status || 'Pending',
-        time: order.created_at ? new Date(order.created_at).toLocaleTimeString() : 'N/A',
-        created_at: order.created_at,
-        delivery_address: order.delivery_address || '',
-        payment_method: order.payment_method || '',
-      }))
-      
-      commit('SET_ORDERS', ordersData)
-      return ordersData
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Failed to fetch orders'
-      commit('SET_ORDERS_ERROR', errorMessage)
-      console.error('❌ Error fetching restaurant orders:', error)
-      throw error
-    } finally {
-      commit('SET_ORDERS_LOADING', false)
-    }
-  },
+  // Fetch Restaurant Details
+async fetchRestaurantDetails(context, restaurantId) {
+  try {
+    const response = await api.get(`/restaurants/${restaurantId}`)
+    return response.data
+  } catch (error) {
+    console.error('Error fetching restaurant details:', error)
+    throw error
+  }
+},
 
   // Update Order Status
   async updateOrderStatus({ commit }, { orderId, status }) {

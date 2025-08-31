@@ -19,252 +19,26 @@
       </div>
     </div>
 
-    <!-- Key Metrics Stats -->
-    <div class="stats-section">
-      <div class="stats-grid">
-        <div class="stat-card revenue">
-          <div class="stat-header">
-            <div class="stat-icon">💰</div>
-            <div class="stat-meta">
-              <span class="stat-label">Total Revenue</span>
-              <span class="stat-period">Today</span>
-            </div>
-          </div>
-          <div class="stat-value">PKR 24,580</div>
-          <div class="stat-change positive">
-            <span class="change-indicator">↗</span>
-            <span>+15.3% from yesterday</span>
-          </div>
-        </div>
+  <!-- Stats cards में -->
+<div class="stat-value">PKR {{ getDashboardStats.revenue.toLocaleString() }}</div>
+<div class="stat-value">{{ getDashboardStats.orders }}</div>
+<div class="stat-value">{{ getDashboardStats.customers.toLocaleString() }}</div>
+<div class="stat-value">{{ getDashboardStats.rating }}</div>
 
-        <div class="stat-card orders">
-          <div class="stat-header">
-            <div class="stat-icon">🛍️</div>
-            <div class="stat-meta">
-              <span class="stat-label">Orders Today</span>
-              <span class="stat-period">Live</span>
-            </div>
-          </div>
-          <div class="stat-value">127</div>
-          <div class="stat-change positive">
-            <span class="change-indicator">↗</span>
-            <span>+8.2% from yesterday</span>
-          </div>
-        </div>
-
-        <div class="stat-card customers">
-          <div class="stat-header">
-            <div class="stat-icon">👥</div>
-            <div class="stat-meta">
-              <span class="stat-label">Active Customers</span>
-              <span class="stat-period">This month</span>
-            </div>
-          </div>
-          <div class="stat-value">2,849</div>
-          <div class="stat-change positive">
-            <span class="change-indicator">↗</span>
-            <span>+23.1% growth</span>
-          </div>
-        </div>
-
-        <div class="stat-card rating">
-          <div class="stat-header">
-            <div class="stat-icon">⭐</div>
-            <div class="stat-meta">
-              <span class="stat-label">Avg Rating</span>
-              <span class="stat-period">This week</span>
-            </div>
-          </div>
-          <div class="stat-value">4.8</div>
-          <div class="stat-change neutral">
-            <span class="change-indicator">→</span>
-            <span>Stable performance</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Restaurant Gallery Section -->
-    <div class="gallery-section">
-      <div class="section-header">
-        <h2>Restaurant Gallery</h2>
-        <button class="btn-secondary gallery-btn">
-          <i class="icon">📸</i>
-          Manage Photos
-        </button>
-      </div>
-      <div class="gallery-grid">
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop&crop=center" alt="Restaurant Interior" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Royal Palace Restaurant</span>
-              <span class="gallery-location">📍 Gulberg, Lahore</span>
-              <span class="gallery-detail">Premium dining with traditional ambiance</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.8</span>
-                <span class="stat-item">👥 150 seats</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=400&h=300&fit=crop&crop=center" alt="Food Presentation" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Spice Garden Karachi</span>
-              <span class="gallery-location">📍 DHA Phase 6, Karachi</span>
-              <span class="gallery-detail">Authentic Pakistani & Continental cuisine</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.9</span>
-                <span class="stat-item">🍽️ 85 dishes</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop&crop=center" alt="Kitchen View" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Metro Kitchen Hub</span>
-              <span class="gallery-location">📍 F-7 Markaz, Islamabad</span>
-              <span class="gallery-detail">Open kitchen concept with live cooking</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.7</span>
-                <span class="stat-item">👨‍🍳 8 chefs</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop&crop=center" alt="Outdoor Seating" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Garden View Cafe</span>
-              <span class="gallery-location">📍 Model Town, Faisalabad</span>
-              <span class="gallery-detail">Beautiful outdoor dining experience</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.6</span>
-                <span class="stat-item">🌿 Garden view</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400&h=300&fit=crop&crop=center" alt="Bar Area" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Urban Lounge</span>
-              <span class="gallery-location">📍 Mall Road, Murree</span>
-              <span class="gallery-detail">Premium bar & lounge with mountain view</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.8</span>
-                <span class="stat-item">🍸 50+ drinks</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop&crop=center" alt="Pizza Making" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Pizza Corner</span>
-              <span class="gallery-location">📍 Anarkali Bazaar, Lahore</span>
-              <span class="gallery-detail">Fresh hand-tossed pizzas daily</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.5</span>
-                <span class="stat-item">🍕 25 varieties</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1592861956120-e524fc739696?w=400&h=300&fit=crop&crop=center" alt="Chef Cooking" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Chef's Table Peshawar</span>
-              <span class="gallery-location">📍 University Town, Peshawar</span>
-              <span class="gallery-detail">Live cooking demonstrations & classes</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.9</span>
-                <span class="stat-item">👨‍🍳 Master chef</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=300&fit=crop&crop=center" alt="Desserts" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Sweet Dreams Bakery</span>
-              <span class="gallery-location">📍 Fortress Stadium, Lahore</span>
-              <span class="gallery-detail">Handcrafted desserts & pastries</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.7</span>
-                <span class="stat-item">🧁 40+ desserts</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=300&fit=crop&crop=center" alt="Wine Selection" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Vintage Cellar</span>
-              <span class="gallery-location">📍 Clifton Block 8, Karachi</span>
-              <span class="gallery-detail">Curated collection of premium beverages</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.8</span>
-                <span class="stat-item">🍷 200+ selection</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
+<!-- Performance metrics में -->
+<span class="metric-value">PKR {{ getDashboardStats.averageOrderValue }}</span>
+<span class="metric-value">{{ getDashboardStats.completionRate }}%</span>
+<span class="metric-value">{{ getDashboardStats.returnRate }}%</span>
+<span class="metric-value">{{ getDashboardStats.peakHours }}</span>
     <!-- Main Content Grid -->
       <!-- Left Column - Charts -->
       <div class="content-left">
         <!-- Earnings Chart -->
-     
+     <div v-if="getStatsLoading" class="loading-state">Loading dashboard...</div>
+<div v-else-if="getStatsError" class="error-state">{{ getStatsError }}</div>
 
         <!-- Performance Metrics -->
-        <div class="metrics-container">
-          <h2>Performance Metrics</h2>
-          <div class="metrics-grid">
-            <div class="metric-item">
-              <span class="metric-label">Average Order Value</span>
-              <span class="metric-value">PKR 850</span>
-              <span class="metric-change positive">+5.2%</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">Order Completion Rate</span>
-              <span class="metric-value">97.8%</span>
-              <span class="metric-change positive">+1.1%</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">Customer Return Rate</span>
-              <span class="metric-value">68.5%</span>
-              <span class="metric-change positive">+3.7%</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">Peak Hours</span>
-              <span class="metric-value">12-2 PM</span>
-              <span class="metric-change neutral">Consistent</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
+       
       <!-- Right Column - Tables & Quick Actions -->
       <div class="content-right">
         <!-- Recent Orders -->
@@ -333,16 +107,18 @@
         </div>
       </div>
     </div>
+    </div>
     
 
 </template>
 
 <script>
-
+import OrdersTable from '../components/OrdersTable.vue'
+import { mapGetters, mapActions } from 'vuex'
 export default {
   name: "RestaurantDashboard",
   components: {
-   
+   OrdersTable
   
   },
   data() {
@@ -374,22 +150,51 @@ export default {
       ],
     };
   },
-  mounted() {
-    // Auto-refresh data every 30s
-    this.refreshInterval = setInterval(() => {
-      this.refreshDashboardData();
-    }, 30000);
-  },
+async mounted() {
+  // Get restaurant ID from route params or user session
+  const restaurantId = this.$route.params.id || this.$store.getters['auth/getCurrentUser']?.restaurant_id
+  
+  if (restaurantId) {
+    try {
+      await this.fetchRestaurantStats(restaurantId)
+      await this.fetchRestaurantOrders(restaurantId)
+    } catch (error) {
+      console.error('Error loading dashboard:', error)
+    }
+  }
+  
+  // Auto-refresh remains same
+  this.refreshInterval = setInterval(() => {
+    this.refreshDashboardData()
+  }, 30000)
+},
+
   beforeUnmount() {
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
   },
+  computed: {
+  ...mapGetters('restaurant', [
+    'getDashboardStats',
+    'getStatsLoading',
+    'getStatsError'
+  ]),
+},
   methods: {
-    refreshDashboardData() {
-      // Here you can call APIs to update stats, orders, and chart data
-      console.log("🔄 Refreshing dashboard data...");
-    },
+  ...mapActions('restaurant', [
+    'fetchRestaurantStats',
+    'fetchRestaurantOrders'
+  ]),
+  
+  async refreshDashboardData() {
+    const restaurantId = this.$route.params.id || this.$store.getters['auth/getCurrentUser']?.restaurant_id
+    if (restaurantId) {
+      await this.fetchRestaurantStats(restaurantId)
+      await this.fetchRestaurantOrders(restaurantId)
+    }
+  },
+
     changePeriod(period) {
       this.currentPeriod = period;
       // Update chart data based on selected period

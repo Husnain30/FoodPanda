@@ -133,12 +133,13 @@
 
     <!-- Users Table -->
     <div v-else-if="hasUsers || (!isLoading && !hasError)">
-      <UsersTable 
-        :users="users"
-        :loading="isLoading"
-        @refresh="refreshUsers"
-        @user-updated="handleUserUpdated"
-      />
+  <UsersTable 
+  :users="users"
+  :loading="isLoading"
+  @refresh="refreshUsers"
+  @user-updated="handleUserUpdated"
+  @edit-user="editUser"
+/>
     </div>
 
  <!-- Empty State -->
@@ -156,65 +157,87 @@
   />
 </div>
 
+ <!-- Add User Dialog -->
+  <q-dialog v-model="showAddDialog">
+  <q-card style="min-width: 400px">
+    <q-card-section>
+      <div class="text-h6">Add New User</div>
+    </q-card-section>
 
-    <!-- Add User Dialog -->
-    <q-dialog v-model="showAddDialog">
-      <q-card style="min-width: 400px">
-        <q-card-section>
-          <div class="text-h6">Add New User</div>
-        </q-card-section>
+    <q-card-section class="q-pt-none">
+      <!-- Full Name -->
+      <q-input
+        filled
+        v-model="newUser.name"
+        label="Full Name"
+        lazy-rules
+        :rules="[val => val && val.length > 0 || 'Name is required']"
+      />
 
-        <q-card-section class="q-pt-none">
-          <q-input
-            filled
-            v-model="newUser.name"
-            label="Full Name"
-            lazy-rules
-            :rules="[val => val && val.length > 0 || 'Name is required']"
+      <!-- Email -->
+      <q-input
+        filled
+        v-model="newUser.email"
+        label="Email"
+        type="email"
+        class="q-mt-md"
+        lazy-rules
+        :rules="[
+          val => val && val.length > 0 || 'Email is required',
+          val => val && val.includes('@') || 'Please enter a valid email'
+        ]"
+      />
+
+      <!-- Phone -->
+      <q-input
+        filled
+        v-model="newUser.phone"
+        label="Phone Number"
+        class="q-mt-md"
+      />
+
+      <!-- Role -->
+      <q-select
+        filled
+        v-model="newUser.role"
+        :options="roleOptions"
+        label="Role"
+        class="q-mt-md"
+        emit-value
+        map-options
+      />
+
+      <!-- Password -->
+      <q-input
+        filled
+        v-model="newUser.password"
+        :type="showPassword ? 'text' : 'password'"
+        label="Password"
+        class="q-mt-md"
+        lazy-rules
+        :rules="[val => val && val.length >= 6 || 'Password must be at least 6 characters']"
+      >
+        <template v-slot:append>
+          <q-icon
+            :name="showPassword ? 'visibility_off' : 'visibility'"
+            class="cursor-pointer"
+            @click="showPassword = !showPassword"
           />
+        </template>
+      </q-input>
+    </q-card-section>
 
-          <q-input
-            filled
-            v-model="newUser.email"
-            label="Email"
-            type="email"
-            class="q-mt-md"
-            lazy-rules
-            :rules="[
-              val => val && val.length > 0 || 'Email is required',
-              val => val && val.includes('@') || 'Please enter a valid email'
-            ]"
-          />
-
-          <q-input
-            filled
-            v-model="newUser.phone"
-            label="Phone Number"
-            class="q-mt-md"
-          />
-
-          <q-select
-            filled
-            v-model="newUser.role"
-            :options="roleOptions"
-            label="Role"
-            class="q-mt-md"
-            emit-value
-            map-options
-          />
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="grey" v-close-popup />
-          <q-btn 
-            label="Add User" 
-            color="primary" 
-            @click="addUser"
-            :loading="isAddingUser"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <q-card-actions align="right">
+      <q-btn flat label="Cancel" color="grey" v-close-popup />
+      <q-btn 
+        label="Add User" 
+        color="primary" 
+        @click="addUser"
+        :loading="isAddingUser"
+      />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
 
     <!-- Edit User Dialog -->
 <q-dialog v-model="showEditDialog">
@@ -299,6 +322,7 @@ export default {
     const newUser = ref({
       name: '',
       email: '',
+        password: "",
       phone: '',
       role: 'customer'
     })
@@ -306,11 +330,9 @@ export default {
 const isUpdatingUser = ref(false)
 const editingUser = ref({})
 
-    const roleOptions = [
-      { label: 'Customer', value: 'customer' },
-      { label: 'Admin', value: 'admin' },
-      { label: 'Support', value: 'support' }
-    ]
+ const roleOptions = [
+  { label: 'Customer', value: 'customer' }
+]
 
     // Computed properties from store
     const users = computed(() => store.getters['admin/users'])
@@ -350,7 +372,12 @@ const editingUser = ref({})
   editingUser.value = { ...user }
   showEditDialog.value = true
 }
-
+const openAddDialog = () => {
+  console.log('Button clicked!')  // Ye print hota hai?
+  console.log('Before:', showAddDialog.value)  // false hoga
+  showAddDialog.value = true
+  console.log('After:', showAddDialog.value)  // true hona chahiye
+}
 const updateUser = async () => {
   if (!editingUser.value.name || !editingUser.value.email) {
     $q.notify({
@@ -434,7 +461,7 @@ const updateUser = async () => {
   isAddingUser.value = true
   
   try {
-    await store.dispatch('admin/addUser', newUser.value)
+    await store.dispatch('admin/createUser', newUser.value)
     
     $q.notify({
       type: 'positive',
@@ -446,6 +473,7 @@ const updateUser = async () => {
       name: '',
       email: '',
       phone: '',
+       password: "",  // Add kar do
       role: 'customer'
     }
     showAddDialog.value = false
@@ -503,6 +531,7 @@ const updateUser = async () => {
       activeUsers,
       verifiedUsers,
       newUsersThisMonth,
+      openAddDialog,
 
       // Methods
       loadUsers,
@@ -513,6 +542,7 @@ const updateUser = async () => {
   isUpdatingUser,
   editingUser,
   editUser,
+  
   updateUser
     }
   }

@@ -42,25 +42,53 @@
       </template>
 
       <template v-slot:body-cell-actions="props">
-        <q-td align="center">
-          <q-btn
-            flat
-            dense
-            round
-            color="primary"
-            icon="edit"
-            @click="editRestaurant(props.row)"
-          />
-          <q-btn
-            flat
-            dense
-            round
-            color="negative"
-            icon="delete"
-            @click="confirmDelete(props.row.id)"
-          />
-        </q-td>
-      </template>
+  <q-td align="center">
+    <q-btn
+      flat
+      dense
+      round
+      color="primary"
+      icon="edit"
+      @click="editRestaurant(props.row)"
+    />
+    
+    <!-- Add Approve/Reject buttons -->
+    <q-btn
+      v-if="!props.row.is_verified"
+      flat
+      dense
+      round
+      color="positive"
+      icon="check"
+      @click="approveRestaurant(props.row.id)"
+      :loading="approving === props.row.id"
+    >
+      <q-tooltip>Approve Restaurant</q-tooltip>
+    </q-btn>
+    
+    <q-btn
+      v-if="!props.row.is_verified"
+      flat
+      dense
+      round
+      color="warning"
+      icon="close"
+      @click="rejectRestaurant(props.row.id)"
+      :loading="rejecting === props.row.id"
+    >
+      <q-tooltip>Reject Restaurant</q-tooltip>
+    </q-btn>
+    
+    <q-btn
+      flat
+      dense
+      round
+      color="negative"
+      icon="delete"
+      @click="confirmDelete(props.row.id)"
+    />
+  </q-td>
+</template>
     </q-table>
 
     <!-- Add Restaurant Dialog -->
@@ -220,6 +248,8 @@ export default {
     const deleting = ref(false);
     const deleteDialog = ref(false);
     const restaurantToDelete = ref(null);
+    const approving = ref(null);
+const rejecting = ref(null);
 
     // Get restaurants from store
     const restaurants = computed(() => {
@@ -356,6 +386,50 @@ const saveRestaurant = async () => {
     saving.value = false;
   }
 };
+const approveRestaurant = async (id) => {
+  approving.value = id;
+  try {
+    await store.dispatch("admin/approveRestaurant", id);
+    $q.notify({
+      color: 'positive',
+      message: 'Restaurant approved successfully',
+      icon: 'check'
+    });
+    await refreshRestaurants();
+  } catch (error) {
+    console.error("Error approving restaurant:", error);
+    $q.notify({
+      color: 'negative',
+      message: 'Failed to approve restaurant',
+      icon: 'error'
+    });
+  } finally {
+    approving.value = null;
+  }
+};
+
+const rejectRestaurant = async (id) => {
+  rejecting.value = id;
+  try {
+    await store.dispatch("admin/rejectRestaurant", id);
+    $q.notify({
+      color: 'positive',
+      message: 'Restaurant rejected successfully',
+      icon: 'check'
+    });
+    await refreshRestaurants();
+  } catch (error) {
+    console.error("Error rejecting restaurant:", error);
+    $q.notify({
+      color: 'negative',
+      message: 'Failed to reject restaurant',
+      icon: 'error'
+    });
+  } finally {
+    rejecting.value = null;
+  }
+};
+
 
     const editRestaurant = (restaurant) => {
       $q.notify({
@@ -419,23 +493,27 @@ const saveRestaurant = async () => {
     });
 
     return {
-      restaurants,
-      columns,
-      pagination,
-      addDialog,
-      newRestaurant,
-      loading,
-      saving,
-      deleting,
-      deleteDialog,
-      openAddDialog,
-      saveRestaurant,
-      editRestaurant,
-      confirmDelete,
-      deleteRestaurant,
-      refreshRestaurants,
-      resetForm,
-    };
+  restaurants,
+  columns,
+  pagination,
+  addDialog,
+  newRestaurant,
+  loading,
+  saving,
+  deleting,
+  deleteDialog,
+  approving,        // Add this
+  rejecting,        // Add this
+  openAddDialog,
+  saveRestaurant,
+  editRestaurant,
+  confirmDelete,
+  deleteRestaurant,
+  approveRestaurant, // Add this
+  rejectRestaurant,  // Add this
+  refreshRestaurants,
+  resetForm,
+};
   },
 };
 </script>

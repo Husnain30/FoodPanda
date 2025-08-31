@@ -61,7 +61,20 @@ const mutations = {
   SET_RIDERS(state, riders) {
     state.riders = riders
   },
-  
+  REMOVE_RIDER(state, riderId) {
+  state.riders = state.riders.filter(rider => rider.id !== riderId)
+},
+
+UPDATE_RIDER(state, updatedRider) {
+  const index = state.riders.findIndex(rider => rider.id === updatedRider.id);
+  if (index !== -1) {
+    state.riders.splice(index, 1, updatedRider);
+  }
+},
+
+ADD_RIDER(state, newRider) {
+  state.riders.unshift(newRider);
+},
   SET_ORDERS(state, orders) {
     state.orders = orders
   },
@@ -88,7 +101,17 @@ const mutations = {
   },
   REMOVE_USER(state, userId) {
   state.users = state.users.filter(user => user.id !== userId)
-}
+},
+UPDATE_USER(state, updatedUser) {
+  const index = state.users.findIndex(user => user.id === updatedUser.id);
+  if (index !== -1) {
+    state.users.splice(index, 1, updatedUser);
+  }
+},
+  ADD_USER(state, newUser) {
+    state.users.unshift(newUser); // Add to beginning of array
+  }
+
 }
 
 const actions = {
@@ -102,6 +125,24 @@ async deleteUser({ commit }, userId) {
   }
 },
 
+async createUser({ dispatch }, userData) {
+  try {
+    await api.post("admin/users", userData);
+    await dispatch("fetchUsers"); // Refresh list
+  } catch (error) {
+    console.error("❌ Error creating user:", error);
+    throw error;
+  }
+},
+async updateUser({ dispatch }, { id, userData }) {
+  try {
+    await api.put(`admin/users/${id}`, userData);
+    await dispatch("fetchUsers"); // Refresh list
+  } catch (error) {
+    console.error("❌ Error updating user:", error);
+    throw error;
+  }
+},
   
 // Add this action to your admin.js store actions:
 async registerUser(_, userData) {
@@ -221,17 +262,55 @@ async updateRider({ dispatch }, { id, riderData }) {
   }
 },
 
-async deleteRider({ dispatch }, riderId) {
+async deleteRider({ commit }, riderId) {
   try {
     await api.delete(`admin/riders/${riderId}`);
-    await dispatch("fetchRiders"); // Refresh list
+    commit('REMOVE_RIDER', riderId); // Direct mutation instead of fetching all
   } catch (error) {
     console.error("❌ Error deleting rider:", error);
     throw error;
   }
 },
+async verifyRider({ dispatch }, riderId) {
+  try {
+    await api.post(`admin/riders/${riderId}/verify`);
+    await dispatch("fetchRiders"); // Refresh list
+  } catch (error) {
+    console.error("❌ Error verifying rider:", error);
+    throw error;
+  }
+},
+
+async rejectRider({ dispatch }, riderId) {
+  try {
+    await api.post(`admin/riders/${riderId}/reject`);
+    await dispatch("fetchRiders"); // Refresh list
+  } catch (error) {
+    console.error("❌ Error rejecting rider:", error);
+    throw error;
+  }
+},
 
   // ========== RESTAURANTS ==========
+
+  async approveRestaurant({ dispatch }, restaurantId) {
+  try {
+    await api.post(`admin/restaurants/${restaurantId}/approve`);
+    await dispatch("fetchRestaurants"); // Refresh list
+  } catch (error) {
+    console.error("❌ Error approving restaurant:", error);
+    throw error;
+  }
+},
+async rejectRestaurant({ dispatch }, restaurantId) {
+  try {
+    await api.post(`admin/restaurants/${restaurantId}/reject`);
+    await dispatch("fetchRestaurants"); // Refresh list
+  } catch (error) {
+    console.error("❌ Error rejecting restaurant:", error);
+    throw error;
+  }
+},
 
   async registerRestaurant({ dispatch }, restaurantData) {
   try {
@@ -258,6 +337,7 @@ async deleteRider({ dispatch }, riderId) {
     } else if (error.message) {
       errorMessage = error.message;
     }
+    
     
     // Create a new error with a user-friendly message
     const friendlyError = new Error(errorMessage);
