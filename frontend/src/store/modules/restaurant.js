@@ -12,6 +12,10 @@ const state = {
     completionRate: 0,
     returnRate: 0,
     peakHours: '',
+     restaurantDetails: {},
+  restaurantStats: {},
+  detailsLoading: false,
+  detailsError: null
   },
 
   // Orders Management
@@ -39,6 +43,10 @@ const getters = {
   getDashboardStats: (state) => state.stats,
   getStatsLoading: (state) => state.statsLoading,
   getStatsError: (state) => state.statsError,
+    getRestaurantDetails: (state) => state.restaurantDetails,
+  getRestaurantStats: (state) => state.restaurantStats,
+  getDetailsLoading: (state) => state.detailsLoading,
+  getDetailsError: (state) => state.detailsError,
 
   // Orders
   getAllOrders: (state) => state.orders,
@@ -74,6 +82,18 @@ const mutations = {
     state.stats = stats
   },
 
+    SET_DETAILS_LOADING(state, loading) {
+    state.detailsLoading = loading
+  },
+  SET_DETAILS_ERROR(state, error) {
+    state.detailsError = error
+  },
+  SET_RESTAURANT_DETAILS(state, details) {
+    state.restaurantDetails = details
+  },
+  SET_RESTAURANT_STATS(state, stats) {
+    state.restaurantStats = stats
+  },
   // Orders Mutations
   SET_ORDERS_LOADING(state, loading) {
     state.ordersLoading = loading
@@ -131,36 +151,38 @@ const mutations = {
 
 const actions = {
   // Fetch Restaurant Stats - UPDATED FOR API INTEGRATION
-  async fetchRestaurantStats({ commit }, restaurantId) {
-    commit('SET_STATS_LOADING', true)
-    commit('SET_STATS_ERROR', null)
+
+
+  async fetchRestaurantWithStats({ commit }, restaurantId) {
+    commit('SET_DETAILS_LOADING', true)
+    commit('SET_DETAILS_ERROR', null)
 
     try {
-      console.log('📊 API Call: Fetching stats for restaurant:', restaurantId)
-      const response = await api.get(`restaurants/${restaurantId}/stats`)
-      console.log('📊 API Response:', response.data)
+      console.log('🏪 Fetching restaurant details and stats:', restaurantId)
       
-      const statsData = {
-        revenue: response.data.revenue || 0,
-        orders: response.data.orders_count || 0,
-        customers: response.data.customers_count || 0,
-        rating: response.data.average_rating || 0,
-        averageOrderValue: response.data.average_order_value || 0,
-        completionRate: response.data.completion_rate || 0,
-        returnRate: response.data.return_rate || 0,
-        peakHours: response.data.peak_hours || 'N/A',
+      // Fetch both details and stats in parallel
+      const [detailsResponse, statsResponse] = await Promise.all([
+        api.get(`restaurant/restaurants/${restaurantId}`),
+        api.get(`restaurant/restaurants/${restaurantId}/stats`)
+      ])
+      
+      console.log('🏪 Details Response:', detailsResponse.data)
+      console.log('📊 Stats Response:', statsResponse.data)
+      
+      commit('SET_RESTAURANT_DETAILS', detailsResponse.data)
+      commit('SET_RESTAURANT_STATS', statsResponse.data)
+      
+      return {
+        details: detailsResponse.data,
+        stats: statsResponse.data
       }
-      
-      commit('SET_STATS', statsData)
-      console.log('✅ Stats updated in store:', statsData)
-      return response.data
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Failed to fetch stats'
-      commit('SET_STATS_ERROR', errorMessage)
-      console.error('❌ Error fetching restaurant stats:', error)
+      const errorMessage = error.response?.data?.message || 'Failed to fetch restaurant data'
+      commit('SET_DETAILS_ERROR', errorMessage)
+      console.error('❌ Error fetching restaurant data:', error)
       throw error
     } finally {
-      commit('SET_STATS_LOADING', false)
+      commit('SET_DETAILS_LOADING', false)
     }
   },
 
