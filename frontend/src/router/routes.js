@@ -18,20 +18,32 @@ export default [
     ]
   },
 
-  {
+{
   path: '/customer',
   component: CustomerLayout,
   children: [
-    { path: '', redirect: '/customer/restaurants' }, // 👈 redirect first page
-    { path: 'restaurants', component: () => import('../modules/customer/pages/BrowseRestaurants.vue') },
-    { path: 'restaurants/:id', component: () => import('../modules/customer/pages/MenuPage.vue') },
-    { path: 'cart', component: () => import('../modules/customer/pages/CartPage.vue') },
-    { path: 'checkout', component: () => import('../modules/customer/pages/CheckoutPage.vue') },
-    { path: 'orders', component: () => import('../modules/customer/pages/OrderHistory.vue') },
-    { path: 'track/:id', component: () => import('../modules/customer/pages/OrderTracking.vue') },
-    { path: 'review/:id', component: () => import('../modules/customer/pages/ReviewPage.vue') },
+    { path: '', redirect: '/restaurants' }, // 👈 after login, default redirect to /restaurants
+    
+    // Restaurants listing
+    { path: '/restaurants', component: () => import('../modules/customer/pages/BrowseRestaurants.vue') },
+
+    // Single restaurant menu
+    { path: '/restaurants/:id/menu', component: () => import('../modules/customer/pages/MenuPage.vue') },
+
+    // Cart and Checkout
+    { path: '/cart', component: () => import('../modules/customer/pages/CartPage.vue') },
+    { path: '/checkout', component: () => import('../modules/customer/pages/CheckoutPage.vue') },
+
+    // Orders
+    { path: '/orders', component: () => import('../modules/customer/pages/OrderHistory.vue') },
+    { path: '/orders/:id', component: () => import('../modules/customer/pages/OrderTracking.vue') },
+
+    // Reviews
+    { path: '/reviews', component: () => import('../modules/customer/pages/ReviewPage.vue') },
   ]
 },
+
+
 
   // Auth Routes (Login/Register use AuthLayout + forms inside)
   {
@@ -150,11 +162,11 @@ export default [
 
   // Rider Routes
     {
-    path: '/rider',
+    path: '/riders',
     component: RiderLayout,
     children: [
       { path: '', component: () => import('../modules/rider/pages/RiderDashboard.vue') },
-      { path: 'order-assignment', component: () => import('../modules/rider/pages/OrderAssignment.vue') },
+      { path: 'orders', component: () => import('../modules/rider/pages/OrderAssignment.vue') },
       { path: 'navigation', component: () => import('../modules/rider/pages/NavigationPage.vue') },
       { path: 'earnings', component: () => import('../modules/rider/pages/EarningsPage.vue') },
     ],

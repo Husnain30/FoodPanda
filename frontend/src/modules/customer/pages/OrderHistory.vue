@@ -1,19 +1,102 @@
 <template>
-  <q-page padding>
-    <h1 class="page-title">📜 Order History</h1>
-    <q-card v-for="n in 3" :key="n" class="q-mb-md shadow-card q-pa-md">
-      <div class="order-info">
-        <span><strong>Order #{{ 1000+n }}</strong></span>
-        <span>Status: <q-badge color="positive">Delivered</q-badge></span>
-      </div>
-      <div class="order-details">Total: ${{ (25*n).toFixed(2) }}</div>
-    </q-card>
+  <q-page class="q-pa-md orders-page">
+
+    <!-- Page Header -->
+    <div class="page-header q-mb-md">
+      <div class="text-h5">Your Orders</div>
+    </div>
+
+    <!-- Orders List -->
+    <div v-if="loading" class="row justify-center q-mt-lg">
+      <q-spinner-dots size="40px" color="primary" />
+    </div>
+
+    <div v-else>
+      <q-card
+        v-for="order in orders"
+        :key="order.id"
+        class="q-mb-md shadow-2"
+      >
+        <q-card-section>
+          <div class="text-h6">Order #{{ order.id }}</div>
+          <div class="text-caption text-grey">
+            Status: 
+            <q-badge :color="statusColor(order.status)" class="q-ml-xs">
+              {{ order.status }}
+            </q-badge>
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <!-- Order Items -->
+        <q-list dense>
+          <q-item v-for="item in order.items" :key="item.id">
+            <q-item-section>
+              <q-item-label>{{ item.name }}</q-item-label>
+              <q-item-label caption>{{ item.quantity }} × {{ item.price }} PKR</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <div class="text-weight-bold">{{ item.quantity * item.price }} PKR</div>
+            </q-item-section>
+          </q-item>
+        </q-list>
+
+        <q-separator />
+
+        <!-- Footer -->
+        <q-card-actions align="right">
+          <div class="text-subtitle1 text-primary">
+            Total: {{ calculateTotal(order.items) }} PKR
+          </div>
+        </q-card-actions>
+      </q-card>
+    </div>
+
   </q-page>
 </template>
 
+<script>
+import { mapState, mapActions } from "vuex";
+
+export default {
+  name: "OrdersPage",
+
+  computed: {
+    ...mapState("customer", ["orders", "loading"]),
+  },
+
+  methods: {
+    ...mapActions("customer", ["fetchOrders"]),
+
+    calculateTotal(items) {
+      return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    },
+
+    statusColor(status) {
+      switch (status) {
+        case "pending":
+          return "orange";
+        case "completed":
+          return "green";
+        case "cancelled":
+          return "red";
+        default:
+          return "grey";
+      }
+    },
+  },
+
+  mounted() {
+    this.fetchOrders();
+  },
+};
+</script>
+
 <style scoped>
-.page-title { font-size: 28px; margin-bottom: 20px; }
-.shadow-card { border-radius: 14px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
-.order-info { display: flex; justify-content: space-between; margin-bottom: 6px; }
-.order-details { font-size: 14px; color: #666; }
+.orders-page {
+  max-width: 800px;
+  margin: 0 auto;
+}
 </style>
+

@@ -84,23 +84,28 @@
       </div>
     </div>
 
-    <!-- Restaurant Gallery Section -->
-    <!-- Restaurant Gallery Section -->
+  <!-- Show loading state -->
+<div v-if="loading" class="loading-state">
+  Loading restaurants...
+</div>
+
+
+  <!-- Restaurant Gallery Section -->
 <div class="gallery-section">
   <div class="section-header">
-    <h2>Restaurant Gallery</h2>
+    <h2>Others Restaurant Service</h2>
     <button class="btn-secondary gallery-btn" @click="fetchRestaurants">
       <i class="icon">🔄</i>
       Refresh
     </button>
   </div>
-  
+
   <!-- Loading State -->
   <div v-if="restaurantsLoading" class="gallery-loading">
     <div class="loading-spinner"></div>
     <p>Loading restaurants...</p>
   </div>
-  
+
   <!-- Error State -->
   <div v-else-if="restaurantsError" class="gallery-error">
     <p>❌ {{ restaurantsError }}</p>
@@ -108,7 +113,7 @@
       Try Again
     </button>
   </div>
-  
+
   <!-- Gallery Grid with Dynamic Data -->
   <div v-else class="gallery-grid">
     <div 
@@ -139,7 +144,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Empty State -->
     <div v-if="!restaurants.length" class="gallery-empty">
       <p>No restaurants found</p>
@@ -149,6 +154,8 @@
     </div>
   </div>
 </div>
+
+
 
     <!-- Main Content Grid -->
       <!-- Left Column - Charts -->
@@ -248,6 +255,8 @@
     
 
 </template>
+// Only script section changes for RestaurantDashboard.vue
+
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
@@ -258,7 +267,7 @@ export default {
   },
   data() {
     return {
-      currentPeriod: "7D", // Default filter for chart
+      currentPeriod: "7D",
       refreshInterval: null,
       stats: {
         revenue: 24580,
@@ -283,10 +292,6 @@ export default {
           status: "active",
         },
       ],
-      // Remove local restaurants data since we're using Vuex store
-      // restaurants: [],
-      // restaurantsLoading: false,
-      // restaurantsError: null,
     };
   },
   
@@ -297,13 +302,28 @@ export default {
       'getStatsError',
       'getAllRestaurants',
       'getRestaurantsLoading',
-      'getRestaurantsError'
+      'getRestaurantsError',
+      // Add new getters for details and stats
+      'getRestaurantDetails',
+      'getRestaurantStats',
+      'getDetailsLoading',
+      'getDetailsError'
     ]),
     
-    // Use store data for template
+    // Use store data for template (enhanced with details and stats)
     restaurants() {
-      return this.getAllRestaurants;
+      return this.getAllRestaurants.map(restaurant => {
+        const details = this.getRestaurantDetails[restaurant.id] || {}
+        const stats = this.getRestaurantStats[restaurant.id] || {}
+        
+        return {
+          ...restaurant,
+          ...details, // Merge restaurant details
+          apiStats: stats // Keep stats separate to avoid conflicts
+        }
+      })
     },
+    
     restaurantsLoading() {
       return this.getRestaurantsLoading;
     },
@@ -331,30 +351,58 @@ export default {
   methods: {
     ...mapActions('restaurant', [
       'fetchRestaurantStats',
-      'fetchAllRestaurants'
+      'fetchAllRestaurants',
+      'fetchRestaurantDetails',
+      'fetchRestaurantWithStats' // Add new action
     ]),
 
+    // Updated fetchRestaurants method
     async fetchRestaurants() {
       try {
         console.log('🏪 Fetching restaurants via Vuex action...');
         await this.fetchAllRestaurants();
-        this.restaurants = this.getAllRestaurants;
-        console.log('✅ Restaurants loaded from store:', this.restaurants.length);
+        
+        // After getting restaurants list, fetch details and stats for each
+        const restaurants = this.getAllRestaurants;
+        console.log('✅ Restaurants loaded from store:', restaurants.length);
+        
+        // Fetch details and stats for each restaurant
+        if (restaurants.length > 0) {
+          await this.fetchRestaurantDetailsAndStats(restaurants);
+        }
+        
       } catch (error) {
         console.error('❌ Error in fetchRestaurants:', error);
-        this.restaurantsError = error.message || 'Failed to fetch restaurants';
-        
-        // Show error notification
         this.$q?.notify?.({
           type: 'negative',
           message: 'Failed to load restaurants',
-          caption: this.restaurantsError
+          caption: error.message
         });
       }
     },
 
+    // NEW METHOD: Fetch details and stats for all restaurants
+    async fetchRestaurantDetailsAndStats(restaurants) {
+      try {
+        console.log('🔄 Fetching details and stats for all restaurants...');
+        
+        // Fetch details and stats for each restaurant in parallel
+        const promises = restaurants.map(restaurant => 
+          this.fetchRestaurantWithStats(restaurant.id).catch(error => {
+            console.warn(`Failed to fetch data for restaurant ${restaurant.id}:`, error);
+            return null; // Continue with other restaurants even if one fails
+          })
+        );
+        
+        await Promise.all(promises);
+        console.log('✅ All restaurant details and stats loaded');
+        
+      } catch (error) {
+        console.error('❌ Error fetching restaurant details:', error);
+      }
+    },
+
     refreshDashboardData() {
-      // Refresh both stats and restaurants data
       console.log("🔄 Refreshing dashboard data...");
       this.fetchRestaurants();
     },
@@ -364,14 +412,13 @@ export default {
       console.log("📊 Changed period to:", period);
     },
 
-    // Helper method to get restaurant image
+    // ENHANCED: Helper method with API stats integration
     getRestaurantImage(restaurant) {
-      // Use restaurant's image if available, otherwise fallback to Unsplash
+      // Use API details image if available, otherwise fallback
       if (restaurant.image_url || restaurant.image) {
         return restaurant.image_url || restaurant.image;
       }
       
-      // Fallback images based on restaurant type or random
       const fallbackImages = [
         'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop&crop=center',
         'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=400&h=300&fit=crop&crop=center',
@@ -382,35 +429,53 @@ export default {
       return fallbackImages[restaurant.id % fallbackImages.length];
     },
 
-    // Helper method to format restaurant rating
     formatRating(rating) {
       return rating ? parseFloat(rating).toFixed(1) : '4.5';
     },
 
-    // Helper method to format restaurant location
+    // ENHANCED: Location with API details
     formatLocation(restaurant) {
       return restaurant.address || restaurant.location || `📍 ${restaurant.city || 'Pakistan'}`;
     },
 
-    // Helper method to get restaurant description
+    // ENHANCED: Description with API details
     getRestaurantDescription(restaurant) {
       return restaurant.description || restaurant.cuisine_type || 'Delicious food and great ambiance';
     },
 
-    // Helper method to get additional stats
+    // ENHANCED: Stats with API data integration
     getRestaurantStats(restaurant) {
       const stats = [];
+      const apiStats = restaurant.apiStats || {};
       
-      if (restaurant.rating) {
-        stats.push(`⭐ ${this.formatRating(restaurant.rating)}`);
+      // Use API stats if available, otherwise fallback to restaurant data
+      const rating = apiStats.average_rating || restaurant.rating;
+      const ordersCount = apiStats.orders_count || restaurant.orders_count;
+      const revenue = apiStats.revenue || restaurant.revenue;
+      const customersCount = apiStats.customers_count || restaurant.customers_count;
+      
+      // Rating (priority to API stats)
+      if (rating) {
+        stats.push(`⭐ ${this.formatRating(rating)}`);
       }
       
-      if (restaurant.seating_capacity) {
+      // Orders count from API stats
+      if (ordersCount) {
+        stats.push(`📦 ${ordersCount} orders`);
+      } else if (restaurant.seating_capacity) {
         stats.push(`👥 ${restaurant.seating_capacity} seats`);
-      } else if (restaurant.table_count) {
-        stats.push(`🪑 ${restaurant.table_count} tables`);
       } else {
         stats.push(`🍽️ Premium dining`);
+      }
+      
+      // Revenue from API stats
+      if (revenue) {
+        stats.push(`💰 Rs ${revenue.toLocaleString()}`);
+      }
+      
+      // Customers count from API stats
+      if (customersCount) {
+        stats.push(`👥 ${customersCount} customers`);
       }
       
       return stats;
