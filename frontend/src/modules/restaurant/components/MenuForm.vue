@@ -107,140 +107,152 @@
   </q-card>
 </template>
 
+<!-- MenuForm.vue - Fix this file -->
 <script>
+import { ref, computed, watch } from 'vue'
+
 export default {
   name: 'MenuForm',
   props: {
-    dish: {
-      type: Object,
-      default: null
-    },
-    loading: {
-      type: Boolean,
-      default: false
-    }
+    dish: Object,
+    loading: Boolean
   },
   emits: ['save', 'cancel'],
-  data() {
-    return {
-      categories: [
-        { label: 'Starters', value: 'starters' },
-        { label: 'Main Course', value: 'main' },
-        { label: 'Desserts', value: 'desserts' },
-        { label: 'Drinks', value: 'drinks' },
-        { label: 'Fast Food', value: 'fast_food' },
-        { label: 'Traditional', value: 'traditional' }
-      ],
-      form: {
-        name: '',
-        category: '',
-        price: null,
-        description: '',
-        restaurant_id: null,
-        image: null
-      },
-      preview: null
-    }
-  },
-  computed: {
-    isEdit() {
-      return !!this.dish
-    },
-    isFormValid() {
-      return !!(
-        this.form.name?.trim() &&
-        this.form.category &&
-        this.form.price > 0
-      )
-    }
-  },
-  watch: {
-    dish: {
-      handler(newDish) {
-        if (newDish) {
-          this.loadDishData(newDish)
-        } else {
-          this.resetForm()
-        }
-      },
-      immediate: true
-    }
-  },
-  mounted() {
-    this.setRestaurantId()
-    if (this.dish) {
-      this.loadDishData(this.dish)
-    }
-  },
-  methods: {
-    setRestaurantId() {
-      // Get restaurant ID from user data
-      const user = JSON.parse(localStorage.getItem('user') || '{}')
-      this.form.restaurant_id = user.restaurant_id || user.id || 1
-    },
+  setup(props, { emit }) {
+    // Form data
+    const form = ref({
+      name: '',
+      description: '',
+      price: 0,
+      category: '',
+      restaurant_id: '',
+      image: null
+    })
+    
+    const preview = ref(null)
+    
+    // Categories for select dropdown
+    const categories = ref([
+      { label: 'Appetizer', value: 'appetizer' },
+      { label: 'Main Course', value: 'main_course' },
+      { label: 'Dessert', value: 'dessert' },
+      { label: 'Beverages', value: 'beverages' },
+      { label: 'Pakistani', value: 'pakistani' },
+      { label: 'Chinese', value: 'chinese' },
+      { label: 'Italian', value: 'italian' }
+    ])
 
-    loadDishData(dish) {
-      this.form = {
-        name: dish.name || '',
-        category: dish.category || '',
-        price: dish.price || null,
-        description: dish.description || '',
-        restaurant_id: dish.restaurant_id || this.form.restaurant_id,
-        image: null // Don't pre-populate file input
+    // Computed properties
+    const isEdit = computed(() => !!props.dish)
+    const isFormValid = computed(() => 
+      form.value.name && form.value.category && form.value.price > 0
+    )
+
+    // Get restaurant ID from localStorage
+    const getRestaurantId = () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}')
+        const restaurantId = user.restaurant_id || user.id
+        console.log('Form: Using restaurant ID:', restaurantId)
+        return restaurantId
+      } catch (error) {
+        console.error('Error getting restaurant ID:', error)
+        return null
       }
+    }
+
+    // Watch for dish changes (edit mode)
+    watch(() => props.dish, (dish) => {
+      const restaurantId = getRestaurantId()
       
-      // Set preview from existing image
-      this.preview = dish.image_url || dish.imageUrl || null
-    },
+      if (dish) {
+        // Edit mode - populate form with existing data
+        form.value = {
+          name: dish.name || '',
+          description: dish.description || '',
+          price: dish.price || 0,
+          category: dish.category || '',
+          restaurant_id: restaurantId,
+          image: null // Don't pre-populate image for edit
+        }
+        preview.value = dish.image_url || dish.imageUrl || null
+        console.log('Form populated for edit:', form.value)
+      } else {
+        // Add mode - reset form
+        form.value = {
+          name: '',
+          description: '',
+          price: 0,
+          category: '',
+          restaurant_id: restaurantId,
+          image: null
+        }
+        preview.value = null
+        console.log('Form reset for new dish:', form.value)
+      }
+    }, { immediate: true })
 
-    handleSubmit() {
-  if (!this.isFormValid) return
-
-  // Create FormData for API submission
-  const formData = new FormData()
-  
-  // Add all form fields to FormData
-  formData.append('name', this.form.name.trim())
-  formData.append('category', this.form.category)
-  formData.append('price', this.form.price)
-  formData.append('restaurant_id', this.form.restaurant_id)
-  
-  if (this.form.description) {
-    formData.append('description', this.form.description.trim())
-  }
-  
-  if (this.form.image) {
-    formData.append('image', this.form.image)
-  }
-
-  this.$emit('save', formData)
-},
-    previewImage(file) {
-      if (file && file instanceof File) {
-        // Create preview URL for the selected file
+    // Image preview method
+    const previewImage = (file) => {
+      if (file) {
         const reader = new FileReader()
         reader.onload = (e) => {
-          this.preview = e.target.result
+          preview.value = e.target.result
         }
         reader.readAsDataURL(file)
+        console.log('Image selected for preview:', file.name)
       } else {
-        // Clear preview if no file selected
-        if (!this.dish?.image_url && !this.dish?.imageUrl) {
-          this.preview = null
-        }
+        // If file is cleared, show existing image (edit mode) or null (add mode)
+        preview.value = props.dish?.image_url || props.dish?.imageUrl || null
       }
-    },
+    }
 
-    resetForm() {
-      this.form = {
-        name: '',
-        category: '',
-        price: null,
-        description: '',
-        restaurant_id: this.form.restaurant_id,
-        image: null
+    // Submit handler
+    const handleSubmit = () => {
+      if (!isFormValid.value) {
+        return
       }
-      this.preview = null
+
+      console.log('Form submitted:', form.value)
+      
+      // Create FormData object
+      const formData = new FormData()
+      
+      // Add all form fields
+      formData.append('name', form.value.name)
+      formData.append('description', form.value.description || '')
+      formData.append('price', form.value.price)
+      formData.append('category', form.value.category)
+      formData.append('restaurant_id', form.value.restaurant_id)
+      
+      // Add image if selected
+      if (form.value.image) {
+        formData.append('image', form.value.image)
+        console.log('Image added to FormData:', form.value.image.name)
+      }
+
+      // Debug FormData contents
+      console.log('FormData being sent:')
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ':', pair[1])
+      }
+      
+      emit('save', formData)
+    }
+
+    return {
+      // Data
+      form,
+      preview,
+      categories,
+      
+      // Computed
+      isEdit,
+      isFormValid,
+      
+      // Methods
+      previewImage,
+      handleSubmit
     }
   }
 }

@@ -43,21 +43,45 @@
         </q-td>
       </template>
        
-      <template v-slot:body-cell-actions="props">
-        <q-td align="center">
-          <q-btn
-            flat dense round color="primary" icon="edit"
-            @click="editRestaurant(props.row)"
-            size="sm"
-          />
-          <q-btn
-            flat dense round color="negative" icon="delete"
-            @click="confirmDelete(props.row)"
-            size="sm"
-            class="q-ml-xs"
-          />
-        </q-td>
-      </template>
+    <template v-slot:body-cell-actions="props">
+  <q-td align="center">
+    <q-btn
+      flat dense round color="primary" icon="edit"
+      @click="editRestaurant(props.row)"
+      size="sm"
+    />
+    
+    <!-- Add Approve/Reject buttons for pending restaurants -->
+    <q-btn
+      v-if="!props.row.is_verified"
+      flat dense round color="positive" icon="check"
+      @click="approveRestaurant(props.row.id)"
+      :loading="approving === props.row.id"
+      size="sm"
+      class="q-ml-xs"
+    >
+      <q-tooltip>Approve Restaurant</q-tooltip>
+    </q-btn>
+    
+    <q-btn
+      v-if="!props.row.is_verified"
+      flat dense round color="warning" icon="close"
+      @click="rejectRestaurant(props.row.id)"
+      :loading="rejecting === props.row.id"
+      size="sm"
+      class="q-ml-xs"
+    >
+      <q-tooltip>Reject Restaurant</q-tooltip>
+    </q-btn>
+    
+    <q-btn
+      flat dense round color="negative" icon="delete"
+      @click="confirmDelete(props.row)"
+      size="sm"
+      class="q-ml-xs"
+    />
+  </q-td>
+</template>
     </q-table>
 
     <!-- Add Restaurant Dialog -->
@@ -194,6 +218,8 @@
 import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import { useQuasar } from "quasar";
+const approving = ref(null);
+const rejecting = ref(null);
 
 export default {
   name: "RestaurantsTable",
@@ -378,6 +404,49 @@ export default {
         saving.value = false;
       }
     };
+    const approveRestaurant = async (id) => {
+  approving.value = id;
+  try {
+    await store.dispatch("admin/approveRestaurant", id);
+    $q.notify({
+      color: 'positive',
+      message: 'Restaurant approved successfully',
+      icon: 'check'
+    });
+    await fetchRestaurants();
+  } catch (error) {
+    console.error("Error approving restaurant:", error);
+    $q.notify({
+      color: 'negative',
+      message: 'Failed to approve restaurant',
+      icon: 'error'
+    });
+  } finally {
+    approving.value = null;
+  }
+};
+
+const rejectRestaurant = async (id) => {
+  rejecting.value = id;
+  try {
+    await store.dispatch("admin/rejectRestaurant", id);
+    $q.notify({
+      color: 'positive',
+      message: 'Restaurant rejected successfully',
+      icon: 'check'
+    });
+    await fetchRestaurants();
+  } catch (error) {
+    console.error("Error rejecting restaurant:", error);
+    $q.notify({
+      color: 'negative',
+      message: 'Failed to reject restaurant',
+      icon: 'error'
+    });
+  } finally {
+    rejecting.value = null;
+  }
+};
 
     const editRestaurant = (restaurant) => {
       $q.notify({
@@ -457,26 +526,31 @@ export default {
       fetchRestaurants();
     });
 
-    return {
-      restaurants, 
-      columns, 
-      pagination,
-      addDialog, 
-      newRestaurant,
-      loading,
-      saving,
-      deleting,
-      deleteDialog,
-      restaurantToDelete,
-      openAddDialog, 
-      saveRestaurant,
-      editRestaurant, 
-      confirmDelete,
-      deleteRestaurant,
-      fetchRestaurants,
-      resetForm,
-      formatTime
-    };
+   
+return {
+  restaurants, 
+  columns, 
+  pagination,
+  addDialog, 
+  newRestaurant,
+  loading,
+  saving,
+  deleting,
+  deleteDialog,
+  restaurantToDelete,
+  approving,           // Add this
+  rejecting,           // Add this
+  openAddDialog, 
+  saveRestaurant,
+  editRestaurant, 
+  confirmDelete,
+  deleteRestaurant,
+  approveRestaurant,   // Add this
+  rejectRestaurant,    // Add this
+  fetchRestaurants,
+  resetForm,
+  formatTime
+};
   },
 };
 </script>

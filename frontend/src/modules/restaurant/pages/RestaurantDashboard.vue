@@ -85,151 +85,70 @@
     </div>
 
     <!-- Restaurant Gallery Section -->
-    <div class="gallery-section">
-      <div class="section-header">
-        <h2>Restaurant Gallery</h2>
-        <button class="btn-secondary gallery-btn">
-          <i class="icon">📸</i>
-          Manage Photos
-        </button>
-      </div>
-      <div class="gallery-grid">
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop&crop=center" alt="Restaurant Interior" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Royal Palace Restaurant</span>
-              <span class="gallery-location">📍 Gulberg, Lahore</span>
-              <span class="gallery-detail">Premium dining with traditional ambiance</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.8</span>
-                <span class="stat-item">👥 150 seats</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=400&h=300&fit=crop&crop=center" alt="Food Presentation" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Spice Garden Karachi</span>
-              <span class="gallery-location">📍 DHA Phase 6, Karachi</span>
-              <span class="gallery-detail">Authentic Pakistani & Continental cuisine</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.9</span>
-                <span class="stat-item">🍽️ 85 dishes</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop&crop=center" alt="Kitchen View" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Metro Kitchen Hub</span>
-              <span class="gallery-location">📍 F-7 Markaz, Islamabad</span>
-              <span class="gallery-detail">Open kitchen concept with live cooking</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.7</span>
-                <span class="stat-item">👨‍🍳 8 chefs</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop&crop=center" alt="Outdoor Seating" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Garden View Cafe</span>
-              <span class="gallery-location">📍 Model Town, Faisalabad</span>
-              <span class="gallery-detail">Beautiful outdoor dining experience</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.6</span>
-                <span class="stat-item">🌿 Garden view</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400&h=300&fit=crop&crop=center" alt="Bar Area" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Urban Lounge</span>
-              <span class="gallery-location">📍 Mall Road, Murree</span>
-              <span class="gallery-detail">Premium bar & lounge with mountain view</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.8</span>
-                <span class="stat-item">🍸 50+ drinks</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop&crop=center" alt="Pizza Making" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Pizza Corner</span>
-              <span class="gallery-location">📍 Anarkali Bazaar, Lahore</span>
-              <span class="gallery-detail">Fresh hand-tossed pizzas daily</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.5</span>
-                <span class="stat-item">🍕 25 varieties</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1592861956120-e524fc739696?w=400&h=300&fit=crop&crop=center" alt="Chef Cooking" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Chef's Table Peshawar</span>
-              <span class="gallery-location">📍 University Town, Peshawar</span>
-              <span class="gallery-detail">Live cooking demonstrations & classes</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.9</span>
-                <span class="stat-item">👨‍🍳 Master chef</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=300&fit=crop&crop=center" alt="Desserts" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Sweet Dreams Bakery</span>
-              <span class="gallery-location">📍 Fortress Stadium, Lahore</span>
-              <span class="gallery-detail">Handcrafted desserts & pastries</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.7</span>
-                <span class="stat-item">🧁 40+ desserts</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-card">
-          <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=300&fit=crop&crop=center" alt="Wine Selection" class="gallery-image">
-          <div class="gallery-overlay">
-            <div class="gallery-info">
-              <span class="gallery-title">Vintage Cellar</span>
-              <span class="gallery-location">📍 Clifton Block 8, Karachi</span>
-              <span class="gallery-detail">Curated collection of premium beverages</span>
-              <div class="gallery-stats">
-                <span class="stat-item">⭐ 4.8</span>
-                <span class="stat-item">🍷 200+ selection</span>
-              </div>
-            </div>
+    <!-- Restaurant Gallery Section -->
+<div class="gallery-section">
+  <div class="section-header">
+    <h2>Restaurant Gallery</h2>
+    <button class="btn-secondary gallery-btn" @click="fetchRestaurants">
+      <i class="icon">🔄</i>
+      Refresh
+    </button>
+  </div>
+  
+  <!-- Loading State -->
+  <div v-if="restaurantsLoading" class="gallery-loading">
+    <div class="loading-spinner"></div>
+    <p>Loading restaurants...</p>
+  </div>
+  
+  <!-- Error State -->
+  <div v-else-if="restaurantsError" class="gallery-error">
+    <p>❌ {{ restaurantsError }}</p>
+    <button @click="fetchRestaurants" class="btn-secondary">
+      Try Again
+    </button>
+  </div>
+  
+  <!-- Gallery Grid with Dynamic Data -->
+  <div v-else class="gallery-grid">
+    <div 
+      v-for="restaurant in restaurants" 
+      :key="restaurant.id" 
+      class="gallery-card"
+    >
+      <img 
+        :src="getRestaurantImage(restaurant)" 
+        :alt="restaurant.name || 'Restaurant Image'" 
+        class="gallery-image"
+        @error="$event.target.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop&crop=center'"
+      >
+      <div class="gallery-overlay">
+        <div class="gallery-info">
+          <span class="gallery-title">{{ restaurant.name || 'Restaurant Name' }}</span>
+          <span class="gallery-location">{{ formatLocation(restaurant) }}</span>
+          <span class="gallery-detail">{{ getRestaurantDescription(restaurant) }}</span>
+          <div class="gallery-stats">
+            <span 
+              v-for="stat in getRestaurantStats(restaurant)" 
+              :key="stat" 
+              class="stat-item"
+            >
+              {{ stat }}
+            </span>
           </div>
         </div>
       </div>
     </div>
+    
+    <!-- Empty State -->
+    <div v-if="!restaurants.length" class="gallery-empty">
+      <p>No restaurants found</p>
+      <button @click="fetchRestaurants" class="btn-primary">
+        Load Restaurants
+      </button>
+    </div>
+  </div>
+</div>
 
     <!-- Main Content Grid -->
       <!-- Left Column - Charts -->
@@ -268,14 +187,7 @@
       <!-- Right Column - Tables & Quick Actions -->
       <div class="content-right">
         <!-- Recent Orders -->
-        <div class="orders-container">
-          <div class="section-header">
-            <h2>Recent Orders</h2>
-          <router-link to="/restaurant/orders" class="view-all-link">View All</router-link>
-
-          </div>
-          <OrdersTable :limit="5" />
-        </div>
+     
 
 
         <!-- Quick Actions Panel -->
@@ -336,13 +248,12 @@
     
 
 </template>
-
 <script>
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: "RestaurantDashboard",
   components: {
-   
   
   },
   data() {
@@ -372,34 +283,141 @@ export default {
           status: "active",
         },
       ],
+      // Remove local restaurants data since we're using Vuex store
+      // restaurants: [],
+      // restaurantsLoading: false,
+      // restaurantsError: null,
     };
   },
-  mounted() {
+  
+  computed: {
+    ...mapGetters('restaurant', [
+      'getDashboardStats',
+      'getStatsLoading',
+      'getStatsError',
+      'getAllRestaurants',
+      'getRestaurantsLoading',
+      'getRestaurantsError'
+    ]),
+    
+    // Use store data for template
+    restaurants() {
+      return this.getAllRestaurants;
+    },
+    restaurantsLoading() {
+      return this.getRestaurantsLoading;
+    },
+    restaurantsError() {
+      return this.getRestaurantsError;
+    }
+  },
+
+  async mounted() {
+    // Fetch restaurants data on component mount
+    await this.fetchRestaurants();
+    
     // Auto-refresh data every 30s
     this.refreshInterval = setInterval(() => {
       this.refreshDashboardData();
     }, 30000);
   },
+  
   beforeUnmount() {
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
   },
+  
   methods: {
-    refreshDashboardData() {
-      // Here you can call APIs to update stats, orders, and chart data
-      console.log("🔄 Refreshing dashboard data...");
+    ...mapActions('restaurant', [
+      'fetchRestaurantStats',
+      'fetchAllRestaurants'
+    ]),
+
+    async fetchRestaurants() {
+      try {
+        console.log('🏪 Fetching restaurants via Vuex action...');
+        await this.fetchAllRestaurants();
+        this.restaurants = this.getAllRestaurants;
+        console.log('✅ Restaurants loaded from store:', this.restaurants.length);
+      } catch (error) {
+        console.error('❌ Error in fetchRestaurants:', error);
+        this.restaurantsError = error.message || 'Failed to fetch restaurants';
+        
+        // Show error notification
+        this.$q?.notify?.({
+          type: 'negative',
+          message: 'Failed to load restaurants',
+          caption: this.restaurantsError
+        });
+      }
     },
+
+    refreshDashboardData() {
+      // Refresh both stats and restaurants data
+      console.log("🔄 Refreshing dashboard data...");
+      this.fetchRestaurants();
+    },
+    
     changePeriod(period) {
       this.currentPeriod = period;
-      // Update chart data based on selected period
       console.log("📊 Changed period to:", period);
     },
+
+    // Helper method to get restaurant image
+    getRestaurantImage(restaurant) {
+      // Use restaurant's image if available, otherwise fallback to Unsplash
+      if (restaurant.image_url || restaurant.image) {
+        return restaurant.image_url || restaurant.image;
+      }
+      
+      // Fallback images based on restaurant type or random
+      const fallbackImages = [
+        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop&crop=center',
+        'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=400&h=300&fit=crop&crop=center',
+        'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop&crop=center',
+        'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop&crop=center'
+      ];
+      
+      return fallbackImages[restaurant.id % fallbackImages.length];
+    },
+
+    // Helper method to format restaurant rating
+    formatRating(rating) {
+      return rating ? parseFloat(rating).toFixed(1) : '4.5';
+    },
+
+    // Helper method to format restaurant location
+    formatLocation(restaurant) {
+      return restaurant.address || restaurant.location || `📍 ${restaurant.city || 'Pakistan'}`;
+    },
+
+    // Helper method to get restaurant description
+    getRestaurantDescription(restaurant) {
+      return restaurant.description || restaurant.cuisine_type || 'Delicious food and great ambiance';
+    },
+
+    // Helper method to get additional stats
+    getRestaurantStats(restaurant) {
+      const stats = [];
+      
+      if (restaurant.rating) {
+        stats.push(`⭐ ${this.formatRating(restaurant.rating)}`);
+      }
+      
+      if (restaurant.seating_capacity) {
+        stats.push(`👥 ${restaurant.seating_capacity} seats`);
+      } else if (restaurant.table_count) {
+        stats.push(`🪑 ${restaurant.table_count} tables`);
+      } else {
+        stats.push(`🍽️ Premium dining`);
+      }
+      
+      return stats;
+    }
   },
 };
 </script>
-
-
 <style scoped>
 /* Variables */
 :root {
