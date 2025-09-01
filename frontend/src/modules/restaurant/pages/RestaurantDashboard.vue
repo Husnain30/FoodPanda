@@ -19,37 +19,175 @@
       </div>
     </div>
 
-  <!-- Stats cards में -->
-<div class="stat-value">PKR {{ getDashboardStats.revenue.toLocaleString() }}</div>
-<div class="stat-value">{{ getDashboardStats.orders }}</div>
-<div class="stat-value">{{ getDashboardStats.customers.toLocaleString() }}</div>
-<div class="stat-value">{{ getDashboardStats.rating }}</div>
+    <!-- Key Metrics Stats -->
+    <div class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-card revenue">
+          <div class="stat-header">
+            <div class="stat-icon">💰</div>
+            <div class="stat-meta">
+              <span class="stat-label">Total Revenue</span>
+              <span class="stat-period">Today</span>
+            </div>
+          </div>
+          <div class="stat-value">PKR 24,580</div>
+          <div class="stat-change positive">
+            <span class="change-indicator">↗</span>
+            <span>+15.3% from yesterday</span>
+          </div>
+        </div>
 
-<!-- Performance metrics में -->
-<span class="metric-value">PKR {{ getDashboardStats.averageOrderValue }}</span>
-<span class="metric-value">{{ getDashboardStats.completionRate }}%</span>
-<span class="metric-value">{{ getDashboardStats.returnRate }}%</span>
-<span class="metric-value">{{ getDashboardStats.peakHours }}</span>
+        <div class="stat-card orders">
+          <div class="stat-header">
+            <div class="stat-icon">🛍️</div>
+            <div class="stat-meta">
+              <span class="stat-label">Orders Today</span>
+              <span class="stat-period">Live</span>
+            </div>
+          </div>
+          <div class="stat-value">127</div>
+          <div class="stat-change positive">
+            <span class="change-indicator">↗</span>
+            <span>+8.2% from yesterday</span>
+          </div>
+        </div>
+
+        <div class="stat-card customers">
+          <div class="stat-header">
+            <div class="stat-icon">👥</div>
+            <div class="stat-meta">
+              <span class="stat-label">Active Customers</span>
+              <span class="stat-period">This month</span>
+            </div>
+          </div>
+          <div class="stat-value">2,849</div>
+          <div class="stat-change positive">
+            <span class="change-indicator">↗</span>
+            <span>+23.1% growth</span>
+          </div>
+        </div>
+
+        <div class="stat-card rating">
+          <div class="stat-header">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-meta">
+              <span class="stat-label">Avg Rating</span>
+              <span class="stat-period">This week</span>
+            </div>
+          </div>
+          <div class="stat-value">4.8</div>
+          <div class="stat-change neutral">
+            <span class="change-indicator">→</span>
+            <span>Stable performance</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Restaurant Gallery Section -->
+    <!-- Restaurant Gallery Section -->
+<div class="gallery-section">
+  <div class="section-header">
+    <h2>Restaurant Gallery</h2>
+    <button class="btn-secondary gallery-btn" @click="fetchRestaurants">
+      <i class="icon">🔄</i>
+      Refresh
+    </button>
+  </div>
+  
+  <!-- Loading State -->
+  <div v-if="restaurantsLoading" class="gallery-loading">
+    <div class="loading-spinner"></div>
+    <p>Loading restaurants...</p>
+  </div>
+  
+  <!-- Error State -->
+  <div v-else-if="restaurantsError" class="gallery-error">
+    <p>❌ {{ restaurantsError }}</p>
+    <button @click="fetchRestaurants" class="btn-secondary">
+      Try Again
+    </button>
+  </div>
+  
+  <!-- Gallery Grid with Dynamic Data -->
+  <div v-else class="gallery-grid">
+    <div 
+      v-for="restaurant in restaurants" 
+      :key="restaurant.id" 
+      class="gallery-card"
+    >
+      <img 
+        :src="getRestaurantImage(restaurant)" 
+        :alt="restaurant.name || 'Restaurant Image'" 
+        class="gallery-image"
+        @error="$event.target.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop&crop=center'"
+      >
+      <div class="gallery-overlay">
+        <div class="gallery-info">
+          <span class="gallery-title">{{ restaurant.name || 'Restaurant Name' }}</span>
+          <span class="gallery-location">{{ formatLocation(restaurant) }}</span>
+          <span class="gallery-detail">{{ getRestaurantDescription(restaurant) }}</span>
+          <div class="gallery-stats">
+            <span 
+              v-for="stat in getRestaurantStats(restaurant)" 
+              :key="stat" 
+              class="stat-item"
+            >
+              {{ stat }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Empty State -->
+    <div v-if="!restaurants.length" class="gallery-empty">
+      <p>No restaurants found</p>
+      <button @click="fetchRestaurants" class="btn-primary">
+        Load Restaurants
+      </button>
+    </div>
+  </div>
+</div>
+
     <!-- Main Content Grid -->
       <!-- Left Column - Charts -->
       <div class="content-left">
         <!-- Earnings Chart -->
-     <div v-if="getStatsLoading" class="loading-state">Loading dashboard...</div>
-<div v-else-if="getStatsError" class="error-state">{{ getStatsError }}</div>
+     
 
         <!-- Performance Metrics -->
-       
+        <div class="metrics-container">
+          <h2>Performance Metrics</h2>
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <span class="metric-label">Average Order Value</span>
+              <span class="metric-value">PKR 850</span>
+              <span class="metric-change positive">+5.2%</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Order Completion Rate</span>
+              <span class="metric-value">97.8%</span>
+              <span class="metric-change positive">+1.1%</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Customer Return Rate</span>
+              <span class="metric-value">68.5%</span>
+              <span class="metric-change positive">+3.7%</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Peak Hours</span>
+              <span class="metric-value">12-2 PM</span>
+              <span class="metric-change neutral">Consistent</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Right Column - Tables & Quick Actions -->
       <div class="content-right">
         <!-- Recent Orders -->
-        <div class="orders-container">
-          <div class="section-header">
-            <h2>Recent Orders</h2>
-          <router-link to="/restaurant/orders" class="view-all-link">View All</router-link>
-
-          </div>
-          <OrdersTable :limit="5" />
-        </div>
+     
 
 
         <!-- Quick Actions Panel -->
@@ -107,18 +245,15 @@
         </div>
       </div>
     </div>
-    </div>
     
 
 </template>
-
 <script>
-import OrdersTable from '../components/OrdersTable.vue'
 import { mapGetters, mapActions } from 'vuex'
+
 export default {
   name: "RestaurantDashboard",
   components: {
-   OrdersTable
   
   },
   data() {
@@ -148,63 +283,141 @@ export default {
           status: "active",
         },
       ],
+      // Remove local restaurants data since we're using Vuex store
+      // restaurants: [],
+      // restaurantsLoading: false,
+      // restaurantsError: null,
     };
   },
-async mounted() {
-  // Get restaurant ID from route params or user session
-  const restaurantId = this.$route.params.id || this.$store.getters['auth/getCurrentUser']?.restaurant_id
   
-  if (restaurantId) {
-    try {
-      await this.fetchRestaurantStats(restaurantId)
-      await this.fetchRestaurantOrders(restaurantId)
-    } catch (error) {
-      console.error('Error loading dashboard:', error)
+  computed: {
+    ...mapGetters('restaurant', [
+      'getDashboardStats',
+      'getStatsLoading',
+      'getStatsError',
+      'getAllRestaurants',
+      'getRestaurantsLoading',
+      'getRestaurantsError'
+    ]),
+    
+    // Use store data for template
+    restaurants() {
+      return this.getAllRestaurants;
+    },
+    restaurantsLoading() {
+      return this.getRestaurantsLoading;
+    },
+    restaurantsError() {
+      return this.getRestaurantsError;
     }
-  }
-  
-  // Auto-refresh remains same
-  this.refreshInterval = setInterval(() => {
-    this.refreshDashboardData()
-  }, 30000)
-},
+  },
 
+  async mounted() {
+    // Fetch restaurants data on component mount
+    await this.fetchRestaurants();
+    
+    // Auto-refresh data every 30s
+    this.refreshInterval = setInterval(() => {
+      this.refreshDashboardData();
+    }, 30000);
+  },
+  
   beforeUnmount() {
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
   },
-  computed: {
-  ...mapGetters('restaurant', [
-    'getDashboardStats',
-    'getStatsLoading',
-    'getStatsError'
-  ]),
-},
-  methods: {
-  ...mapActions('restaurant', [
-    'fetchRestaurantStats',
-    'fetchRestaurantOrders'
-  ]),
   
-  async refreshDashboardData() {
-    const restaurantId = this.$route.params.id || this.$store.getters['auth/getCurrentUser']?.restaurant_id
-    if (restaurantId) {
-      await this.fetchRestaurantStats(restaurantId)
-      await this.fetchRestaurantOrders(restaurantId)
-    }
-  },
+  methods: {
+    ...mapActions('restaurant', [
+      'fetchRestaurantStats',
+      'fetchAllRestaurants'
+    ]),
 
+    async fetchRestaurants() {
+      try {
+        console.log('🏪 Fetching restaurants via Vuex action...');
+        await this.fetchAllRestaurants();
+        this.restaurants = this.getAllRestaurants;
+        console.log('✅ Restaurants loaded from store:', this.restaurants.length);
+      } catch (error) {
+        console.error('❌ Error in fetchRestaurants:', error);
+        this.restaurantsError = error.message || 'Failed to fetch restaurants';
+        
+        // Show error notification
+        this.$q?.notify?.({
+          type: 'negative',
+          message: 'Failed to load restaurants',
+          caption: this.restaurantsError
+        });
+      }
+    },
+
+    refreshDashboardData() {
+      // Refresh both stats and restaurants data
+      console.log("🔄 Refreshing dashboard data...");
+      this.fetchRestaurants();
+    },
+    
     changePeriod(period) {
       this.currentPeriod = period;
-      // Update chart data based on selected period
       console.log("📊 Changed period to:", period);
     },
+
+    // Helper method to get restaurant image
+    getRestaurantImage(restaurant) {
+      // Use restaurant's image if available, otherwise fallback to Unsplash
+      if (restaurant.image_url || restaurant.image) {
+        return restaurant.image_url || restaurant.image;
+      }
+      
+      // Fallback images based on restaurant type or random
+      const fallbackImages = [
+        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop&crop=center',
+        'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=400&h=300&fit=crop&crop=center',
+        'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop&crop=center',
+        'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop&crop=center'
+      ];
+      
+      return fallbackImages[restaurant.id % fallbackImages.length];
+    },
+
+    // Helper method to format restaurant rating
+    formatRating(rating) {
+      return rating ? parseFloat(rating).toFixed(1) : '4.5';
+    },
+
+    // Helper method to format restaurant location
+    formatLocation(restaurant) {
+      return restaurant.address || restaurant.location || `📍 ${restaurant.city || 'Pakistan'}`;
+    },
+
+    // Helper method to get restaurant description
+    getRestaurantDescription(restaurant) {
+      return restaurant.description || restaurant.cuisine_type || 'Delicious food and great ambiance';
+    },
+
+    // Helper method to get additional stats
+    getRestaurantStats(restaurant) {
+      const stats = [];
+      
+      if (restaurant.rating) {
+        stats.push(`⭐ ${this.formatRating(restaurant.rating)}`);
+      }
+      
+      if (restaurant.seating_capacity) {
+        stats.push(`👥 ${restaurant.seating_capacity} seats`);
+      } else if (restaurant.table_count) {
+        stats.push(`🪑 ${restaurant.table_count} tables`);
+      } else {
+        stats.push(`🍽️ Premium dining`);
+      }
+      
+      return stats;
+    }
   },
 };
 </script>
-
-
 <style scoped>
 /* Variables */
 :root {

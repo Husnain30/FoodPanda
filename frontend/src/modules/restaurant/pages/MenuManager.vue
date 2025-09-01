@@ -115,7 +115,6 @@
 </template>
 
 <script>
-
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useQuasar } from 'quasar'
@@ -136,123 +135,131 @@ export default {
     const formLoading = ref(false)
     const deleteLoading = ref(false)
 
-    // Computed properties
-  const menuItems = computed(() => store.getters['restaurant/getMenuItems'] || [])
-const loading = computed(() => store.getters['restaurant/getMenuLoading'] || false)
-const error = computed(() => store.getters['restaurant/getMenuError'] || null)
+    // Computed properties from Vuex store
+    const menuItems = computed(() => store.getters['restaurant/getMenuItems'] || [])
+    const loading = computed(() => store.getters['restaurant/getMenuLoading'] || false)
+    const error = computed(() => store.getters['restaurant/getMenuError'] || null)
 
-    // Get restaurant ID from localStorage or user data
-
-// Replace your getRestaurantId function with this improved version:
-const getRestaurantId = () => {
-  try {
-    const user = JSON.parse(localStorage.getItem('user') || '{}')
-    const restaurantId = user.restaurant_id || user.id
-    
-    if (!restaurantId) {
-      console.warn('No restaurant ID found in user data')
-      $q.notify({
-        color: 'warning',
-        message: 'Restaurant ID not found. Please login again.',
-        icon: 'warning'
-      })
-      return null
+    // Get restaurant ID from localStorage
+    const getRestaurantId = () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}')
+        const restaurantId = user.restaurant_id || user.id
+        
+        if (!restaurantId) {
+          console.warn('No restaurant ID found in user data')
+          $q.notify({
+            color: 'warning',
+            message: 'Restaurant ID not found. Please login again.',
+            icon: 'warning'
+          })
+          return null
+        }
+        
+        console.log('Using restaurant ID:', restaurantId)
+        return restaurantId
+      } catch (error) {
+        console.error('Error parsing user data:', error)
+        return null
+      }
     }
-    
-    return restaurantId
-  } catch (error) {
-    console.error('Error parsing user data:', error)
-    return null
-  }
-}
 
-    // Methods
- // Replace your loadMenuItems function with this:
-const loadMenuItems = async () => {
-  try {
-    const restaurantId = getRestaurantId()
-    if (!restaurantId) {
-      return // Exit if no restaurant ID
+    // Load menu items
+    const loadMenuItems = async () => {
+      try {
+        const restaurantId = getRestaurantId()
+        if (!restaurantId) {
+          return
+        }
+        
+        console.log('Loading menu items for restaurant:', restaurantId)
+        await store.dispatch('restaurant/fetchMenuItems', restaurantId)
+        console.log('Menu items loaded:', menuItems.value.length)
+      } catch (error) {
+        console.error('Error loading menu items:', error)
+        $q.notify({
+          color: 'negative',
+          message: 'Failed to load menu items',
+          caption: error.message,
+          icon: 'error'
+        })
+      }
     }
-    
-    await store.dispatch('restaurant/fetchMenuItems', restaurantId)
-  } catch (error) {
-    console.error('Error loading menu items:', error)
-    $q.notify({
-      color: 'negative',
-      message: 'Failed to load menu items',
-      icon: 'error'
-    })
-  }
-}
 
-
+    // Open form for add/edit
     const openForm = (dish = null) => {
       selectedDish.value = dish
       formDialog.value = true
     }
 
+    // Close form
     const closeForm = () => {
       formDialog.value = false
       selectedDish.value = null
       formLoading.value = false
     }
 
-   // Replace your saveDish function with this debug version:
-const saveDish = async (formData) => {
-  console.log('saveDish called with:', formData) // Debug log
-  formLoading.value = true
-  
-  try {
-    if (selectedDish.value) {
-      // Update existing dish
-      console.log('Updating dish:', selectedDish.value.id) // Debug log
-      await store.dispatch('restaurant/updateMenuItemWithImage', {
-        itemId: selectedDish.value.id,
-        formData
-      })
+    // Save dish (add or update)
+    const saveDish = async (formData) => {
+      console.log('Saving dish...')
+      formLoading.value = true
       
-      $q.notify({
-        color: 'positive',
-        message: 'Dish updated successfully',
-        icon: 'check'
-      })
-    } else {
-      // Add new dish
-      console.log('Adding new dish') // Debug log
-      await store.dispatch('restaurant/addMenuItemWithImage', formData)
-      
-      $q.notify({
-        color: 'positive',
-        message: 'Dish added successfully',
-        icon: 'check'
-      })
+      try {
+        if (selectedDish.value) {
+          // Update existing dish
+          console.log('Updating dish:', selectedDish.value.id)
+          await store.dispatch('restaurant/updateMenuItemWithImage', {
+            itemId: selectedDish.value.id,
+            formData
+          })
+          
+          $q.notify({
+            color: 'positive',
+            message: 'Dish updated successfully',
+            icon: 'check'
+          })
+        } else {
+          // Add new dish
+          console.log('Adding new dish')
+          await store.dispatch('restaurant/addMenuItemWithImage', formData)
+          
+          $q.notify({
+            color: 'positive',
+            message: 'Dish added successfully',
+            icon: 'check'
+          })
+        }
+        
+        closeForm()
+        // Reload menu items to show updated data
+        await loadMenuItems()
+        
+      } catch (error) {
+        console.error('Error saving dish:', error)
+        $q.notify({
+          color: 'negative',
+          message: error.message || 'Failed to save dish',
+          icon: 'error'
+        })
+      } finally {
+        formLoading.value = false
+      }
     }
-    
-    closeForm()
-  } catch (error) {
-    console.error('Error in saveDish:', error) // Debug log
-    $q.notify({
-      color: 'negative',
-      message: error.message || 'Failed to save dish',
-      icon: 'error'
-    })
-  } finally {
-    formLoading.value = false
-  }
-}
 
+    // Confirm delete
     const confirmDelete = (dish) => {
       dishToDelete.value = dish
       deleteDialog.value = true
     }
 
+    // Delete dish
     const deleteDish = async () => {
       if (!dishToDelete.value) return
 
       deleteLoading.value = true
       
       try {
+        console.log('Deleting dish:', dishToDelete.value.id)
         await store.dispatch('restaurant/deleteMenuItem', dishToDelete.value.id)
         
         $q.notify({
@@ -263,7 +270,12 @@ const saveDish = async (formData) => {
         
         deleteDialog.value = false
         dishToDelete.value = null
+        
+        // Reload menu items
+        await loadMenuItems()
+        
       } catch (error) {
+        console.error('Error deleting dish:', error)
         $q.notify({
           color: 'negative',
           message: error.message || 'Failed to delete dish',
@@ -274,18 +286,12 @@ const saveDish = async (formData) => {
       }
     }
 
-    // Lifecycle
-   onMounted(() => {
-  // Debug: Check if store has restaurant module
-  console.log('Store modules:', Object.keys(store._modules.root._children))
-  console.log('Restaurant module exists:', !!store._modules.root._children.restaurant)
-  
-  if (store._modules.root._children.restaurant) {
-    console.log('Restaurant actions:', Object.keys(store._modules.root._children.restaurant._rawModule.actions))
-  }
-  
-  loadMenuItems()
-})
+    // Lifecycle - Load menu on component mount
+    onMounted(() => {
+      console.log('MenuManager mounted')
+      console.log('Store modules:', Object.keys(store._modules.root._children))
+      loadMenuItems()
+    })
 
     return {
       // Data
@@ -312,7 +318,6 @@ const saveDish = async (formData) => {
   }
 }
 </script>
-
 <style scoped>
 .dish-card {
   border-radius: 16px;

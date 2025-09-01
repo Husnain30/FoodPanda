@@ -24,6 +24,11 @@ const state = {
   menuLoading: false,
   menuError: null,
 
+  // Restaurants Gallery - NEW ADDITION
+  restaurants: [],
+  restaurantsLoading: false,
+  restaurantsError: null,
+
   // Loading States
   statsLoading: false,
   statsError: null,
@@ -50,6 +55,11 @@ const getters = {
   getMenuItems: (state) => state.menuItems,
   getMenuLoading: (state) => state.menuLoading,
   getMenuError: (state) => state.menuError,
+
+  // Restaurants - NEW ADDITION
+  getAllRestaurants: (state) => state.restaurants,
+  getRestaurantsLoading: (state) => state.restaurantsLoading,
+  getRestaurantsError: (state) => state.restaurantsError,
 }
 
 const mutations = {
@@ -106,16 +116,29 @@ const mutations = {
   DELETE_MENU_ITEM(state, itemId) {
     state.menuItems = state.menuItems.filter(item => item.id !== itemId)
   },
+
+  // Restaurants Mutations - NEW ADDITION
+  SET_RESTAURANTS_LOADING(state, loading) {
+    state.restaurantsLoading = loading
+  },
+  SET_RESTAURANTS_ERROR(state, error) {
+    state.restaurantsError = error
+  },
+  SET_RESTAURANTS(state, restaurants) {
+    state.restaurants = restaurants
+  },
 }
 
 const actions = {
-  // Fetch Restaurant Stats
+  // Fetch Restaurant Stats - UPDATED FOR API INTEGRATION
   async fetchRestaurantStats({ commit }, restaurantId) {
     commit('SET_STATS_LOADING', true)
     commit('SET_STATS_ERROR', null)
 
     try {
-      const response = await api.get(`/restaurants/${restaurantId}/stats`)
+      console.log('📊 API Call: Fetching stats for restaurant:', restaurantId)
+      const response = await api.get(`restaurants/${restaurantId}/stats`)
+      console.log('📊 API Response:', response.data)
       
       const statsData = {
         revenue: response.data.revenue || 0,
@@ -129,6 +152,7 @@ const actions = {
       }
       
       commit('SET_STATS', statsData)
+      console.log('✅ Stats updated in store:', statsData)
       return response.data
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Failed to fetch stats'
@@ -140,112 +164,207 @@ const actions = {
     }
   },
 
-  // Fetch Restaurant Orders
-  // Fetch Restaurant Details
-async fetchRestaurantDetails(context, restaurantId) {
+// Replace your existing fetchRestaurantOrders function with this:
+
+async fetchRestaurantOrders({ commit }, restaurantId) {
+  commit('SET_ORDERS_LOADING', true)
+  commit('SET_ORDERS_ERROR', null)
+
   try {
-    const response = await api.get(`/restaurants/${restaurantId}`)
-    return response.data
+    console.log('📋 API Call: Fetching orders for restaurant:', restaurantId)
+    
+    // FIXED: Use the correct endpoint that matches your Laravel route
+    // Your Laravel route: Route::get('/restaurant/orders', ...)
+    // So the call should be: GET /restaurant/orders
+    const response = await api.get('restaurant/orders', {
+      params: {
+        restaurant_id: restaurantId  // Pass restaurant ID as query parameter
+      }
+    })
+    
+    console.log('📋 API Response:', response.data)
+    
+    // Handle different response structures
+    const ordersData = response.data.data || response.data || []
+    
+    commit('SET_ORDERS', ordersData)
+    console.log('✅ Orders loaded in store:', ordersData.length)
+    return ordersData
+    
   } catch (error) {
-    console.error('Error fetching restaurant details:', error)
+    const errorMessage = error.response?.data?.message || 'Failed to fetch restaurant orders'
+    commit('SET_ORDERS_ERROR', errorMessage)
+    console.error('❌ Error fetching restaurant orders:', error)
     throw error
+  } finally {
+    commit('SET_ORDERS_LOADING', false)
   }
 },
 
-  // Update Order Status
-  async updateOrderStatus({ commit }, { orderId, status }) {
-    try {
-      const response = await api.patch(`/orders/${orderId}`, { status })
-      
-      commit('UPDATE_ORDER_STATUS', { orderId, status })
-      
-      return response.data
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Failed to update order status'
-      console.error('❌ Error updating order status:', error)
-      throw new Error(errorMessage)
-    }
-  },
+// Also fix your updateOrderStatus action to match the correct endpoint
 
-  // Fetch Menu Items (commented out since you don't have GET route yet)
-  async fetchMenuItems({ commit }, restaurantId) {
-    commit('SET_MENU_LOADING', true)
-    commit('SET_MENU_ERROR', null)
+
+  // NEW ACTION: Fetch All Restaurants for Gallery
+  async fetchAllRestaurants({ commit }) {
+    commit('SET_RESTAURANTS_LOADING', true)
+    commit('SET_RESTAURANTS_ERROR', null)
 
     try {
-      const response = await api.get(`menu?restaurant_id=${restaurantId}`)
-      commit('SET_MENU_ITEMS', response.data)
-      return response.data
+      console.log('🏪 API Call: Fetching all restaurants')
+      const response = await api.get('restaurant/restaurants')
+      console.log('🏪 API Response:', response.data)
+      
+      // Handle different response structures
+      const restaurantsData = response.data.data || response.data || []
+      
+      commit('SET_RESTAURANTS', restaurantsData)
+      console.log('✅ Restaurants loaded in store:', restaurantsData.length)
+      return restaurantsData
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Failed to fetch menu items'
-      commit('SET_MENU_ERROR', errorMessage)
-      console.error('❌ Error fetching menu items:', error)
+      const errorMessage = error.response?.data?.message || 'Failed to fetch restaurants'
+      commit('SET_RESTAURANTS_ERROR', errorMessage)
+      console.error('❌ Error fetching restaurants:', error)
       throw error
     } finally {
-      commit('SET_MENU_LOADING', false)
+      commit('SET_RESTAURANTS_LOADING', false)
     }
   },
+
+  // Fetch Restaurant Details
+  async fetchRestaurantDetails(context, restaurantId) {
+    try {
+      console.log('🏪 API Call: Fetching restaurant details:', restaurantId)
+      const response = await api.get(`restaurants/${restaurantId}`)
+      console.log('🏪 API Response:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('❌ Error fetching restaurant details:', error)
+      throw error
+    }
+  },
+
+  // Update Order Status
+async updateOrderStatus({ commit }, { orderId, status }) {
+  try {
+    console.log('🔄 API Call: Updating order status:', { orderId, status })
+    // FIXED: Using your correct endpoint structure
+    const response = await api.patch(`restaurant/orders/${orderId}/status`, { 
+      status: status 
+    })
+    
+    commit('UPDATE_ORDER_STATUS', { orderId, status })
+    console.log('✅ Order status updated')
+    
+    return response.data
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Failed to update order status'
+    console.error('❌ Error updating order status:', error)
+    throw new Error(errorMessage)
+  }
+},
+
+
+  // Fetch Menu Items
+  async fetchMenuItems({ commit }, restaurantId) {
+  commit('SET_MENU_LOADING', true)
+  commit('SET_MENU_ERROR', null)
+
+  try {
+    console.log('🍽️ API Call: Fetching menu items for restaurant:', restaurantId)
+    // FIXED: Using your correct endpoint structure
+    const response = await api.get(`restaurant/menu/${restaurantId}`)
+    console.log('🍽️ API Response:', response.data)
+    
+    // Handle different response structures
+    const menuData = response.data.data || response.data || []
+    commit('SET_MENU_ITEMS', menuData)
+    return menuData
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Failed to fetch menu items'
+    commit('SET_MENU_ERROR', errorMessage)
+    console.error('❌ Error fetching menu items:', error)
+    throw error
+  } finally {
+    commit('SET_MENU_LOADING', false)
+  }
+},
+
 
   // Add Menu Item with Image
   async addMenuItemWithImage({ commit }, formData) {
-    try {
-      console.log('Making API request to add menu item') // Debug log
-      
-      const response = await api.post('menu', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        timeout: 30000 // 30 second timeout for image upload
-      })
-      
-      console.log('Menu item added successfully:', response.data) // Debug log
-      commit('ADD_MENU_ITEM', response.data)
-      return response.data
-    } catch (error) {
-      console.error('API Error:', error.response?.data || error) // Debug log
-      const errorMessage = error.response?.data?.message || 'Failed to add menu item'
-      console.error('❌ Error adding menu item with image:', error)
-      throw new Error(errorMessage)
+  try {
+    console.log('🍕 API Call: Adding menu item with image')
+    console.log('🍕 FormData contents:')
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ': ' + pair[1])
     }
-  },
+    
+    // FIXED: Using your correct endpoint
+    const response = await api.post('restaurant/menu', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      timeout: 30000
+    })
+    
+    console.log('✅ Menu item added successfully:', response.data)
+    commit('ADD_MENU_ITEM', response.data)
+    return response.data
+  } catch (error) {
+    console.error('❌ API Error:', error.response?.data || error)
+    const errorMessage = error.response?.data?.message || 'Failed to add menu item'
+    throw new Error(errorMessage)
+  }
+},
 
   // Update Menu Item with Image
-  async updateMenuItemWithImage({ commit }, { itemId, formData }) {
-    try {
-      const response = await api.patch(`menu/${itemId}`, formData, {
-        headers: { 
-          'Content-Type': 'multipart/form-data' 
-        },
-        timeout: 30000 // 30 second timeout for image upload
-      })
-      
-      commit('UPDATE_MENU_ITEM', response.data)
-      return response.data
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Failed to update menu item'
-      console.error('❌ Error updating menu item with image:', error)
-      throw new Error(errorMessage)
+async updateMenuItemWithImage({ commit }, { itemId, formData }) {
+  try {
+    console.log('🔄 API Call: Updating menu item:', itemId)
+    console.log('🔄 FormData contents:')
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ': ' + pair[1])
     }
-  },
+    
+    // FIXED: Using your correct endpoint
+    const response = await api.patch(`restaurant/menu/${itemId}`, formData, {
+      headers: { 
+        'Content-Type': 'multipart/form-data' 
+      },
+      timeout: 30000
+    })
+    
+    console.log('✅ Menu item updated successfully')
+    commit('UPDATE_MENU_ITEM', response.data)
+    return response.data
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Failed to update menu item'
+    console.error('❌ Error updating menu item:', error)
+    throw new Error(errorMessage)
+  }
+},
 
   // Delete Menu Item
-  async deleteMenuItem({ commit }, itemId) {
-    try {
-      await api.delete(`menu/${itemId}`)
-      
-      // Remove from state using mutation
-      commit('DELETE_MENU_ITEM', itemId)
-      
-      return true
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Failed to delete menu item'
-      console.error('❌ Error deleting menu item:', error)
-      throw new Error(errorMessage)
-    }
-  },
+async deleteMenuItem({ commit }, itemId) {
+  try {
+    console.log('🗑️ API Call: Deleting menu item:', itemId)
+    // FIXED: Using your correct endpoint
+    await api.delete(`restaurant/menu/${itemId}`)
+    
+    commit('DELETE_MENU_ITEM', itemId)
+    console.log('✅ Menu item deleted successfully')
+    
+    return true
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Failed to delete menu item'
+    console.error('❌ Error deleting menu item:', error)
+    throw new Error(errorMessage)
+  }
+},
 
   // Clear All Data (useful for logout)
   clearRestaurantData({ commit }) {
+    console.log('🧹 Clearing restaurant data')
     commit('SET_STATS', {
       revenue: 0,
       orders: 0,
@@ -258,9 +377,11 @@ async fetchRestaurantDetails(context, restaurantId) {
     })
     commit('SET_ORDERS', [])
     commit('SET_MENU_ITEMS', [])
+    commit('SET_RESTAURANTS', [])
     commit('SET_STATS_ERROR', null)
     commit('SET_ORDERS_ERROR', null)
     commit('SET_MENU_ERROR', null)
+    commit('SET_RESTAURANTS_ERROR', null)
   },
 }
 
