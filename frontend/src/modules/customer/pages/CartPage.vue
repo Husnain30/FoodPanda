@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <h1 class="page-title">🛒 Your Cart</h1>
+    <h1 class="page-title"> Your Cart</h1>
 
     <q-card class="cart-card q-pa-md">
       <q-list bordered separator>
@@ -32,9 +32,9 @@
 <style scoped>
 /* Title */
 .page-title {
-  margin-top: 0px;
-  font-size: 28px;
-  margin-bottom: 20px;
+  
+  font-size: 35px;
+  margin-bottom: 1px;
   font-weight: 700;
   color: #333;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);

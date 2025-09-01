@@ -17,12 +17,12 @@
         indicator-color="white"
         class="navbar-tabs"
       >
-        <q-route-tab to="/customer/restaurants" name="restaurants" label="Browse Restaurants" />
-        <q-route-tab to="/customer/cart" name="cart" label="Cart" />
-        <q-route-tab to="/customer/checkout" name="checkout" label="Checkout" />
-        <q-route-tab to="/customer/orders" name="orders" label="Order History" />
-        <q-route-tab to="/customer/track/1" name="track" label="Order Tracking" />
-        <q-route-tab to="/customer/review/1" name="review" label="Review" />
+        <q-route-tab to="/restaurants" name="restaurants" label="Browse Restaurants" />
+        <q-route-tab to="/cart" name="cart" label="Cart" />
+        <q-route-tab to="/checkout" name="checkout" label="Checkout" />
+        <q-route-tab to="/orders" name="placeOrder" label="Order History" />
+        <q-route-tab to="/orders/1" name="trackOrder" label="Order Tracking" />
+        <q-route-tab to="/reviews" name="review" label="Review" />
       </q-tabs>
 
       <q-space />
@@ -38,7 +38,7 @@ import { ref } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 
-const tab = ref("/customer/restaurants");
+const tab = ref("/restaurants");
 const store = useStore();
 const router = useRouter();
 

@@ -1,8 +1,8 @@
 <template>
   <div class="q-pa-md order-status-card">
     <!-- Title -->
-    <div class="text-h6 q-mb-sm">Order Status</div>
-    <div class="text-caption text-grey-6 q-mb-md">
+    <div class="text-h6 q-mb-sm order-title"> Order Status</div>
+    <div class="text-caption text-grey-7 q-mb-md">
       Track the progress of your delivery in real-time
     </div>
 
@@ -34,11 +34,9 @@
 
     <!-- Next Button -->
     <q-btn
-      color="primary"
       label="Next"
       class="next-btn q-mt-md"
       @click="nextStep"
-      glossy
     />
   </div>
 </template>
@@ -55,34 +53,64 @@ function nextStep() {
 <style scoped>
 .order-status-card {
   background: #fff;
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+.order-status-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
 }
 
+.order-title {
+  font-size: 20px;
+  font-weight: 700;
+ color: black;
+}
+
+/* Stepper styling */
 .custom-stepper .q-stepper__tab {
-  background: #f4f6f8;
-  border-radius: 12px;
+  background: #f8f9fa;
+  border-radius: 14px;
   margin-bottom: 14px;
   transition: 0.3s;
-  padding: 10px;
+  padding: 12px;
 }
-
+.custom-stepper .q-stepper__tab:hover {
+  background: #f1f5ff;
+}
 .custom-stepper .q-stepper__tab--active {
-  background: #e0f2fe; /* light blue */
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+  background: #e8f0fe;
+  box-shadow: 0 3px 10px rgba(33, 150, 243, 0.3);
+  transform: scale(1.02);
 }
 
 .custom-stepper .q-stepper__title {
   font-weight: 600;
-  color: #1976d2;
+  color: #1a237e;
 }
 
 .custom-stepper .q-stepper__icon {
-  color: #1976d2;
-  background: #e3f2fd;
+  color: white;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
   border-radius: 50%;
+  padding: 6px;
+  box-shadow: 0 2px 6px rgba(37, 117, 252, 0.4);
 }
 
-
+/* Next button */
+.next-btn {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 10px 20px;
+  box-shadow: 0 6px 14px rgba(37, 117, 252, 0.35);
+  transition: all 0.3s ease;
+}
+.next-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 18px rgba(106, 17, 203, 0.4);
+}
 </style>
