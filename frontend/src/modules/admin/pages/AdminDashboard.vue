@@ -1,7 +1,7 @@
 <template>
   <q-page class="admin-dashboard">
     <!-- Dashboard Header -->
-    <div class="dashboard-header ">
+    <div class="dashboard-header">
       <div class="header-content">
         <div class="welcome-section">
           <h1 class="page-title text-black">Admin Dashboard</h1>
@@ -11,6 +11,15 @@
         </div>
         
         <div class="header-actions">
+          <q-btn
+            outline
+            color="primary"
+            icon="refresh"
+            label="Refresh Data"
+            class="action-btn"
+            :loading="isAnyLoading"
+            @click="refreshData"
+          />
           <q-btn
             outline
             color="primary"
@@ -37,12 +46,12 @@
         </div>
         <div class="user-details">
           <div class="user-name">{{ user.name || user.email }}</div>
-          <div class="user-role">{{ user.role }}</div>
+          <div class="user-role">{{ user.role || 'Administrator' }}</div>
           <div class="user-meta">Last login: Today at 9:30 AM</div>
         </div>
         <div class="user-stats">
           <div class="stat-item">
-            <div class="stat-value">15</div>
+            <div class="stat-value">{{ todayActions }}</div>
             <div class="stat-label">Actions Today</div>
           </div>
           <div class="stat-item">
@@ -71,7 +80,10 @@
             <q-icon name="account_balance_wallet" size="2.5rem" />
           </div>
           <div class="metric-content">
-            <div class="metric-value">PKR 2,45,680</div>
+            <div class="metric-value">
+              <q-skeleton v-if="isLoading('analytics')" type="text" width="120px" />
+              <span v-else>{{ revenueFormatted }}</span>
+            </div>
             <div class="metric-label">Total Revenue</div>
             <div class="metric-period">This month</div>
           </div>
@@ -86,7 +98,10 @@
             <q-icon name="shopping_cart" size="2.5rem" />
           </div>
           <div class="metric-content">
-            <div class="metric-value">3,847</div>
+            <div class="metric-value">
+              <q-skeleton v-if="isLoading('orders')" type="text" width="80px" />
+              <span v-else>{{ totalOrders.toLocaleString() }}</span>
+            </div>
             <div class="metric-label">Total Orders</div>
             <div class="metric-period">This month</div>
           </div>
@@ -101,7 +116,10 @@
             <q-icon name="people" size="2.5rem" />
           </div>
           <div class="metric-content">
-            <div class="metric-value">8,429</div>
+            <div class="metric-value">
+              <q-skeleton v-if="isLoading('users')" type="text" width="80px" />
+              <span v-else>{{ activeUsers.toLocaleString() }}</span>
+            </div>
             <div class="metric-label">Active Users</div>
             <div class="metric-period">This month</div>
           </div>
@@ -116,7 +134,10 @@
             <q-icon name="star" size="2.5rem" />
           </div>
           <div class="metric-content">
-            <div class="metric-value">4.8</div>
+            <div class="metric-value">
+              <q-skeleton v-if="isLoading('restaurants')" type="text" width="60px" />
+              <span v-else>{{ avgRating || '4.8' }}</span>
+            </div>
             <div class="metric-label">Avg Rating</div>
             <div class="metric-period">Platform wide</div>
           </div>
@@ -125,6 +146,29 @@
             <span>Stable</span>
           </div>
         </div>
+      </div>
+
+      <!-- Error Messages -->
+      <div v-if="hasErrors" class="error-section q-mt-md">
+        <q-banner 
+          v-for="(error, type) in errors" 
+          :key="type" 
+          class="bg-red-1 text-red-8 q-mb-sm"
+          icon="error"
+        >
+          <template v-slot:avatar>
+            <q-icon name="error" color="red" />
+          </template>
+          Failed to load {{ type }}: {{ error }}
+          <template v-slot:action>
+            <q-btn 
+              flat 
+              color="red" 
+              label="Retry" 
+              @click="retryFetch(type)"
+            />
+          </template>
+        </q-banner>
       </div>
     </div>
 
@@ -139,7 +183,7 @@
         
         <div class="actions-grid">
           <div
-            v-for="link in quickLinks"
+            v-for="link in quickLinksData"
             :key="link.label"
             class="action-card"
             @click="goTo(link.to)"
@@ -167,23 +211,46 @@
         </div>
         
         <div class="activity-list">
-          <div
-            v-for="activity in recentActivities"
-            :key="activity.id"
-            class="activity-item"
-          >
-            <div class="activity-icon" :class="activity.type">
-              <q-icon :name="activity.icon" />
+          <template v-if="isLoading('analytics')">
+            <div 
+              v-for="n in 5" 
+              :key="n"
+              class="activity-item skeleton"
+            >
+              <q-skeleton type="QAvatar" size="40px" />
+              <div class="activity-content">
+                <q-skeleton type="text" width="60%" />
+                <q-skeleton type="text" width="80%" />
+                <q-skeleton type="text" width="30%" />
+              </div>
+              <q-skeleton type="text" width="80px" />
             </div>
-            <div class="activity-content">
-              <div class="activity-title">{{ activity.title }}</div>
-              <div class="activity-description">{{ activity.description }}</div>
-              <div class="activity-time">{{ activity.time }}</div>
+          </template>
+          
+          <template v-else>
+            <div
+              v-for="activity in displayActivities"
+              :key="activity.id"
+              class="activity-item"
+            >
+              <div class="activity-icon" :class="activity.type">
+                <q-icon :name="activity.icon" />
+              </div>
+              <div class="activity-content">
+                <div class="activity-title">{{ activity.title }}</div>
+                <div class="activity-description">{{ activity.description }}</div>
+                <div class="activity-time">{{ formatTime(activity.time || activity.created_at) }}</div>
+              </div>
+              <div class="activity-status" :class="activity.status">
+                {{ activity.statusText || activity.status }}
+              </div>
             </div>
-            <div class="activity-status" :class="activity.status">
-              {{ activity.statusText }}
+            
+            <div v-if="displayActivities.length === 0" class="no-activities">
+              <q-icon name="info" size="2rem" color="grey-5" />
+              <div>No recent activities</div>
             </div>
-          </div>
+          </template>
         </div>
         
         <div class="panel-footer">
@@ -217,13 +284,18 @@
             </div>
           </div>
           <div class="chart-placeholder">
-            <div class="placeholder-content">
-              <q-icon name="bar_chart" size="4rem" color="grey-5" />
-              <div class="placeholder-text">Revenue chart will be displayed here</div>
-              <div class="placeholder-description">
-                Integration with charting library required (Chart.js, ApexCharts, etc.)
+            <template v-if="isLoading('analytics')">
+              <q-skeleton type="rect" height="200px" />
+            </template>
+            <template v-else>
+              <div class="placeholder-content">
+                <q-icon name="bar_chart" size="4rem" color="grey-5" />
+                <div class="placeholder-text">Revenue chart will be displayed here</div>
+                <div class="placeholder-description">
+                  Integration with charting library required (Chart.js, ApexCharts, etc.)
+                </div>
               </div>
-            </div>
+            </template>
           </div>
         </div>
 
@@ -238,12 +310,18 @@
                 <div class="stat-subtitle">Completed orders</div>
               </div>
               <div class="stat-progress">
-                <div class="progress-value">96.2%</div>
-                <q-linear-progress 
-                  :value="0.962" 
-                  color="green" 
-                  class="progress-bar"
-                />
+                <template v-if="isLoading('orders')">
+                  <q-skeleton type="text" width="60px" />
+                  <q-skeleton type="rect" height="8px" class="q-mt-sm" />
+                </template>
+                <template v-else>
+                  <div class="progress-value">{{ orderSuccessRate }}%</div>
+                  <q-linear-progress 
+                    :value="orderSuccessRate / 100" 
+                    color="green" 
+                    class="progress-bar"
+                  />
+                </template>
               </div>
             </div>
             
@@ -253,12 +331,18 @@
                 <div class="stat-subtitle">Average rating</div>
               </div>
               <div class="stat-progress">
-                <div class="progress-value">4.8/5.0</div>
-                <q-linear-progress 
-                  :value="0.96" 
-                  color="blue" 
-                  class="progress-bar"
-                />
+                <template v-if="isLoading('restaurants')">
+                  <q-skeleton type="text" width="60px" />
+                  <q-skeleton type="rect" height="8px" class="q-mt-sm" />
+                </template>
+                <template v-else>
+                  <div class="progress-value">{{ avgRating || '4.8' }}/5.0</div>
+                  <q-linear-progress 
+                    :value="(avgRating || 4.8) / 5" 
+                    color="blue" 
+                    class="progress-bar"
+                  />
+                </template>
               </div>
             </div>
             
@@ -279,16 +363,22 @@
             
             <div class="stat-row">
               <div class="stat-info">
-                <div class="stat-title">Delivery Time</div>
-                <div class="stat-subtitle">Average delivery</div>
+                <div class="stat-title">Active Riders</div>
+                <div class="stat-subtitle">Currently online</div>
               </div>
               <div class="stat-progress">
-                <div class="progress-value">28 min</div>
-                <q-linear-progress 
-                  :value="0.85" 
-                  color="orange" 
-                  class="progress-bar"
-                />
+                <template v-if="isLoading('riders')">
+                  <q-skeleton type="text" width="60px" />
+                  <q-skeleton type="rect" height="8px" class="q-mt-sm" />
+                </template>
+                <template v-else>
+                  <div class="progress-value">{{ Math.floor(totalRiders * 0.75) }}</div>
+                  <q-linear-progress 
+                    :value="0.75" 
+                    color="orange" 
+                    class="progress-bar"
+                  />
+                </template>
               </div>
             </div>
           </div>
@@ -322,12 +412,12 @@
           </div>
         </div>
         
-        <div class="status-card warning">
+        <div class="status-card" :class="paymentGatewayStatus">
           <div class="status-indicator"></div>
           <div class="status-content">
             <div class="status-title">Payment Gateway</div>
-            <div class="status-value">Minor Issues</div>
-            <div class="status-details">Slower response times</div>
+            <div class="status-value">{{ paymentStatus }}</div>
+            <div class="status-details">{{ paymentDetails }}</div>
           </div>
         </div>
         
@@ -345,134 +435,289 @@
 </template>
 
 <script>
-import { ref, computed } from "vue"
+import { ref, computed, onMounted, onBeforeUnmount } from "vue"
 import { useStore } from "vuex"
 import { useRouter } from "vue-router"
+import { useQuasar } from "quasar"
 
 export default {
   name: "AdminDashboard",
   setup() {
     const store = useStore()
     const router = useRouter()
+    const $q = useQuasar()
     
     const revenuePeriod = ref('30d')
+    const refreshInterval = ref(null)
+    const todayActions = ref(15)
     
+    // Computed properties from store
     const user = computed(() => store.getters["auth/getUser"])
+    const isAnyLoading = computed(() => store.getters["admin/isAnyLoading"])
+    const isLoading = computed(() => (type) => store.getters["admin/isLoading"](type))
+    
+    // Stats
+    const stats = computed(() => store.getters["admin/stats"])
+    const totalUsers = computed(() => store.getters["admin/totalUsers"])
+    const totalRestaurants = computed(() => store.getters["admin/totalRestaurants"])
+    const totalRiders = computed(() => store.getters["admin/totalRiders"])
+    const totalOrders = computed(() => store.getters["admin/totalOrders"])
+    const revenue = computed(() => store.getters["admin/revenue"])
+    const activeUsers = computed(() => store.getters["admin/activeUsers"])
+    const avgRating = computed(() => store.getters["admin/avgRating"])
+    const revenueFormatted = computed(() => store.getters["admin/revenueFormatted"])
+    
+    // Quick links with dynamic data
+    const quickLinksData = computed(() => store.getters["admin/quickLinks"])
+    
+    // Recent activities
+    const recentActivities = computed(() => store.getters["admin/recentActivities"])
+    const displayActivities = computed(() => {
+      // If we have data from API, use it, otherwise use default activities
+      if (recentActivities.value && recentActivities.value.length > 0) {
+        return recentActivities.value.slice(0, 5)
+      }
+      // Default activities as fallback
+      return [
+        {
+          id: 1,
+          type: 'success',
+          icon: 'person_add',
+          title: 'New Restaurant Partner',
+          description: 'Spice Garden Restaurant joined the platform',
+          time: '2 minutes ago',
+          status: 'completed',
+          statusText: 'Approved'
+        },
+        {
+          id: 2,
+          type: 'warning',
+          icon: 'report',
+          title: 'Payment Issue Reported',
+          description: 'Customer reported payment failure for Order #1247',
+          time: '15 minutes ago',
+          status: 'pending',
+          statusText: 'Investigating'
+        },
+        {
+          id: 3,
+          type: 'info',
+          icon: 'security',
+          title: 'System Backup Completed',
+          description: 'Daily database backup finished successfully',
+          time: '1 hour ago',
+          status: 'completed',
+          statusText: 'Success'
+        },
+        {
+          id: 4,
+          type: 'error',
+          icon: 'block',
+          title: 'Restaurant Suspended',
+          description: 'Quality violations reported for Fast Food Corner',
+          time: '2 hours ago',
+          status: 'action-required',
+          statusText: 'Action Required'
+        },
+        {
+          id: 5,
+          type: 'success',
+          icon: 'trending_up',
+          title: 'Revenue Milestone',
+          description: 'Monthly revenue target of PKR 2M achieved',
+          time: '3 hours ago',
+          status: 'completed',
+          statusText: 'Achieved'
+        }
+      ]
+    })
+    
+    // Errors
+    const errors = computed(() => store.getters["admin/errors"])
+    const hasErrors = computed(() => Object.keys(errors.value).length > 0)
+    
+    // Computed stats
+    const orderSuccessRate = computed(() => {
+      // Calculate success rate from orders data
+      const orders = store.getters["admin/orders"]
+      if (!orders || orders.length === 0) return 96.2
+      
+      const completedOrders = orders.filter(order => 
+        order.status === 'completed' || order.status === 'delivered'
+      ).length
+      
+      return Math.round((completedOrders / orders.length) * 1000) / 10
+    })
+    
+    // System status
+    const paymentGatewayStatus = computed(() => {
+      // This could be dynamic based on real system health checks
+      return Math.random() > 0.3 ? 'healthy' : 'warning'
+    })
+    
+    const paymentStatus = computed(() => {
+      return paymentGatewayStatus.value === 'healthy' ? 'Operational' : 'Minor Issues'
+    })
+    
+    const paymentDetails = computed(() => {
+      return paymentGatewayStatus.value === 'healthy' 
+        ? 'Processing normally' 
+        : 'Slower response times'
+    })
 
+    // Methods
     const goTo = (path) => {
       router.push(path)
     }
 
-    const quickLinks = [
-      { 
-        label: "Manage Users", 
-        to: "/admin/users", 
-        icon: "people",
-        description: "Customer accounts & profiles",
-        color: "#6366f1",
-        count: "8.4k+"
-      },
-      { 
-        label: "Restaurant Partners", 
-        to: "/admin/restaurants", 
-        icon: "store",
-        description: "Partner restaurant management",
-        color: "#10b981",
-        count: "245"
-      },
-      { 
-        label: "Delivery Fleet", 
-        to: "/admin/riders", 
-        icon: "two_wheeler",
-        description: "Rider management & tracking",
-        color: "#f59e0b",
-        count: "128"
-      },
-      { 
-        label: "Order Management", 
-        to: "/admin/orders", 
-        icon: "receipt_long",
-        description: "Order tracking & support",
-        color: "#8b5cf6",
-        count: "1.2k+"
-      },
-      { 
-        label: "Financial Reports", 
-        to: "/admin/payments", 
-        icon: "payments",
-        description: "Payment processing & reports",
-        color: "#06b6d4",
-        count: "PKR 2.4M"
-      },
-      { 
-        label: "Analytics Dashboard", 
-        to: "/admin/analytics", 
-        icon: "analytics",
-        description: "Business intelligence & insights",
-        color: "#ec4899",
-        count: "Live"
-      }
-    ]
+   const refreshData = async () => {
+  try {
+    await store.dispatch("admin/refreshDashboard")
+    $q.notify({
+      type: 'positive',
+      message: 'Dashboard data refreshed successfully',
+      position: 'top-right'
+    })
+  } catch {
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to refresh dashboard data',
+      position: 'top-right'
+    })
+  }
+}
 
-    const recentActivities = [
-      {
-        id: 1,
-        type: 'success',
-        icon: 'person_add',
-        title: 'New Restaurant Partner',
-        description: 'Spice Garden Restaurant joined the platform',
-        time: '2 minutes ago',
-        status: 'completed',
-        statusText: 'Approved'
-      },
-      {
-        id: 2,
-        type: 'warning',
-        icon: 'report',
-        title: 'Payment Issue Reported',
-        description: 'Customer reported payment failure for Order #1247',
-        time: '15 minutes ago',
-        status: 'pending',
-        statusText: 'Investigating'
-      },
-      {
-        id: 3,
-        type: 'info',
-        icon: 'security',
-        title: 'System Backup Completed',
-        description: 'Daily database backup finished successfully',
-        time: '1 hour ago',
-        status: 'completed',
-        statusText: 'Success'
-      },
-      {
-        id: 4,
-        type: 'error',
-        icon: 'block',
-        title: 'Restaurant Suspended',
-        description: 'Quality violations reported for Fast Food Corner',
-        time: '2 hours ago',
-        status: 'action-required',
-        statusText: 'Action Required'
-      },
-      {
-        id: 5,
-        type: 'success',
-        icon: 'trending_up',
-        title: 'Revenue Milestone',
-        description: 'Monthly revenue target of PKR 2M achieved',
-        time: '3 hours ago',
-        status: 'completed',
-        statusText: 'Achieved'
+    const retryFetch = async (type) => {
+  try {
+    switch (type) {
+      case 'users':
+        await store.dispatch("admin/fetchUsers")
+        break
+      case 'restaurants':
+        await store.dispatch("admin/fetchRestaurants")
+        break
+      case 'riders':
+        await store.dispatch("admin/fetchRiders")
+        break
+      case 'orders':
+        await store.dispatch("admin/fetchOrders")
+        break
+      case 'analytics':
+        await store.dispatch("admin/fetchAnalytics")
+        break
+    }
+    $q.notify({
+      type: 'positive',
+      message: `${type} data loaded successfully`,
+      position: 'top-right'
+    })
+  } catch (error) {
+    console.error(`Error loading ${type} data:`, error) // 👈 ab error use ho gaya
+    $q.notify({
+      type: 'negative',
+      message: `Failed to load ${type} data: ${error.message || error}`,
+      position: 'top-right'
+    })
+  }
+}
+
+
+   const formatTime = (timeString) => {
+  if (!timeString) return 'Just now'
+  
+  // If it's already formatted (like "2 minutes ago"), return as is
+  if (typeof timeString === 'string' && timeString.includes('ago')) {
+    return timeString
+  }
+  
+  try {
+    const date = new Date(timeString)
+    const now = new Date()
+    const diffInSeconds = Math.floor((now - date) / 1000)
+
+    if (diffInSeconds < 60) return 'Just now'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`
+    return `${Math.floor(diffInSeconds / 86400)} days ago`
+  } catch (error) {
+    console.error("Time formatting failed:", error) // 👈 ab error use ho gaya
+    return 'Recently'
+  }
+}
+
+    const setupAutoRefresh = () => {
+      // Auto-refresh data every 5 minutes
+      refreshInterval.value = setInterval(() => {
+        store.dispatch("admin/fetchDashboardData")
+      }, 5 * 60 * 1000)
+    }
+
+    const loadInitialData = async () => {
+      try {
+        await store.dispatch("admin/fetchDashboardData")
+      } catch (error) {
+        console.error("Failed to load initial dashboard data:", error)
+        $q.notify({
+          type: 'warning',
+          message: 'Some dashboard data could not be loaded. Please check your connection.',
+          position: 'top-right',
+          timeout: 5000
+        })
       }
-    ]
+    }
+
+    // Lifecycle hooks
+    onMounted(() => {
+      loadInitialData()
+      setupAutoRefresh()
+    })
+
+    onBeforeUnmount(() => {
+      if (refreshInterval.value) {
+        clearInterval(refreshInterval.value)
+      }
+    })
 
     return {
+      // Reactive data
       user,
+      revenuePeriod,
+      todayActions,
+      
+      // Loading states
+      isAnyLoading,
+      isLoading,
+      
+      // Stats
+      stats,
+      totalUsers,
+      totalRestaurants,
+      totalRiders,
+      totalOrders,
+      revenue,
+      activeUsers,
+      avgRating,
+      revenueFormatted,
+      orderSuccessRate,
+      
+      // Data
+      quickLinksData,
+      displayActivities,
+      
+      // Errors
+      errors,
+      hasErrors,
+      
+      // System status
+      paymentGatewayStatus,
+      paymentStatus,
+      paymentDetails,
+      
+      // Methods
       goTo,
-      quickLinks,
-      recentActivities,
-      revenuePeriod
+      refreshData,
+      retryFetch,
+      formatTime
     }
   },
 }

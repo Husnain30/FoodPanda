@@ -17,6 +17,7 @@
       row-key="id"
       flat
       bordered
+      :loading="loading"
       v-model:pagination="pagination"
     >
       <template v-slot:body-cell-status="props">
@@ -41,7 +42,7 @@
       </template>
     </q-table>
 
-    <!-- Add/Edit Payment Dialog -->
+    <!-- Add Payment Dialog -->
     <q-dialog v-model="addDialog">
       <q-card style="min-width: 400px">
         <q-card-section>
@@ -76,15 +77,29 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { useStore } from "vuex";
 
 export default {
   name: "PaymentsManager",
   setup() {
-    const payments = ref([
-      { id: 1, orderId: "ORD001", customer: "Ali", amount: 1200, status: "Paid", date: "2025-08-01" },
-      { id: 2, orderId: "ORD002", customer: "Ahmed", amount: 800, status: "Unpaid", date: "2025-08-02" },
-    ]);
+    const store = useStore();
+    const loading = ref(false);
+
+    // Get payments from analytics API
+    const payments = computed(() => {
+      const analytics = store.getters["admin/analytics"];
+      const rawPayments = analytics?.payments || [];
+      
+      return rawPayments.map((p) => ({
+        id: p.id,
+        orderId: p.order_id || "N/A",
+        customer: p.customer_name || "Unknown",
+        amount: p.amount,
+        status: p.status === "paid" ? "Paid" : "Unpaid",
+        date: new Date(p.created_at).toLocaleDateString(),
+      }));
+    });
 
     const columns = [
       { name: "orderId", label: "Order ID", field: "orderId", align: "left" },
@@ -110,14 +125,24 @@ export default {
       addDialog.value = true;
     };
 
-    const savePayment = () => {
+    const savePayment = async () => {
       if (newPayment.value.orderId && newPayment.value.customer && newPayment.value.amount && newPayment.value.date) {
-        payments.value.push({
-          id: payments.value.length + 1,
-          ...newPayment.value,
-        });
-        newPayment.value = { orderId: "", customer: "", amount: null, status: "Unpaid", date: "" };
-        addDialog.value = false;
+        try {
+          loading.value = true;
+          // API call would go here
+          console.log("Save Payment:", newPayment.value);
+          
+          // Reset form
+          newPayment.value = { orderId: "", customer: "", amount: null, status: "Unpaid", date: "" };
+          addDialog.value = false;
+          
+          // Refresh data
+          await fetchAnalytics();
+        } catch (error) {
+          console.error("Error saving payment:", error);
+        } finally {
+          loading.value = false;
+        }
       }
     };
 
@@ -125,15 +150,47 @@ export default {
       alert(`Edit Payment for Order: ${payment.orderId}`);
     };
 
-    const deletePayment = (id) => {
-      payments.value = payments.value.filter((p) => p.id !== id);
+    const deletePayment = async (id) => {
+      try {
+        loading.value = true;
+        // API call would go here
+        console.log(`Delete Payment with ID: ${id}`);
+        
+        // Refresh data after delete
+        await fetchAnalytics();
+      } catch (error) {
+        console.error("Error deleting payment:", error);
+      } finally {
+        loading.value = false;
+      }
     };
 
+    const fetchAnalytics = async () => {
+      loading.value = true;
+      try {
+        await store.dispatch("admin/fetchAnalytics");
+      } catch (error) {
+        console.error("Error fetching analytics:", error);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    onMounted(() => {
+      fetchAnalytics();
+    });
+
     return {
-      payments, columns, pagination,
-      addDialog, newPayment,
-      openAddDialog, savePayment,
-      editPayment, deletePayment
+      payments, 
+      columns, 
+      pagination,
+      addDialog, 
+      newPayment,
+      loading,
+      openAddDialog, 
+      savePayment,
+      editPayment, 
+      deletePayment
     };
   },
 };

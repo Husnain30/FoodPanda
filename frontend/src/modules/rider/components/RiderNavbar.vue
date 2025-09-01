@@ -15,10 +15,10 @@
         indicator-color="white"
         class="navbar-tabs"
       >
-        <q-route-tab to="/rider" name="dashboard" label="Dashboard" />
-        <q-route-tab to="/rider/order-assignment" name="orders" label="Orders" />
-        <q-route-tab to="/rider/navigation" name="navigation" label="Navigation" />
-        <q-route-tab to="/rider/earnings" name="earnings" label="Earnings" />
+        <q-route-tab to="/riders" name="dashboard" label="Dashboard" />
+        <q-route-tab to="/riders/orders" name="orders" label="Orders" />
+        <q-route-tab to="/riders/navigation" name="navigation" label="Navigation" />
+        <q-route-tab to="/riders/earnings" name="earnings" label="Earnings" />
       </q-tabs>
 
       <q-space />
@@ -44,7 +44,7 @@ import RiderStatusToggle from './RiderStatusToggle.vue'
 const tab = ref('/rider')
 
 function handleLogout() {
-  store.dispatch("rider/logout");
+  store.dispatch("riders/logout");
   router.push("/auth/login"); // redirect after logout
 }
 </script>

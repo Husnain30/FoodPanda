@@ -7,6 +7,13 @@
       </div>
       <div class="col-auto">
         <q-btn color="primary" label="Add Rider" @click="openAddRiderDialog" />
+        <q-btn
+          color="secondary"
+          icon="refresh"
+          label="Refresh"
+          class="q-ml-sm"
+          @click="refreshRiders"
+        />
       </div>
     </div>
 
@@ -17,8 +24,17 @@
       row-key="id"
       flat
       bordered
+      :loading="loading"
       v-model:pagination="pagination"
     >
+      <template v-slot:body-cell-status="props">
+        <q-td>
+          <q-badge :color="props.row.status === 'active' ? 'green' : 'red'">
+            {{ props.row.status }}
+          </q-badge>
+        </q-td>
+      </template>
+
       <template v-slot:body-cell-actions="props">
         <q-td align="center">
           <q-btn
@@ -52,6 +68,12 @@
           <q-input v-model="newRider.name" label="Name" outlined />
           <q-input v-model="newRider.email" label="Email" outlined />
           <q-input v-model="newRider.phone" label="Phone" outlined />
+          <q-select
+            v-model="newRider.status"
+            :options="['active', 'inactive']"
+            label="Status"
+            outlined
+          />
         </q-card-section>
 
         <q-card-actions align="right">
@@ -64,51 +86,87 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { useStore } from "vuex";
 
 export default {
   name: "RidersPage",
   setup() {
-    const riders = ref([
-      { id: 1, name: "Ali Khan", email: "ali@example.com", phone: "0300-1234567" },
-      { id: 2, name: "Ahmed Raza", email: "ahmed@example.com", phone: "0301-9876543" },
-    ]);
+    const store = useStore();
+    const loading = ref(false);
+
+    // Get riders from store
+    const riders = computed(() => {
+      const rawRiders = store.getters["admin/riders"] || [];
+      return rawRiders.map((r) => ({
+        id: r.id,
+        name: r.name || "Unknown",
+        email: r.email || "N/A",
+        phone: r.phone || "N/A",
+        status: r.status || r.is_active ? 'active' : 'inactive',
+      }));
+    });
 
     const columns = [
       { name: "name", label: "Name", field: "name", align: "left" },
       { name: "email", label: "Email", field: "email", align: "left" },
       { name: "phone", label: "Phone", field: "phone", align: "left" },
+      { name: "status", label: "Status", field: "status", align: "center" },
       { name: "actions", label: "Actions", field: "actions", align: "center" },
     ];
 
     const pagination = ref({ page: 1, rowsPerPage: 5 });
 
     const addRiderDialog = ref(false);
-    const newRider = ref({ name: "", email: "", phone: "" });
+    const newRider = ref({
+      name: "",
+      email: "",
+      phone: "",
+      status: "active"
+    });
 
     const openAddRiderDialog = () => {
       addRiderDialog.value = true;
     };
 
-    const saveRider = () => {
+    const saveRider = async () => {
       if (newRider.value.name && newRider.value.email && newRider.value.phone) {
-        riders.value.push({
-          id: riders.value.length + 1,
-          ...newRider.value,
-        });
-        newRider.value = { name: "", email: "", phone: "" };
-        addRiderDialog.value = false;
+        try {
+          await store.dispatch("admin/createRider", newRider.value);
+          addRiderDialog.value = false;
+          newRider.value = { name: "", email: "", phone: "", status: "active" };
+        } catch (error) {
+          console.error("Error saving rider:", error);
+        }
       }
     };
 
     const editRider = (rider) => {
-      // abhi simple alert, baad me edit dialog bana sakte ho
       alert(`Edit Rider: ${rider.name}`);
     };
 
-    const deleteRider = (id) => {
-      riders.value = riders.value.filter((r) => r.id !== id);
+    const deleteRider = async (id) => {
+      try {
+        await store.dispatch("admin/deleteRider", id);
+      } catch (error) {
+        console.error("Error deleting rider:", error);
+      }
     };
+
+    const refreshRiders = async () => {
+      loading.value = true;
+      try {
+        await store.dispatch("admin/fetchRiders");
+      } catch (error) {
+        console.error("Error refreshing riders:", error);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    onMounted(() => {
+      refreshRiders();
+    });
 
     return {
       riders,
@@ -116,10 +174,12 @@ export default {
       pagination,
       addRiderDialog,
       newRider,
+      loading,
       openAddRiderDialog,
       saveRider,
       editRider,
       deleteRider,
+      refreshRiders,
     };
   },
 };

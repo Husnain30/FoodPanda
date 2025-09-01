@@ -132,11 +132,11 @@ export default [
       name: 'RestaurantDashboard',
       component: () => import('../modules/restaurant/pages/RestaurantDashboard.vue')
     },
-    {
-      path: 'menu',
-      name: 'MenuManager',
-      component: () => import('../modules/restaurant/pages/MenuManager.vue')
-    },
+   {
+  path: 'menu',  // Remove the leading slash and /restaurant part
+  name: 'MenuManager',
+  component: () => import('../modules/restaurant/pages/MenuManager.vue')
+},
     {
       path: 'orders',
       name: 'OrdersPage',
@@ -162,11 +162,11 @@ export default [
 
   // Rider Routes
     {
-    path: '/rider',
+    path: '/riders',
     component: RiderLayout,
     children: [
       { path: '', component: () => import('../modules/rider/pages/RiderDashboard.vue') },
-      { path: 'order-assignment', component: () => import('../modules/rider/pages/OrderAssignment.vue') },
+      { path: 'orders', component: () => import('../modules/rider/pages/OrderAssignment.vue') },
       { path: 'navigation', component: () => import('../modules/rider/pages/NavigationPage.vue') },
       { path: 'earnings', component: () => import('../modules/rider/pages/EarningsPage.vue') },
     ],

@@ -1,85 +1,119 @@
 <template>
-  <q-page padding class="track-page">
-    <h1 class="page-title">Track Your Order</h1>
+  <q-page class="q-pa-md">
+    <!-- Loading -->
+    <div v-if="loading" class="text-center q-mt-md">
+      <q-spinner color="primary" size="40px" />
+      <p>Loading order details...</p>
+    </div>
 
-    <!-- Timeline -->
-    <q-card class="shadow-card q-pa-lg">
-      <q-timeline color="primary">
-        <q-timeline-entry title="Order Placed" subtitle="10:00 AM" icon="shopping_cart" />
-        <q-timeline-entry title="Preparing Food" subtitle="10:15 AM" icon="restaurant" />
-        <q-timeline-entry title="Out for Delivery" subtitle="10:45 AM" icon="delivery_dining" />
-        <q-timeline-entry title="Delivered" subtitle="11:15 AM" icon="done_all" />
-      </q-timeline>
+    <!-- Error -->
+    <div v-else-if="error" class="text-negative text-center q-mt-md">
+      {{ error }}
+    </div>
 
-      <!-- Button -->
-      <div class="q-mt-lg text-center">
-        <q-btn 
-          unelevated
-          class="track-btn"
-          icon="map"
-          label="Track on Map"
-        />
-      </div>
-    </q-card>
+    <!-- Order Details -->
+    <div v-else-if="order" class="q-mt-md">
+      <q-card class="q-pa-md shadow-3">
+        <q-card-section>
+          <div class="text-h6">Order #{{ order.id }}</div>
+          <div><strong>Status:</strong> {{ order.status }}</div>
+          <div><strong>Total:</strong> {{ order.total }} PKR</div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section>
+          <div class="text-subtitle1 q-mb-sm">Items</div>
+          <q-list bordered separator>
+            <q-item v-for="item in order.items" :key="item.id">
+              <q-item-section>
+                <div>{{ item.name }}</div>
+                <small>Qty: {{ item.quantity }}</small>
+              </q-item-section>
+              <q-item-section side>
+                <div>{{ item.price }} PKR</div>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-card-section>
+      </q-card>
+
+      <!-- Stepper for status tracking -->
+      <q-stepper
+        v-model="step"
+        vertical
+        animated
+        flat
+        color="primary"
+        class="q-mt-lg"
+      >
+        <q-step name="1" title="Accepted" icon="check_circle" :done="step > 1" />
+        <q-step name="2" title="Preparing" icon="restaurant" :done="step > 2" />
+        <q-step name="3" title="On the Way" icon="delivery_dining" :done="step > 3" />
+        <q-step name="4" title="Delivered" icon="done_all" />
+      </q-stepper>
+    </div>
   </q-page>
 </template>
 
-<style scoped>
-.track-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+<script>
+import { mapGetters, mapActions } from "vuex";
 
-/* Gradient Title */
-.page-title {
-  font-size: 30px;
-  font-weight: 700;
-  margin-bottom: 25px;
-  text-align: center;
-  color: #2d3436;
-}
+export default {
+  name: "OrderTracking",
+  data() {
+    return {
+      step: 1, // default step
+    };
+  },
+  computed: {
+    ...mapGetters("customer", [
+      "currentOrder",
+      "customerLoading",
+      "customerError",
+    ]),
+    order() {
+      return this.currentOrder;
+    },
+    loading() {
+      return this.customerLoading;
+    },
+    error() {
+      return this.customerError;
+    },
+  },
+  watch: {
+    order: {
+      handler(order) {
+        if (!order) return;
+        // Map backend status to stepper value
+        switch (order.status) {
+          case "accepted":
+            this.step = 1;
+            break;
+          case "preparing":
+            this.step = 2;
+            break;
+          case "on_the_way":
+            this.step = 3;
+            break;
+          case "delivered":
+            this.step = 4;
+            break;
+          default:
+            this.step = 1;
+        }
+      },
+      immediate: true,
+    },
+  },
+  created() {
+    const orderId = this.$route.params.id;
+    this.trackOrder(orderId);
+  },
+  methods: {
+    ...mapActions("customer", ["trackOrder"]),
+  },
+};
+</script>
 
-/* Card Styling */
-.shadow-card {
-  border-radius: 18px;
-  width: 100%;
-  max-width: 600px;
-  background: #fff;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-  transition: all 0.3s ease;
-}
-.shadow-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.18);
-}
-
-/* Timeline spacing */
-.q-timeline {
-  padding: 10px 0;
-}
-.q-timeline-entry__title {
-  font-weight: 600;
-  color: #333;
-}
-.q-timeline-entry__subtitle {
-  color: #666;
-  font-size: 14px;
-}
-
-/* Gradient Button */
-.track-btn {
-  background: linear-gradient(135deg, #6a11cb, #2575fc);
-  color: #fff;
-  font-weight: 600;
-  font-size: 15px;
-  padding: 12px 24px;
-  border-radius: 12px;
-  box-shadow: 0 6px 14px rgba(37, 117, 252, 0.3);
-  transition: all 0.3s ease;
-}
-.track-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 18px rgba(106, 17, 203, 0.35);
-}
-</style>

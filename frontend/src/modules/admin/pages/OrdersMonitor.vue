@@ -69,7 +69,6 @@
     </q-dialog>
   </q-page>
 </template>
-
 <script>
 import { computed, ref, onMounted } from "vue"
 import { useStore } from "vuex"
@@ -82,7 +81,19 @@ export default {
     const showDialog = ref(false)
     const selectedOrder = ref({})
 
-    const orders = computed(() => store.getters["admin/orders"] || [])
+    // backend data ko transform karke table ke liye tayar karna
+    const orders = computed(() => {
+      const rawOrders = store.getters["admin/orders"] || []
+      return rawOrders.map(order => ({
+        id: order.id,
+        customer: order.customer?.name || "Unknown",
+        restaurant: order.restaurant?.name || "Unknown",
+        rider: order.rider?.name || null, // agar rider ka object backend me aata hai
+        status: order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : "Pending",
+        amount: order.total_price,
+        createdAt: new Date(order.created_at).toLocaleString(), // readable format
+      }))
+    })
 
     const columns = [
       { name: "id", label: "Order ID", field: "id", align: "left" },
@@ -102,12 +113,12 @@ export default {
     }
 
     const statusColor = (status) => {
-      switch (status) {
-        case "Pending": return "orange"
-        case "Accepted": return "blue"
-        case "Picked": return "purple"
-        case "Delivered": return "green"
-        case "Cancelled": return "red"
+      switch (status.toLowerCase()) {
+        case "pending": return "orange"
+        case "accepted": return "blue"
+        case "picked": return "purple"
+        case "delivered": return "green"
+        case "cancelled": return "red"
         default: return "grey"
       }
     }

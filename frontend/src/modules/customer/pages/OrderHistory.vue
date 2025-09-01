@@ -1,89 +1,102 @@
 <template>
-  <q-page padding class="order-history-page">
-    <h1 class="page-title"> Order History</h1>
+  <q-page class="q-pa-md orders-page">
 
-    <q-card v-for="n in 3" :key="n" class="q-mb-md shadow-card q-pa-md order-card">
-      <div class="order-info">
-        <span class="order-id"><strong>Order #{{ 1000+n }}</strong></span>
-        <q-badge color="white" text-color="primary" class="status-badge">
-          Delivered
-        </q-badge>
-      </div>
+    <!-- Page Header -->
+    <div class="page-header q-mb-md">
+      <div class="text-h5">Your Orders</div>
+    </div>
 
-      <div class="order-details">
-        <p><strong>Total:</strong> ${{ (25*n).toFixed(2) }}</p>
-        <p><strong>Date:</strong> {{ new Date().toLocaleDateString() }}</p>
-      </div>
+    <!-- Orders List -->
+    <div v-if="loading" class="row justify-center q-mt-lg">
+      <q-spinner-dots size="40px" color="primary" />
+    </div>
 
-      <q-btn flat rounded class="reorder-btn" label="Reorder" icon="refresh" />
-    </q-card>
+    <div v-else>
+      <q-card
+        v-for="order in orders"
+        :key="order.id"
+        class="q-mb-md shadow-2"
+      >
+        <q-card-section>
+          <div class="text-h6">Order #{{ order.id }}</div>
+          <div class="text-caption text-grey">
+            Status: 
+            <q-badge :color="statusColor(order.status)" class="q-ml-xs">
+              {{ order.status }}
+            </q-badge>
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <!-- Order Items -->
+        <q-list dense>
+          <q-item v-for="item in order.items" :key="item.id">
+            <q-item-section>
+              <q-item-label>{{ item.name }}</q-item-label>
+              <q-item-label caption>{{ item.quantity }} × {{ item.price }} PKR</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <div class="text-weight-bold">{{ item.quantity * item.price }} PKR</div>
+            </q-item-section>
+          </q-item>
+        </q-list>
+
+        <q-separator />
+
+        <!-- Footer -->
+        <q-card-actions align="right">
+          <div class="text-subtitle1 text-primary">
+            Total: {{ calculateTotal(order.items) }} PKR
+          </div>
+        </q-card-actions>
+      </q-card>
+    </div>
+
   </q-page>
 </template>
 
+<script>
+import { mapState, mapActions } from "vuex";
+
+export default {
+  name: "OrdersPage",
+
+  computed: {
+    ...mapState("customer", ["orders", "loading"]),
+  },
+
+  methods: {
+    ...mapActions("customer", ["fetchOrders"]),
+
+    calculateTotal(items) {
+      return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    },
+
+    statusColor(status) {
+      switch (status) {
+        case "pending":
+          return "orange";
+        case "completed":
+          return "green";
+        case "cancelled":
+          return "red";
+        default:
+          return "grey";
+      }
+    },
+  },
+
+  mounted() {
+    this.fetchOrders();
+  },
+};
+</script>
+
 <style scoped>
-/* Page Title */
-.page-title {
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 30px;
-  color: black;
-  text-align: center;
-  
-}
-
-/* Order Cards */
-.order-card {
-  border-radius: 18px;
-
-  color: black;
-  transition: all 0.3s ease;
-}
-.order-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 18px rgba(106, 17, 203, 0.4),
-              0 10px 22px rgba(37, 117, 252, 0.4);
-}
-
-/* Order Info */
-.order-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-.order-id {
-  font-size: 18px;
-}
-.status-badge {
-  border-radius: 10px;
-  font-weight: 600;
-  padding: 6px 10px;
-  background: black;
-  color: #2575fc !important;
-}
-
-/* Details */
-.order-details {
-  font-size: 15px;
-  margin-bottom: 12px;
-  color: black;
-}
-.order-details p {
-  margin: 2px 0;
-}
-
-/* Reorder Button */
-.reorder-btn {
-  background: #fff !important;
-  color: #2575fc !important;
-  font-weight: 600;
-  text-transform: none;
-  border-radius: 10px;
-  padding: 8px 16px;
-  transition: all 0.3s ease;
-}
-.reorder-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(255,255,255,0.3);
+.orders-page {
+  max-width: 800px;
+  margin: 0 auto;
 }
 </style>
+
