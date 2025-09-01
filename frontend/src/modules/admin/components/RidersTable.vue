@@ -28,45 +28,53 @@
         </q-td>
       </template>
 
-      <template v-slot:body-cell-actions="props">
-        <q-td align="center">
-          <q-btn
-            flat dense round color="primary" icon="edit"
-            @click="editRider(props.row)"
-          />
-          <q-btn
-            flat dense round color="negative" icon="delete"
-            @click="deleteRider(props.row.id)"
-          />
-        </q-td>
-      </template>
+    <template v-slot:body-cell-actions="props">
+  <q-td align="center">
+    <q-btn flat dense round color="primary" icon="edit" @click="editRider(props.row)" />
+    <q-btn flat dense round color="negative" icon="delete" @click="deleteRider(props.row.id)" />
+    
+    <!-- Verify/Reject buttons -->
+    <q-btn 
+      v-if="props.row.status !== 'verified'"
+      flat dense round color="positive" icon="verified" 
+      @click="verifyRider(props.row.id)" 
+    />
+    <q-btn 
+      v-if="props.row.status !== 'rejected'"
+      flat dense round color="warning" icon="block" 
+      @click="rejectRider(props.row.id)" 
+    />
+  </q-td>
+</template>
     </q-table>
 
-    <!-- Add Rider Dialog -->
-    <q-dialog v-model="addRiderDialog">
-      <q-card style="min-width: 400px">
-        <q-card-section>
-          <div class="text-h6">Add Rider</div>
-        </q-card-section>
+   <!-- Edit Rider Dialog -->
+<q-dialog v-model="editRiderDialog">
+  <q-card style="min-width: 400px">
+    <q-card-section>
+      <div class="text-h6">Edit Rider</div>
+    </q-card-section>
 
-        <q-card-section>
-          <q-input v-model="newRider.name" label="Name" outlined />
-          <q-input v-model="newRider.email" label="Email" outlined />
-          <q-input v-model="newRider.phone" label="Phone" outlined />
-          <q-select
-            v-model="newRider.status"
-            :options="['active', 'inactive']"
-            label="Status"
-            outlined
-          />
-        </q-card-section>
+    <q-card-section>
+      <q-input v-model="editingRider.name" label="Name" outlined />
+      <q-input v-model="editingRider.email" label="Email" outlined />
+      <q-input v-model="editingRider.phone" label="Phone" outlined />
+      <q-select
+        v-model="editingRider.status"
+        :options="['active', 'inactive', 'verified', 'rejected']"
+        label="Status"
+        outlined
+      />
+    </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" v-close-popup />
-          <q-btn color="primary" label="Save" @click="saveRider" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <q-card-actions align="right">
+      <q-btn flat label="Cancel" v-close-popup />
+      <q-btn color="primary" label="Update" @click="updateRider" />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
+
+      
   </div>
 </template>
 
@@ -74,11 +82,20 @@
 import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 
+
 export default {
   name: "RiderTable",
   setup() {
     const store = useStore();
     const loading = ref(false);
+    const editRiderDialog = ref(false);
+const editingRider = ref({
+  id: null,
+  name: "",
+  email: "",
+  phone: "",
+  status: "active"
+});
 
     // Get riders from store
     const riders = computed(() => {
@@ -113,6 +130,64 @@ export default {
     const openAddRiderDialog = () => {
       addRiderDialog.value = true;
     };
+    const editRider = (rider) => {
+  editingRider.value = {
+    id: rider.id,
+    name: rider.name,
+    email: rider.email,
+    phone: rider.phone,
+    status: rider.status
+  };
+  editRiderDialog.value = true;
+};
+
+const updateRider = async () => {
+  if (editingRider.value.name && editingRider.value.email && editingRider.value.phone) {
+    try {
+      loading.value = true;
+      await store.dispatch("admin/updateRider", {
+        id: editingRider.value.id,
+        riderData: {
+          name: editingRider.value.name,
+          email: editingRider.value.email,
+          phone: editingRider.value.phone,
+          status: editingRider.value.status
+        }
+      });
+      
+      editRiderDialog.value = false;
+      await fetchRiders();
+    } catch (error) {
+      console.error("Error updating rider:", error);
+    } finally {
+      loading.value = false;
+    }
+  }
+};
+
+const verifyRider = async (riderId) => {
+  try {
+    loading.value = true;
+    await store.dispatch("admin/verifyRider", riderId);
+    await fetchRiders();
+  } catch (error) {
+    console.error("Error verifying rider:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const rejectRider = async (riderId) => {
+  try {
+    loading.value = true;
+    await store.dispatch("admin/rejectRider", riderId);
+    await fetchRiders();
+  } catch (error) {
+    console.error("Error rejecting rider:", error);
+  } finally {
+    loading.value = false;
+  }
+};
 
     const saveRider = async () => {
       if (newRider.value.name && newRider.value.email && newRider.value.phone) {
@@ -135,9 +210,7 @@ export default {
       }
     };
 
-    const editRider = (rider) => {
-      alert(`Edit Rider: ${rider.name}`);
-    };
+   
 
     const deleteRider = async (id) => {
       try {
@@ -176,7 +249,12 @@ export default {
       openAddRiderDialog,
       saveRider,
       editRider,
-      deleteRider
+      deleteRider,
+      editRiderDialog,
+  editingRider,
+  updateRider,
+  verifyRider,
+  rejectRider
     };
   },
 };

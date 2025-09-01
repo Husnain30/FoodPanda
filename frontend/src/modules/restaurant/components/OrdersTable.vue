@@ -1,7 +1,14 @@
-<!-- src/modules/restaurant/components/OrdersTable.vue -->
+<!-- REPLACE your OrdersTable.vue template with this: -->
+
 <template>
   <div class="orders-table">
-    <table>
+    <!-- Empty State -->
+    <div v-if="orders.length === 0" class="empty-state">
+      <p>No orders found</p>
+    </div>
+    
+    <!-- Orders Table -->
+    <table v-else>
       <thead>
         <tr>
           <th>🆔 Order ID</th>
@@ -16,38 +23,40 @@
       <tbody>
         <tr v-for="order in orders" :key="order.id">
           <td>#{{ order.id }}</td>
-          <td>{{ order.customer }}</td>
+          <td>{{ getCustomerName(order) }}</td>
           <td>
             <ul>
-              <li v-for="(item, index) in order.items" :key="index">{{ item }}</li>
+              <li v-for="(item, index) in getOrderItems(order)" :key="index">
+                {{ item }}
+              </li>
             </ul>
           </td>
-          <td>Rs. {{ order.amount }}</td>
-          <td>{{ order.time }}</td>
+          <td>Rs. {{ getOrderAmount(order) }}</td>
+          <td>{{ getOrderTime(order) }}</td>
           <td>
-            <span :class="['status-badge', order.status.toLowerCase()]">
-              {{ order.status }}
+            <span :class="['status-badge', getOrderStatus(order).toLowerCase()]">
+              {{ getOrderStatus(order) }}
             </span>
           </td>
           <td>
             <button 
-              class="btn accept" 
-              @click="$emit('update-status', order.id, 'Accepted')"
-              :disabled="order.status !== 'Pending'"
+              class="btn accept"
+              @click="handleStatusUpdate(order.id, 'Accepted')"
+              :disabled="!canAccept(order)"
             >
               ✅ Accept
             </button>
             <button 
-              class="btn reject" 
-              @click="$emit('update-status', order.id, 'Rejected')"
-              :disabled="order.status !== 'Pending'"
+              class="btn reject"
+              @click="handleStatusUpdate(order.id, 'Rejected')"
+              :disabled="!canReject(order)"
             >
               ❌ Reject
             </button>
             <button 
-              class="btn deliver" 
-              @click="$emit('update-status', order.id, 'Delivered')"
-              :disabled="order.status !== 'Accepted'"
+              class="btn deliver"
+              @click="handleStatusUpdate(order.id, 'Delivered')"
+              :disabled="!canDeliver(order)"
             >
               🚚 Delivered
             </button>
@@ -59,6 +68,8 @@
 </template>
 
 <script>
+
+
 export default {
   name: "OrdersTable",
   props: {
@@ -67,8 +78,94 @@ export default {
       required: true,
     },
   },
-};
+  emits: ['update-status'],
+  setup(props, { emit }) {
+    
+    // Helper methods to handle different data structures
+    const getCustomerName = (order) => {
+      return order.customer_name || 
+             order.customer?.name || 
+             order.customer || 
+             order.user?.name || 
+             'Unknown Customer'
+    }
+
+    const getOrderItems = (order) => {
+      // Handle different possible structures
+      if (order.items && Array.isArray(order.items)) {
+        return order.items.map(item => 
+          typeof item === 'string' ? item : 
+          item.name || 
+          `${item.menu_item?.name || 'Item'} x${item.quantity || 1}`
+        )
+      }
+      
+      if (order.order_items && Array.isArray(order.order_items)) {
+        return order.order_items.map(item => 
+          `${item.menu_item?.name || item.name || 'Item'} x${item.quantity || 1}`
+        )
+      }
+      
+      // Fallback
+      return [order.item_names || 'Order items']
+    }
+
+    const getOrderAmount = (order) => {
+      return order.total_amount || order.amount || order.total || 0
+    }
+
+    const getOrderTime = (order) => {
+      if (order.created_at) {
+        return new Date(order.created_at).toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      }
+      return order.time || order.order_time || 'N/A'
+    }
+
+    const getOrderStatus = (order) => {
+      return order.status || 'Pending'
+    }
+
+    const canAccept = (order) => {
+      const status = getOrderStatus(order).toLowerCase()
+      return status === 'pending' || status === 'new'
+    }
+
+    const canReject = (order) => {
+      const status = getOrderStatus(order).toLowerCase()
+      return status === 'pending' || status === 'new'
+    }
+
+    const canDeliver = (order) => {
+      const status = getOrderStatus(order).toLowerCase()
+      return status === 'accepted' || status === 'preparing'
+    }
+
+    const handleStatusUpdate = (orderId, newStatus) => {
+      console.log('OrdersTable: Emitting status update:', { orderId, newStatus })
+      emit('update-status', orderId, newStatus)
+    }
+
+    return {
+      // Helper methods
+      getCustomerName,
+      getOrderItems,
+      getOrderAmount,
+      getOrderTime,
+      getOrderStatus,
+      canAccept,
+      canReject,
+      canDeliver,
+      handleStatusUpdate
+    }
+  }
+}
 </script>
+
 
 <style scoped>
 .orders-table table {

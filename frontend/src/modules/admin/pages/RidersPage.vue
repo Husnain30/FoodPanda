@@ -27,61 +27,151 @@
       :loading="loading"
       v-model:pagination="pagination"
     >
-      <template v-slot:body-cell-status="props">
-        <q-td>
-          <q-badge :color="props.row.status === 'active' ? 'green' : 'red'">
-            {{ props.row.status }}
-          </q-badge>
-        </q-td>
-      </template>
+    <template v-slot:body-cell-status="props">
+  <q-td>
+    <q-badge :color="getStatusColor(props.row.status)">
+      {{ props.row.status }}
+    </q-badge>
+  </q-td>
+</template>
 
-      <template v-slot:body-cell-actions="props">
-        <q-td align="center">
-          <q-btn
-            flat
-            dense
-            round
-            color="primary"
-            icon="edit"
-            @click="editRider(props.row)"
-          />
-          <q-btn
-            flat
-            dense
-            round
-            color="negative"
-            icon="delete"
-            @click="deleteRider(props.row.id)"
-          />
-        </q-td>
-      </template>
+     <template v-slot:body-cell-actions="props">
+  <q-td align="center">
+    <!-- Existing buttons -->
+    <q-btn flat dense round color="primary" icon="edit" @click="editRider(props.row)" />
+    <q-btn flat dense round color="negative" icon="delete" @click="deleteRider(props.row.id)" />
+    
+    <!-- New verify/reject buttons -->
+    <q-btn 
+      v-if="props.row.status !== 'verified'"
+      flat dense round color="positive" icon="verified" 
+      @click="verifyRider(props.row.id)" 
+    />
+    <q-btn 
+      v-if="props.row.status !== 'rejected'"
+      flat dense round color="warning" icon="block" 
+      @click="rejectRider(props.row.id)" 
+    />
+  </q-td>
+</template>
     </q-table>
 
     <!-- Add Rider Dialog -->
     <q-dialog v-model="addRiderDialog">
-      <q-card style="min-width: 400px">
-        <q-card-section>
-          <div class="text-h6">Add Rider</div>
-        </q-card-section>
+  <q-card style="min-width: 400px">
+    <q-card-section>
+      <div class="text-h6">Add Rider</div>
+    </q-card-section>
 
-        <q-card-section>
-          <q-input v-model="newRider.name" label="Name" outlined />
-          <q-input v-model="newRider.email" label="Email" outlined />
-          <q-input v-model="newRider.phone" label="Phone" outlined />
-          <q-select
-            v-model="newRider.status"
-            :options="['active', 'inactive']"
-            label="Status"
-            outlined
+    <q-card-section>
+      <!-- Name -->
+      <q-input v-model="newRider.name" label="Name" outlined />
+
+      <!-- Email -->
+      <q-input v-model="newRider.email" label="Email" outlined />
+
+      <!-- Phone -->
+      <q-input v-model="newRider.phone" label="Phone" outlined />
+
+      <!-- Status -->
+      <q-select
+        v-model="newRider.status"
+        :options="['active', 'inactive']"
+        label="Status"
+        outlined
+      />
+
+      <!-- Role (fixed as rider) -->
+      <q-input
+        v-model="newRider.role"
+        label="Role"
+        outlined
+        disable
+      />
+
+      <!-- Password -->
+      <q-input
+        v-model="newRider.password"
+        :type="showPassword ? 'text' : 'password'"
+        label="Password"
+        outlined
+        lazy-rules
+        :rules="[val => val && val.length >= 6 || 'Password must be at least 6 characters']"
+      >
+        <template v-slot:append>
+          <q-icon
+            :name="showPassword ? 'visibility_off' : 'visibility'"
+            class="cursor-pointer"
+            @click="showPassword = !showPassword"
           />
-        </q-card-section>
+        </template>
+      </q-input>
+    </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" v-close-popup />
-          <q-btn color="primary" label="Save" @click="saveRider" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <q-card-actions align="right">
+      <q-btn flat label="Cancel" v-close-popup />
+      <q-btn color="primary" label="Save" @click="saveRider" />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
+<!-- Edit Rider Dialog -->
+<q-dialog v-model="editRiderDialog">
+  <q-card style="min-width: 400px">
+    <q-card-section>
+      <div class="text-h6">Edit Rider</div>
+    </q-card-section>
+
+    <q-card-section>
+      <!-- Name -->
+      <q-input v-model="editingRider.name" label="Name" outlined />
+
+      <!-- Email -->
+      <q-input v-model="editingRider.email" label="Email" outlined />
+
+      <!-- Phone -->
+      <q-input v-model="editingRider.phone" label="Phone" outlined />
+
+      <!-- Status -->
+      <q-select
+        v-model="editingRider.status"
+        :options="['active', 'inactive']"
+        label="Status"
+        outlined
+      />
+
+      <!-- Role (fixed as rider) -->
+      <q-input
+        v-model="editingRider.role"
+        label="Role"
+        outlined
+        disable
+      />
+
+      <!-- Password -->
+      <q-input
+        v-model="editingRider.password"
+        :type="showPassword ? 'text' : 'password'"
+        label="Password"
+        outlined
+        hint="Leave blank if you don’t want to change"
+      >
+        <template v-slot:append>
+          <q-icon
+            :name="showPassword ? 'visibility_off' : 'visibility'"
+            class="cursor-pointer"
+            @click="showPassword = !showPassword"
+          />
+        </template>
+      </q-input>
+    </q-card-section>
+
+    <q-card-actions align="right">
+      <q-btn flat label="Cancel" v-close-popup />
+      <q-btn color="primary" label="Update" @click="updateRider" />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
+
   </q-page>
 </template>
 
@@ -118,16 +208,65 @@ export default {
     const pagination = ref({ page: 1, rowsPerPage: 5 });
 
     const addRiderDialog = ref(false);
-    const newRider = ref({
-      name: "",
-      email: "",
-      phone: "",
-      status: "active"
-    });
+    const showPassword = ref(false);
+    const editRiderDialog = ref(false);
 
-    const openAddRiderDialog = () => {
-      addRiderDialog.value = true;
-    };
+const newRider = ref({
+  name: "",
+  email: "",
+  phone: "",
+  status: "active",
+  role: "rider",      // default role
+  password: ""        // required by API
+});
+const editingRider = ref({
+  id: null,
+  name: "",
+  email: "",
+  phone: "",
+  status: "active",
+  role: "rider",
+  password: "" // optional while editing
+});
+
+  
+
+  const openAddRiderDialog = () => {
+  newRider.value = {
+    name: "",
+    email: "",
+    phone: "",
+    status: "active",
+    role: "rider",
+    password: ""
+  };
+  addRiderDialog.value = true;
+};
+    const verifyRider = async (riderId) => {
+  try {
+    await store.dispatch("admin/verifyRider", riderId);
+  } catch (error) {
+    console.error("Error verifying rider:", error);
+  }
+};
+
+const rejectRider = async (riderId) => {
+  try {
+    await store.dispatch("admin/rejectRider", riderId);
+  } catch (error) {
+    console.error("Error rejecting rider:", error);
+  }
+};
+
+const getStatusColor = (status) => {
+  switch(status) {
+    case 'verified': return 'green';
+    case 'rejected': return 'red';
+    case 'active': return 'blue';
+    default: return 'grey';
+  }
+};
+
 
     const saveRider = async () => {
       if (newRider.value.name && newRider.value.email && newRider.value.phone) {
@@ -141,10 +280,41 @@ export default {
       }
     };
 
-    const editRider = (rider) => {
-      alert(`Edit Rider: ${rider.name}`);
+ const editRider = (rider) => {
+  editingRider.value = { ...rider, password: "" }; // reset password so it's optional
+  if (!editingRider.value.role) editingRider.value.role = "rider";
+  editRiderDialog.value = true;
+};
+
+const updateRider = async () => {
+  if (!editingRider.value.name || !editingRider.value.email) {
+    console.error("Name and email are required");
+    return;
+  }
+
+  try {
+    await store.dispatch("admin/updateRider", {
+      id: editingRider.value.id,
+      riderData: editingRider.value
+    });
+
+    editRiderDialog.value = false;
+    editingRider.value = {
+      id: null,
+      name: "",
+      email: "",
+      phone: "",
+      status: "active",
+      role: "rider",
+      password: ""
     };
 
+    // Refresh after update
+    await refreshRiders();
+  } catch (error) {
+    console.error("Error updating rider:", error);
+  }
+};
     const deleteRider = async (id) => {
       try {
         await store.dispatch("admin/deleteRider", id);
@@ -168,19 +338,27 @@ export default {
       refreshRiders();
     });
 
-    return {
-      riders,
-      columns,
-      pagination,
-      addRiderDialog,
-      newRider,
-      loading,
-      openAddRiderDialog,
-      saveRider,
-      editRider,
-      deleteRider,
-      refreshRiders,
-    };
+   return {
+  riders,
+  columns,
+  pagination,
+  addRiderDialog,
+  editRiderDialog,
+  newRider,
+  editingRider,
+  loading,
+  showPassword,
+  openAddRiderDialog,
+  saveRider,
+  editRider,
+  updateRider,
+  deleteRider,
+  refreshRiders,
+  verifyRider,
+  rejectRider,
+  getStatusColor,
+};
+
   },
 };
 </script>

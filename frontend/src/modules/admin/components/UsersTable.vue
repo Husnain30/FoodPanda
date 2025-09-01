@@ -88,39 +88,39 @@
         </q-inner-loading>
       </template>
       
-    <!-- No data slot -->
-<template v-slot:no-data>
-  <div class="full-width column flex-center q-pa-lg">
-    <q-icon 
-      :name="hasActiveFilters ? 'search_off' : 'people_outline'" 
-      size="3em" 
-      class="q-mb-md text-grey-5" 
-    />
-    <div class="text-h6 text-grey-6 q-mb-sm">
-      {{ hasActiveFilters ? 'No users match your filters' : 'No users found' }}
-    </div>
-    <div class="text-body2 text-grey-5 q-mb-lg">
-      {{ hasActiveFilters ? 'Try adjusting your search criteria' : 'Users will appear here when added to the system' }}
-    </div>
-    <div class="row q-gutter-sm">
-      <q-btn
-        v-if="hasActiveFilters"
-        flat
-        color="primary"
-        label="Clear Filters"
-        icon="filter_list_off"
-        @click="clearFilters"
-      />
-      <q-btn
-        outline
-        color="primary" 
-        label="Refresh Data"
-        icon="refresh"
-        @click="$emit('refresh')"
-      />
-    </div>
-  </div>
-</template>
+      <!-- No data slot -->
+      <template v-slot:no-data>
+        <div class="full-width column flex-center q-pa-lg">
+          <q-icon 
+            :name="hasActiveFilters ? 'search_off' : 'people_outline'" 
+            size="3em" 
+            class="q-mb-md text-grey-5" 
+          />
+          <div class="text-h6 text-grey-6 q-mb-sm">
+            {{ hasActiveFilters ? 'No users match your filters' : 'No users found' }}
+          </div>
+          <div class="text-body2 text-grey-5 q-mb-lg">
+            {{ hasActiveFilters ? 'Try adjusting your search criteria' : 'Users will appear here when added to the system' }}
+          </div>
+          <div class="row q-gutter-sm">
+            <q-btn
+              v-if="hasActiveFilters"
+              flat
+              color="primary"
+              label="Clear Filters"
+              icon="filter_list_off"
+              @click="clearFilters"
+            />
+            <q-btn
+              outline
+              color="primary" 
+              label="Refresh Data"
+              icon="refresh"
+              @click="$emit('refresh')"
+            />
+          </div>
+        </div>
+      </template>
 
       <!-- Custom column templates -->
       <template v-slot:body-cell-avatar="props">
@@ -265,11 +265,14 @@
       </template>
     </q-table>
   </div>
+  
 </template>
 
 <script>
 import { ref, computed, watch } from 'vue'
 import { useQuasar, date } from 'quasar'
+import { useStore } from 'vuex'
+
 
 export default {
   name: 'UsersTable',
@@ -283,9 +286,10 @@ export default {
       default: false
     }
   },
-  emits: ['refresh', 'user-updated'],
+  emits: ['refresh', 'user-updated', 'edit-user'],
   setup(props, { emit }) {
     const $q = useQuasar()
+    const store = useStore()
 
     // Reactive data
     const searchQuery = ref('')
@@ -460,9 +464,9 @@ export default {
       // Implement view user logic
     }
 
+    // Fixed editUser function
     const editUser = (user) => {
-      console.log('Edit user:', user)
-      // Implement edit user logic
+      emit('edit-user', user)
     }
 
     const toggleUserStatus = async (user) => {
@@ -470,15 +474,13 @@ export default {
       const action = newStatus === 'active' ? 'activate' : 'suspend'
 
       try {
-        const confirmed = await new Promise((resolve) => {
-          $q.dialog({
-            title: `${action.charAt(0).toUpperCase() + action.slice(1)} User`,
-            message: `Are you sure you want to ${action} "${user.name}"?`,
-            cancel: true,
-            persistent: true
-          }).onOk(() => resolve(true))
-            .onCancel(() => resolve(false))
-        })
+     const confirmed = await new Promise((resolve) => {
+  if (confirm(`Are you sure you want to delete "${user.name}"?`)) {
+    resolve(true)
+  } else {
+    resolve(false)
+  }
+})
 
         if (!confirmed) return
 
@@ -488,69 +490,27 @@ export default {
           [user.id]: true
         }
 
-        // Simulate API call - replace with actual API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // Update user status locally
-        user.status = newStatus
-
-        $q.notify({
-          type: 'negative',
-          message: `Failed to ${action} user`,
-          position: 'top-right'
+        // Call store action to update user status
+        await store.dispatch('admin/updateUser', {
+          id: user.id,
+          userData: { status: newStatus }
         })
-      } finally {
-        // Clear loading state
-        userActionLoading.value = {
-          ...userActionLoading.value,
-          [user.id]: false
-        }
-      }
-    }
-
-    const deleteUser = async (user) => {
-      try {
-        const confirmed = await new Promise((resolve) => {
-          $q.dialog({
-            title: 'Delete User',
-            message: `Are you sure you want to permanently delete "${user.name}"? This action cannot be undone.`,
-            cancel: true,
-            persistent: true,
-            color: 'negative',
-            ok: {
-              color: 'negative',
-              label: 'Delete'
-            }
-          }).onOk(() => resolve(true))
-            .onCancel(() => resolve(false))
-        })
-
-        if (!confirmed) return
-
-        // Set loading state
-        userActionLoading.value = {
-          ...userActionLoading.value,
-          [user.id]: true
-        }
-
-        // Simulate API call - replace with actual API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
         
         $q.notify({
           type: 'positive',
-          message: 'User deleted successfully',
+          message: `User ${action}d successfully`,
           position: 'top-right'
         })
 
         emit('user-updated')
 
-      } catch (error) {
-        console.error('Failed to delete user:', error)
-        $q.notify({
-          type: 'negative',
-          message: 'Failed to delete user',
-          position: 'top-right'
-        })
+      } catch {
+  $q.notify({
+    type: 'negative',
+    message: `Failed to ${action} user`,
+    position: 'top-right'
+  })
+
       } finally {
         // Clear loading state
         userActionLoading.value = {
@@ -559,6 +519,35 @@ export default {
         }
       }
     }
+
+   const deleteUser = async (user) => {
+  try {
+    // $q.dialog ki jagah native confirm use kar do
+    const confirmed = confirm(`Are you sure you want to permanently delete "${user.name}"? This action cannot be undone.`)
+    
+    if (!confirmed) return
+
+    userActionLoading.value = {
+      ...userActionLoading.value,
+      [user.id]: true
+    }
+
+    await store.dispatch('admin/deleteUser', user.id)
+    
+    // $q.notify ki jagah console ya alert use kar do temporarily
+    console.log('User deleted successfully')
+    
+    emit('user-updated')
+
+  } catch (error) {
+    console.error('Failed to delete user:', error.message)
+  } finally {
+    userActionLoading.value = {
+      ...userActionLoading.value,
+      [user.id]: false
+    }
+  }
+}
 
     // Watch for search query changes to reset pagination
     watch(searchQuery, () => {
@@ -637,4 +626,4 @@ export default {
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(2px);
 }
-</style> 
+</style>
