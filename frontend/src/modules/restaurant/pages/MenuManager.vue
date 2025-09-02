@@ -53,9 +53,9 @@
           />
           <q-card-section>
             <div class="text-h6">{{ dish.name }}</div>
-            <div class="text-subtitle2 text-grey">
-              {{ dish.category }} • ${{ dish.price }}
-            </div>
+           <div class="text-subtitle2 text-grey">
+  {{ dish.category }} • PKR {{ dish.price }}
+</div>
             <div class="text-body2 q-mt-sm">{{ dish.description }}</div>
           </q-card-section>
           <q-card-actions align="right">
@@ -141,28 +141,24 @@ export default {
     const error = computed(() => store.getters['restaurant/getMenuError'] || null)
 
     // Get restaurant ID from localStorage
-    const getRestaurantId = () => {
-      try {
-        const user = JSON.parse(localStorage.getItem('user') || '{}')
-        const restaurantId = user.restaurant_id || user.id
-        
-        if (!restaurantId) {
-          console.warn('No restaurant ID found in user data')
-          $q.notify({
-            color: 'warning',
-            message: 'Restaurant ID not found. Please login again.',
-            icon: 'warning'
-          })
-          return null
-        }
-        
-        console.log('Using restaurant ID:', restaurantId)
-        return restaurantId
-      } catch (error) {
-        console.error('Error parsing user data:', error)
-        return null
-      }
+   const getRestaurantId = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    // Pehle restaurant_id check karo, phir id
+    const restaurantId = user.restaurant?.id || user.restaurant_id || user.id
+    
+    if (!restaurantId) {
+      console.warn('No restaurant ID found in user data')
+      return null
     }
+    
+    return restaurantId
+  } catch (error) {
+    console.error('Error parsing user data:', error)
+    return null
+  }
+}
+
 
     // Load menu items
     const loadMenuItems = async () => {
@@ -200,51 +196,55 @@ export default {
     }
 
     // Save dish (add or update)
-    const saveDish = async (formData) => {
-      console.log('Saving dish...')
-      formLoading.value = true
-      
-      try {
-        if (selectedDish.value) {
-          // Update existing dish
-          console.log('Updating dish:', selectedDish.value.id)
-          await store.dispatch('restaurant/updateMenuItemWithImage', {
-            itemId: selectedDish.value.id,
-            formData
-          })
-          
-          $q.notify({
-            color: 'positive',
-            message: 'Dish updated successfully',
-            icon: 'check'
-          })
-        } else {
-          // Add new dish
-          console.log('Adding new dish')
-          await store.dispatch('restaurant/addMenuItemWithImage', formData)
-          
-          $q.notify({
-            color: 'positive',
-            message: 'Dish added successfully',
-            icon: 'check'
-          })
-        }
-        
-        closeForm()
-        // Reload menu items to show updated data
-        await loadMenuItems()
-        
-      } catch (error) {
-        console.error('Error saving dish:', error)
-        $q.notify({
-          color: 'negative',
-          message: error.message || 'Failed to save dish',
-          icon: 'error'
-        })
-      } finally {
-        formLoading.value = false
-      }
+   const saveDish = async (formData) => {
+  formLoading.value = true
+  
+  try {
+    const restaurantId = getRestaurantId()
+    if (!restaurantId) {
+      throw new Error('Restaurant ID not found')
     }
+    
+    // FormData mein restaurant_id add karo
+    formData.append('restaurant_id', restaurantId)
+    
+    if (selectedDish.value) {
+      // Update existing dish
+      await store.dispatch('restaurant/updateMenuItemWithImage', {
+        itemId: selectedDish.value.id,
+        formData
+      })
+      
+      $q.notify({
+        color: 'positive',
+        message: 'Dish updated successfully',
+        icon: 'check'
+      })
+    } else {
+      // Add new dish
+      await store.dispatch('restaurant/addMenuItemWithImage', formData)
+      
+      $q.notify({
+        color: 'positive',
+        message: 'Dish added successfully', 
+        icon: 'check'
+      })
+    }
+    
+    closeForm()
+    await loadMenuItems()
+    
+  } catch (error) {
+    console.error('Error saving dish:', error)
+    $q.notify({
+      color: 'negative',
+      message: error.message || 'Failed to save dish',
+      icon: 'error'
+    })
+  } finally {
+    formLoading.value = false
+  }
+}
 
     // Confirm delete
     const confirmDelete = (dish) => {
