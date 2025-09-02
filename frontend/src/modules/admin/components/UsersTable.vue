@@ -609,21 +609,654 @@ export default {
   background-color: rgba(0, 0, 0, 0.03);
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
+/* Loading animation */
+.users-table :deep(.q-inner-loading) {
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(2px);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Mobile devices (320px to 575px) */
+@media (max-width: 575px) {
+  .users-table-container {
+    padding: 0;
+  }
+  
+  /* Search and filters responsive */
+  .q-card-section .row.q-gutter-md {
+    margin: 0 !important;
+    gap: 12px !important;
+  }
+  
+  .q-card-section .row.q-gutter-md > div {
+    margin: 0 !important;
+  }
+  
+  /* Stack filter buttons vertically on mobile */
+  .row.q-gutter-sm {
+    flex-direction: column;
+    gap: 8px !important;
+  }
+  
+  .row.q-gutter-sm .q-btn {
+    width: 100%;
+    margin: 0 !important;
+  }
+  
+  /* Table responsive adjustments */
+  .users-table-container :deep(.q-table__container) {
+    font-size: 11px;
+  }
+  
+  .users-table-container :deep(.q-table th),
+  .users-table-container :deep(.q-table td) {
+    padding: 6px 2px;
+    white-space: nowrap;
+  }
+  
+  /* Hide less important columns on mobile */
+  .users-table-container :deep(.q-table th:nth-child(1)),
+  .users-table-container :deep(.q-table td:nth-child(1)) {
+    display: none; /* Hide avatar column */
+  }
+  
+  .users-table-container :deep(.q-table th:nth-child(6)),
+  .users-table-container :deep(.q-table td:nth-child(6)) {
+    display: none; /* Hide join date column */
+  }
+  
+  /* Compact action buttons on mobile */
+  .row.q-gutter-xs.no-wrap {
+    gap: 2px !important;
+  }
+  
+  .row.q-gutter-xs.no-wrap .q-btn {
+    min-width: 32px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+  }
+  
+  /* Mobile table header */
+  .users-table :deep(.q-table__top) {
+    padding: 8px 12px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .users-table :deep(.q-table__top) .text-h6 {
+    font-size: 1.1rem;
+  }
+  
+  /* Mobile badges and chips smaller */
+  .q-badge,
+  .q-chip {
+    font-size: 10px !important;
+    padding: 2px 6px !important;
+  }
+}
+
+/* Small tablets (576px to 767px) */
+@media (min-width: 576px) and (max-width: 767px) {
   .users-table-container :deep(.q-table__container) {
     font-size: 12px;
   }
   
   .users-table-container :deep(.q-table th),
   .users-table-container :deep(.q-table td) {
-    padding: 8px 4px;
+    padding: 8px 6px;
+  }
+  
+  /* Hide avatar on small tablets */
+  .users-table-container :deep(.q-table th:nth-child(1)),
+  .users-table-container :deep(.q-table td:nth-child(1)) {
+    display: none;
+  }
+  
+  /* Filter row responsive */
+  .q-card-section .row.q-gutter-md > div:last-child {
+    width: 100%;
+    margin-top: 12px;
+  }
+  
+  .q-card-section .row.q-gutter-md > div:last-child .row {
+    justify-content: center;
   }
 }
 
-/* Loading animation */
+/* Medium tablets (768px to 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+  .users-table-container :deep(.q-table__container) {
+    font-size: 13px;
+  }
+  
+  .users-table-container :deep(.q-table th),
+  .users-table-container :deep(.q-table td) {
+    padding: 10px 8px;
+  }
+  
+  /* Show all columns but make them more compact */
+  .row.q-gutter-xs.no-wrap .q-btn {
+    min-width: 36px;
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Large screens (992px and up) */
+@media (min-width: 992px) {
+  .users-table-container :deep(.q-table__container) {
+    font-size: 14px;
+  }
+  
+  .users-table-container :deep(.q-table th),
+  .users-table-container :deep(.q-table td) {
+    padding: 12px 16px;
+  }
+  
+  /* Better spacing for action buttons */
+  .row.q-gutter-xs.no-wrap {
+    gap: 4px !important;
+  }
+  
+  .row.q-gutter-xs.no-wrap .q-btn {
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Extra large screens (1200px and up) */
+@media (min-width: 1200px) {
+  .users-table-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .users-table-container :deep(.q-table th),
+  .users-table-container :deep(.q-table td) {
+    padding: 14px 20px;
+  }
+}
+
+/* ===== ENHANCED TABLE STYLING ===== */
+
+/* Better table styling */
+.users-table :deep(.q-table__container) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.users-table :deep(.q-table thead th) {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.users-table :deep(.q-table tbody tr) {
+  transition: background-color 0.2s ease;
+}
+
+.users-table :deep(.q-table tbody tr:nth-child(even)) {
+  background-color: #fafafa;
+}
+
+.users-table :deep(.q-table tbody tr:hover) {
+  background-color: rgba(25, 118, 210, 0.08) !important;
+}
+
+/* Badge and chip improvements */
+.q-badge {
+  border-radius: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.q-chip {
+  border-radius: 16px;
+  font-weight: 500;
+}
+
+/* Avatar improvements */
+.q-avatar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid #fff;
+}
+
+/* Action buttons improvements */
+.row.q-gutter-xs.no-wrap .q-btn {
+  transition: all 0.2s ease;
+  border-radius: 50%;
+}
+
+.row.q-gutter-xs.no-wrap .q-btn:hover {
+  transform: scale(1.1);
+}
+
+/* ===== SEARCH AND FILTER STYLING ===== */
+
+/* Search card styling */
+.q-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.q-input,
+.q-select {
+  border-radius: 8px;
+}
+
+/* Filter buttons styling */
+.q-btn {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.q-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== RESPONSIVE SEARCH FILTERS ===== */
+
+@media (max-width: 575px) {
+  /* Mobile search section */
+  .q-card-section .row.q-gutter-md {
+    flex-direction: column;
+  }
+  
+  .q-card-section .row.q-gutter-md > div {
+    width: 100% !important;
+  }
+  
+  /* Mobile input styling */
+  .q-input,
+  .q-select {
+    margin-bottom: 12px;
+  }
+  
+  /* Mobile button group */
+  .q-card-section .row.q-gutter-md > div:last-child .row {
+    flex-direction: column;
+    gap: 8px !important;
+  }
+  
+  .q-card-section .row.q-gutter-md > div:last-child .q-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+  /* Tablet search layout */
+  .q-card-section .row.q-gutter-md > div:nth-child(2),
+  .q-card-section .row.q-gutter-md > div:nth-child(3) {
+    flex: 0 0 calc(50% - 12px);
+  }
+  
+  .q-card-section .row.q-gutter-md > div:last-child {
+    flex: 0 0 100%;
+    margin-top: 12px;
+  }
+}
+
+/* ===== PAGINATION RESPONSIVE ===== */
+
+.users-table :deep(.q-table__bottom) {
+  padding: 12px 16px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #fafafa;
+}
+
+@media (max-width: 575px) {
+  .users-table :deep(.q-table__bottom) {
+    padding: 8px 12px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .users-table :deep(.q-table__bottom-item) {
+    margin: 0 !important;
+    justify-content: center;
+  }
+  
+  /* Pagination controls responsive */
+  .users-table :deep(.q-pagination) {
+    font-size: 12px;
+  }
+  
+  .users-table :deep(.q-pagination .q-btn) {
+    min-width: 32px;
+    height: 32px;
+    margin: 0 2px;
+  }
+}
+
+/* ===== NO DATA STATE RESPONSIVE ===== */
+
+.full-width.column.flex-center {
+  min-height: 300px;
+}
+
+@media (max-width: 575px) {
+  .full-width.column.flex-center {
+    min-height: 200px;
+    padding: 20px !important;
+  }
+  
+  .full-width.column.flex-center .q-icon {
+    font-size: 2.5rem !important;
+  }
+  
+  .full-width.column.flex-center .text-h6 {
+    font-size: 1.2rem;
+  }
+  
+  .full-width.column.flex-center .row.q-gutter-sm {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px !important;
+  }
+  
+  .full-width.column.flex-center .row.q-gutter-sm .q-btn {
+    width: 100%;
+  }
+}
+
+/* ===== HORIZONTAL SCROLL FOR MOBILE TABLES ===== */
+
+@media (max-width: 767px) {
+  .users-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .users-table :deep(.q-table__container) {
+    min-width: 600px; /* Minimum width to maintain table structure */
+  }
+  
+  /* Add scroll indicators */
+  .users-table-container::after {
+    content: "← Scroll to see more →";
+    display: block;
+    text-align: center;
+    font-size: 12px;
+    color: #999;
+    padding: 8px;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.05), transparent);
+  }
+}
+
+/* Hide scroll indicator on larger screens */
+@media (min-width: 768px) {
+  .users-table-container::after {
+    display: none;
+  }
+}
+
+/* ===== IMPROVED VISUAL ELEMENTS ===== */
+
+/* Better status badges */
+.q-badge {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  border-radius: 10px;
+}
+
+/* Better role chips */
+.q-chip {
+  font-weight: 500;
+  font-size: 12px;
+  height: 24px;
+  border-radius: 12px;
+}
+
+/* Avatar enhancements */
+.q-avatar {
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.q-avatar:hover {
+  transform: scale(1.05);
+}
+
+/* Action buttons enhancements */
+.row.q-gutter-xs.no-wrap .q-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.row.q-gutter-xs.no-wrap .q-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.row.q-gutter-xs.no-wrap .q-btn:hover::before {
+  left: 100%;
+}
+
+/* ===== TABLE HEADER IMPROVEMENTS ===== */
+
+.users-table :deep(.q-table thead th) {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+/* ===== RESPONSIVE TABLE PAGINATION ===== */
+
+@media (max-width: 575px) {
+  .users-table :deep(.q-table__bottom) {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .users-table :deep(.q-table__bottom-item) {
+    font-size: 12px;
+  }
+  
+  .users-table :deep(.q-select--standard .q-field__control) {
+    min-height: 32px;
+  }
+}
+
+/* ===== SEARCH CARD RESPONSIVE ===== */
+
+@media (max-width: 575px) {
+  .q-card {
+    margin: 0 -12px 16px -12px;
+    border-radius: 0 0 12px 12px;
+  }
+  
+  .q-card-section {
+    padding: 16px 12px !important;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+  .q-card-section {
+    padding: 18px 16px !important;
+  }
+}
+
+/* ===== ENHANCED LOADING STATE ===== */
+
 .users-table :deep(.q-inner-loading) {
-  background-color: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(2px);
+  border-radius: 8px;
+}
+
+.users-table :deep(.q-spinner-grid) {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* ===== IMPROVED HOVER EFFECTS ===== */
+
+.users-table :deep(.q-table tbody tr) {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.users-table :deep(.q-table tbody tr:hover) {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.05) 0%, rgba(25, 118, 210, 0.02) 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== RESPONSIVE TOOLTIPS ===== */
+
+@media (max-width: 767px) {
+  /* Hide tooltips on mobile to prevent issues */
+  .q-tooltip {
+    display: none !important;
+  }
+}
+
+/* ===== SCROLL ENHANCEMENT ===== */
+
+.users-table-container {
+  scrollbar-width: thin;
+  scrollbar-color: #ccc #f5f5f5;
+}
+
+.users-table-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.users-table-container::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 3px;
+}
+
+.users-table-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.users-table-container::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+
+/* Focus styles */
+.q-btn:focus,
+.q-input:focus,
+.q-select:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .users-table :deep(.q-table thead th) {
+    background: #000;
+    color: #fff;
+  }
+  
+  .users-table :deep(.q-table tbody tr:hover) {
+    background: #333 !important;
+    color: #fff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .users-table :deep(.q-table tbody tr),
+  .q-btn,
+  .q-avatar {
+    transition: none !important;
+  }
+  
+  .row.q-gutter-xs.no-wrap .q-btn:hover {
+    transform: none !important;
+  }
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+
+.body--dark .users-table :deep(.q-table thead th) {
+  background: #2d2d2d;
+  color: #fff;
+  border-bottom-color: #404040;
+}
+
+.body--dark .users-table :deep(.q-table tbody tr:nth-child(even)) {
+  background-color: #1e1e1e;
+}
+
+.body--dark .users-table :deep(.q-table tbody tr:hover) {
+  background: rgba(25, 118, 210, 0.15) !important;
+}
+
+.body--dark .q-card {
+  background: #2d2d2d;
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+
+/* GPU acceleration for smooth scrolling */
+.users-table-container {
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+/* Optimize repaints */
+.users-table :deep(.q-table tbody tr) {
+  contain: layout style paint;
+}
+
+/* ===== RESPONSIVE BREAKPOINT UTILITIES ===== */
+
+/* Hide elements on specific screen sizes */
+.hide-xs {
+  display: block;
+}
+
+.hide-sm {
+  display: block;
+}
+
+.hide-md {
+  display: block;
+}
+
+@media (max-width: 575px) {
+  .hide-xs {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .hide-sm {
+    display: none !important;
+  }
+}
+
+@media (max-width: 991px) {
+  .hide-md {
+    display: none !important;
+  }
 }
 </style>

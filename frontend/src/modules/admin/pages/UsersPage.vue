@@ -562,4 +562,353 @@ const updateUser = async () => {
 .stats-card .q-card-section {
   min-height: 80px;
 }
+
+/* Mobile First Responsive Design */
+
+/* Extra small devices (phones, 576px and down) */
+@media (max-width: 575px) {
+  .q-page {
+    padding: 12px !important;
+  }
+  
+  /* Header responsive */
+  .text-h4 {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Button group stacking */
+  .row.q-gutter-sm {
+    flex-direction: column;
+    gap: 8px !important;
+  }
+  
+  .row.q-gutter-sm .q-btn {
+    width: 100%;
+    margin: 0 !important;
+  }
+  
+  /* Stats cards full width on mobile */
+  .stats-card .q-card-section {
+    min-height: 60px;
+    padding: 12px !important;
+  }
+  
+  .stats-card .text-h6 {
+    font-size: 1.1rem;
+  }
+  
+  .stats-card .q-icon {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Dialog responsive */
+  .q-dialog .q-card {
+    min-width: 90vw !important;
+    margin: 0 16px;
+  }
+  
+  /* Empty state responsive */
+  .q-pa-xl {
+    padding: 24px !important;
+  }
+  
+  .q-pa-xl .q-icon {
+    font-size: 3rem !important;
+  }
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) and (max-width: 767px) {
+  .q-page {
+    padding: 16px !important;
+  }
+  
+  /* Header layout */
+  .row.items-center.justify-between {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 16px;
+  }
+  
+  .row.items-center.justify-between .col-auto {
+    width: 100%;
+  }
+  
+  .row.q-gutter-sm {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .row.q-gutter-sm .q-btn {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  /* Stats cards 2 columns */
+  .stats-card .q-card-section {
+    min-height: 70px;
+  }
+  
+  /* Dialog size */
+  .q-dialog .q-card {
+    min-width: 80vw !important;
+  }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 991px) {
+  .q-page {
+    padding: 20px !important;
+  }
+  
+  /* Header responsive */
+  .row.items-center.justify-between {
+    flex-wrap: wrap;
+  }
+  
+  .row.items-center.justify-between .col {
+    min-width: 250px;
+  }
+  
+  /* Button group responsive */
+  .row.q-gutter-sm .q-btn {
+    white-space: nowrap;
+  }
+  
+  /* Dialog size */
+  .q-dialog .q-card {
+    min-width: 500px !important;
+  }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+  .q-page {
+    padding: 24px !important;
+  }
+  
+  /* Ensure proper spacing on larger screens */
+  .stats-card .q-card-section {
+    min-height: 90px;
+  }
+  
+  .q-dialog .q-card {
+    min-width: 600px !important;
+  }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+  .q-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px !important;
+  }
+  
+  .stats-card .q-card-section {
+    min-height: 100px;
+  }
+}
+
+/* Utility classes for responsive behavior */
+
+/* Hide/Show elements on different screen sizes */
+.mobile-only {
+  display: block;
+}
+
+.desktop-only {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .mobile-only {
+    display: none;
+  }
+  
+  .desktop-only {
+    display: block;
+  }
+}
+
+/* Responsive text sizes */
+.responsive-title {
+  font-size: 1.5rem;
+}
+
+@media (min-width: 576px) {
+  .responsive-title {
+    font-size: 1.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .responsive-title {
+    font-size: 2rem;
+  }
+}
+
+/* Responsive spacing */
+.responsive-margin {
+  margin-bottom: 16px;
+}
+
+@media (min-width: 768px) {
+  .responsive-margin {
+    margin-bottom: 24px;
+  }
+}
+
+/* Table responsive wrapper (if needed) */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Form responsive adjustments */
+.q-field {
+  margin-bottom: 16px;
+}
+
+@media (max-width: 575px) {
+  .q-field .q-field__control {
+    min-height: 48px;
+  }
+  
+  .q-btn {
+    min-height: 44px;
+    padding: 0 16px;
+  }
+}
+
+/* Responsive banner */
+.q-banner {
+  border-radius: 8px;
+}
+
+@media (max-width: 575px) {
+  .q-banner .q-banner__content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .q-banner .q-banner__actions {
+    margin-top: 12px;
+    justify-content: center;
+  }
+}
+
+/* Loading state responsive */
+.loading-container {
+  padding: 40px 20px;
+}
+
+@media (min-width: 768px) {
+  .loading-container {
+    padding: 80px 40px;
+  }
+}
+
+/* Error state responsive */
+@media (max-width: 575px) {
+  .q-banner .text-subtitle1 {
+    font-size: 1rem;
+  }
+  
+  .q-banner .text-body2 {
+    font-size: 0.875rem;
+    margin-top: 8px;
+  }
+}
+
+/* Dialog responsive improvements */
+@media (max-width: 575px) {
+  .q-dialog .q-card-section .q-input,
+  .q-dialog .q-card-section .q-select {
+    margin-top: 12px;
+  }
+  
+  .q-dialog .q-card-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+  
+  .q-dialog .q-card-actions .q-btn {
+    width: 100%;
+  }
+}
+
+/* Ensure icons are responsive */
+.q-icon {
+  flex-shrink: 0;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 575px) {
+  .row.q-gutter-md {
+    margin: 0 -8px !important;
+  }
+  
+  .row.q-gutter-md > div {
+    padding: 0 8px !important;
+    margin-bottom: 16px !important;
+  }
+}
+
+/* Additional mobile optimizations */
+@media (max-width: 575px) {
+  /* Reduce header margin on mobile */
+  .q-mb-md {
+    margin-bottom: 16px !important;
+  }
+  
+  .q-mb-lg {
+    margin-bottom: 20px !important;
+  }
+  
+  /* Optimize card spacing */
+  .q-card {
+    border-radius: 8px;
+  }
+  
+  /* Better touch targets */
+  .q-btn {
+    min-height: 44px;
+    border-radius: 6px;
+  }
+  
+  /* Responsive spacing for sections */
+  .q-card-section {
+    padding: 16px 12px !important;
+  }
+}
+
+/* Tablet specific adjustments */
+@media (min-width: 576px) and (max-width: 991px) {
+  .q-page {
+    padding: 20px !important;
+  }
+  
+  /* Better button layout on tablets */
+  .row.q-gutter-sm .q-btn {
+    min-width: 100px;
+  }
+  
+  /* Optimal stats card height for tablets */
+  .stats-card .q-card-section {
+    min-height: 85px;
+  }
+}
+
+/* Print styles (bonus) */
+@media print {
+  .q-btn,
+  .q-dialog {
+    display: none !important;
+  }
+  
+  .stats-card {
+    break-inside: avoid;
+  }
+}
 </style>

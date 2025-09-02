@@ -319,7 +319,6 @@
         </div>
 
         <!-- Active Promotions -->
-        <span class="promotion-name">20% Off Lunch Combo</span>
         <div class="promotions-container">
           <div class="section-header">
             <h3>Active Promotions</h3>
@@ -328,6 +327,7 @@
           <div class="promotion-list">
             <div class="promotion-item">
               <div class="promotion-info">
+                <span class="promotion-name">20% Off Lunch Combo</span>
                 <span class="promotion-expiry">Expires in 3 days</span>
               </div>
               <span class="promotion-status active">Active</span>
