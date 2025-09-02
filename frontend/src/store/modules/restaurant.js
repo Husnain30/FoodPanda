@@ -198,7 +198,7 @@ async fetchRestaurantOrders({ commit }, restaurantId) {
     // FIXED: Use the correct endpoint that matches your Laravel route
     // Your Laravel route: Route::get('/restaurant/orders', ...)
     // So the call should be: GET /restaurant/orders
-    const response = await api.get('/restaurant/restaurant/orders', {
+    const response = await api.get('restaurant/orders', {
       params: {
         restaurant_id: restaurantId  // Pass restaurant ID as query parameter
       }
@@ -294,7 +294,7 @@ async updateOrderStatus({ commit }, { orderId, status }) {
   try {
     console.log('🍽️ API Call: Fetching menu items for restaurant:', restaurantId)
     // FIXED: Using your correct endpoint structure
-    const response = await api.get(`restaurant/menu/${restaurantId}`)
+   const response = await api.get(`restaurant/menu/${restaurantId}`)
     console.log('🍽️ API Response:', response.data)
     
     // Handle different response structures

@@ -19,21 +19,21 @@
       </div>
     </div>
 
-    <!-- Key Metrics Stats -->
+    <!-- Key Metrics Stats - Using API Data -->
     <div class="stats-section">
       <div class="stats-grid">
         <div class="stat-card revenue">
           <div class="stat-header">
             <div class="stat-icon">💰</div>
             <div class="stat-meta">
-              <span class="stat-label">Total Revenue</span>
-              <span class="stat-period">Today</span>
+              <span class="stat-label">Total Sales</span>
+              <span class="stat-period">Overall</span>
             </div>
           </div>
-          <div class="stat-value">PKR 24,580</div>
+          <div class="stat-value">PKR {{ formatCurrency(currentRestaurantStats?.total_sales || 0) }}</div>
           <div class="stat-change positive">
             <span class="change-indicator">↗</span>
-            <span>+15.3% from yesterday</span>
+            <span>Net Payout: PKR {{ formatCurrency(currentRestaurantStats?.net_payout || 0) }}</span>
           </div>
         </div>
 
@@ -41,14 +41,14 @@
           <div class="stat-header">
             <div class="stat-icon">🛍️</div>
             <div class="stat-meta">
-              <span class="stat-label">Orders Today</span>
-              <span class="stat-period">Live</span>
+              <span class="stat-label">Total Orders</span>
+              <span class="stat-period">All time</span>
             </div>
           </div>
-          <div class="stat-value">127</div>
+          <div class="stat-value">{{ currentRestaurantStats?.total_orders || 0 }}</div>
           <div class="stat-change positive">
             <span class="change-indicator">↗</span>
-            <span>+8.2% from yesterday</span>
+            <span>Commission: PKR {{ formatCurrency(currentRestaurantStats?.commission || 0) }}</span>
           </div>
         </div>
 
@@ -56,14 +56,14 @@
           <div class="stat-header">
             <div class="stat-icon">👥</div>
             <div class="stat-meta">
-              <span class="stat-label">Active Customers</span>
-              <span class="stat-period">This month</span>
+              <span class="stat-label">Menu Items</span>
+              <span class="stat-period">Available</span>
             </div>
           </div>
-          <div class="stat-value">2,849</div>
+          <div class="stat-value">{{ currentRestaurantDetails?.menus?.length || 0 }}</div>
           <div class="stat-change positive">
             <span class="change-indicator">↗</span>
-            <span>+23.1% growth</span>
+            <span>{{ currentRestaurantDetails?.cuisine_type || 'Various cuisine' }}</span>
           </div>
         </div>
 
@@ -71,156 +71,255 @@
           <div class="stat-header">
             <div class="stat-icon">⭐</div>
             <div class="stat-meta">
-              <span class="stat-label">Avg Rating</span>
-              <span class="stat-period">This week</span>
+              <span class="stat-label">Status</span>
+              <span class="stat-period">Current</span>
             </div>
           </div>
-          <div class="stat-value">4.8</div>
-          <div class="stat-change neutral">
-            <span class="change-indicator">→</span>
-            <span>Stable performance</span>
+          <div class="stat-value">{{ getStatusDisplay(currentRestaurantDetails?.approval_status) }}</div>
+          <div class="stat-change" :class="getStatusClass(currentRestaurantDetails?.approval_status)">
+            <span class="change-indicator">{{ getStatusIcon(currentRestaurantDetails?.approval_status) }}</span>
+            <span>{{ currentRestaurantDetails?.is_verified ? 'Verified' : 'Pending verification' }}</span>
           </div>
         </div>
       </div>
     </div>
 
-  <!-- Show loading state -->
-<div v-if="loading" class="loading-state">
-  Loading restaurants...
-</div>
+    <!-- Current Restaurant Details -->
+    <div v-if="currentRestaurantDetails" class="restaurant-details-section">
+      <div class="section-header">
+        <h2>{{ currentRestaurantDetails.name }} - Restaurant Information</h2>
+        <div class="restaurant-meta">
+          <span class="meta-item">📍 {{ currentRestaurantDetails.address }}</span>
+          <span class="meta-item">🕒 {{ currentRestaurantDetails.opening_time }} - {{ currentRestaurantDetails.closing_time }}</span>
+          <span class="meta-item">📞 {{ currentRestaurantDetails.phone }}</span>
+          <span class="meta-item">📧 {{ currentRestaurantDetails.email }}</span>
+        </div>
+      </div>
 
+      <!-- Menu Items Grid -->
+      <div v-if="currentRestaurantDetails.menus && currentRestaurantDetails.menus.length > 0" class="menu-section">
+        <h3>Current Menu Items ({{ currentRestaurantDetails.menus.length }})</h3>
+        <div class="menu-grid">
+          <div 
+            v-for="menu in currentRestaurantDetails.menus" 
+            :key="menu.id" 
+            class="menu-card"
+          >
+            <div class="menu-info">
+              <span class="menu-name">{{ menu.name }}</span>
+              <span class="menu-price">PKR {{ formatCurrency(menu.price) }}</span>
+            </div>
+            <div class="menu-meta">
+              <span class="menu-description">{{ menu.description || 'Delicious food item' }}</span>
+              <span class="menu-availability">{{ menu.is_available ? '✅ Available' : '❌ Unavailable' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-  <!-- Restaurant Gallery Section -->
-<div class="gallery-section">
-  <div class="section-header">
-    <h2>Others Restaurant Service</h2>
-    <button class="btn-secondary gallery-btn" @click="fetchRestaurants">
-      <i class="icon">🔄</i>
-      Refresh
-    </button>
-  </div>
-
-  <!-- Loading State -->
-  <div v-if="restaurantsLoading" class="gallery-loading">
-    <div class="loading-spinner"></div>
-    <p>Loading restaurants...</p>
-  </div>
-
-  <!-- Error State -->
-  <div v-else-if="restaurantsError" class="gallery-error">
-    <p>❌ {{ restaurantsError }}</p>
-    <button @click="fetchRestaurants" class="btn-secondary">
-      Try Again
-    </button>
-  </div>
-
-  <!-- Gallery Grid with Dynamic Data -->
-  <div v-else class="gallery-grid">
-    <div 
-      v-for="restaurant in restaurants" 
-      :key="restaurant.id" 
-      class="gallery-card"
-    >
-      <img 
-        :src="getRestaurantImage(restaurant)" 
-        :alt="restaurant.name || 'Restaurant Image'" 
-        class="gallery-image"
-        @error="$event.target.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop&crop=center'"
-      >
-      <div class="gallery-overlay">
-        <div class="gallery-info">
-          <span class="gallery-title">{{ restaurant.name || 'Restaurant Name' }}</span>
-          <span class="gallery-location">{{ formatLocation(restaurant) }}</span>
-          <span class="gallery-detail">{{ getRestaurantDescription(restaurant) }}</span>
-          <div class="gallery-stats">
-            <span 
-              v-for="stat in getRestaurantStats(restaurant)" 
-              :key="stat" 
-              class="stat-item"
-            >
-              {{ stat }}
-            </span>
+      <!-- Recent Orders -->
+      <div v-if="currentRestaurantDetails.orders && currentRestaurantDetails.orders.length > 0" class="orders-section">
+        <h3>Recent Orders ({{ currentRestaurantDetails.orders.length }})</h3>
+        <div class="orders-list">
+          <div 
+            v-for="order in currentRestaurantDetails.orders.slice(0, 5)" 
+            :key="order.id" 
+            class="order-item"
+          >
+            <div class="order-info">
+              <span class="order-id">Order #{{ order.id }}</span>
+              <span class="order-date">{{ formatDate(order.created_at) }}</span>
+            </div>
+            <div class="order-details">
+              <span class="order-total">PKR {{ formatCurrency(order.total_amount) }}</span>
+              <span class="order-status" :class="getOrderStatusClass(order.status)">
+                {{ order.status }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Empty State -->
-    <div v-if="!restaurants.length" class="gallery-empty">
-      <p>No restaurants found</p>
-      <button @click="fetchRestaurants" class="btn-primary">
-        Load Restaurants
-      </button>
+    <!-- Show loading state -->
+    <div v-if="loading" class="loading-state">
+      Loading dashboard data...
     </div>
-  </div>
-</div>
 
+    <!-- All Restaurants Gallery Section -->
+    <div class="gallery-section">
+      <div class="section-header">
+        <h2>All Restaurants Overview ({{ restaurants.length }})</h2>
+        <button class="btn-secondary gallery-btn" @click="fetchRestaurants">
+          <i class="icon">🔄</i>
+          Refresh
+        </button>
+      </div>
 
+      <!-- Loading State -->
+      <div v-if="restaurantsLoading" class="gallery-loading">
+        <div class="loading-spinner"></div>
+        <p>Loading restaurants...</p>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="restaurantsError" class="gallery-error">
+        <p>❌ {{ restaurantsError }}</p>
+        <button @click="fetchRestaurants" class="btn-secondary">
+          Try Again
+        </button>
+      </div>
+
+      <!-- Gallery Grid with Dynamic Data -->
+      <div v-else class="gallery-grid">
+        <div 
+          v-for="restaurant in restaurants" 
+          :key="restaurant.id" 
+          class="gallery-card"
+          @click="selectRestaurant(restaurant)"
+          :class="{ 'selected': currentSelectedRestaurant?.id === restaurant.id }"
+        >
+          <img 
+            :src="getRestaurantImage(restaurant)" 
+            :alt="restaurant.name || 'Restaurant Image'" 
+            class="gallery-image"
+            @error="$event.target.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop&crop=center'"
+          >
+          <div class="gallery-overlay">
+            <div class="gallery-info">
+              <span class="gallery-title">{{ restaurant.name || 'Restaurant Name' }}</span>
+              <span class="gallery-location">{{ formatLocation(restaurant) }}</span>
+              <span class="gallery-detail">{{ restaurant.cuisine_type || 'Great dining experience' }}</span>
+              <div class="gallery-stats">
+                <span class="stat-item">📧 {{ restaurant.email }}</span>
+                <span class="stat-item">📞 {{ restaurant.phone }}</span>
+                <span class="stat-item">{{ restaurant.is_verified ? '✅ Verified' : '⏳ Pending' }}</span>
+                <span class="stat-item">{{ getApprovalStatusDisplay(restaurant.approval_status) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div v-if="!restaurants.length" class="gallery-empty">
+          <p>No restaurants found</p>
+          <button @click="fetchRestaurants" class="btn-primary">
+            Load Restaurants
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Main Content Grid -->
-      <!-- Left Column - Charts -->
+    <div class="content-grid">
+      <!-- Left Column - Performance Metrics -->
       <div class="content-left">
-        <!-- Earnings Chart -->
-     
-
-        <!-- Performance Metrics -->
+        <!-- Performance Metrics with API Data -->
         <div class="metrics-container">
           <h2>Performance Metrics</h2>
           <div class="metrics-grid">
             <div class="metric-item">
-              <span class="metric-label">Average Order Value</span>
-              <span class="metric-value">PKR 850</span>
-              <span class="metric-change positive">+5.2%</span>
+              <span class="metric-label">Commission Rate</span>
+              <span class="metric-value">{{ currentRestaurantDetails?.commission_rate || '15' }}%</span>
+              <span class="metric-change neutral">Standard</span>
             </div>
             <div class="metric-item">
-              <span class="metric-label">Order Completion Rate</span>
-              <span class="metric-value">97.8%</span>
-              <span class="metric-change positive">+1.1%</span>
+              <span class="metric-label">Delivery Radius</span>
+              <span class="metric-value">{{ currentRestaurantDetails?.delivery_radius || '10' }} KM</span>
+              <span class="metric-change positive">Good coverage</span>
             </div>
             <div class="metric-item">
-              <span class="metric-label">Customer Return Rate</span>
-              <span class="metric-value">68.5%</span>
-              <span class="metric-change positive">+3.7%</span>
+              <span class="metric-label">Operating Hours</span>
+              <span class="metric-value">
+                {{ currentRestaurantDetails?.opening_time }} - {{ currentRestaurantDetails?.closing_time }}
+              </span>
+              <span class="metric-change neutral">Daily schedule</span>
             </div>
             <div class="metric-item">
-              <span class="metric-label">Peak Hours</span>
-              <span class="metric-value">12-2 PM</span>
-              <span class="metric-change neutral">Consistent</span>
+              <span class="metric-label">Last Updated</span>
+              <span class="metric-value">{{ formatDate(currentRestaurantDetails?.updated_at) }}</span>
+              <span class="metric-change neutral">Recent</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Restaurant Statistics -->
+        <div v-if="currentRestaurantStats" class="stats-overview">
+          <h2>Financial Overview</h2>
+          <div class="financial-grid">
+            <div class="financial-item">
+              <span class="financial-label">Total Sales</span>
+              <span class="financial-value">PKR {{ formatCurrency(currentRestaurantStats.total_sales) }}</span>
+            </div>
+            <div class="financial-item">
+              <span class="financial-label">Commission Paid</span>
+              <span class="financial-value">PKR {{ formatCurrency(currentRestaurantStats.commission) }}</span>
+            </div>
+            <div class="financial-item">
+              <span class="financial-label">Net Earnings</span>
+              <span class="financial-value net-earnings">PKR {{ formatCurrency(currentRestaurantStats.net_payout) }}</span>
+            </div>
+            <div class="financial-item">
+              <span class="financial-label">Total Orders</span>
+              <span class="financial-value">{{ currentRestaurantStats.total_orders }}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Right Column - Tables & Quick Actions -->
+      <!-- Right Column - Actions & Lists -->
       <div class="content-right">
-        <!-- Recent Orders -->
-     
-
-
         <!-- Quick Actions Panel -->
         <div class="quick-actions">
           <h3>Quick Actions</h3>
           <div class="actions-grid">
-     <router-link :to="{ name: 'MenuManager' }" class="action-card">
-  <div class="action-icon">🍽️</div>
-  <span>Manage Menu</span>
-</router-link>
-          <router-link to="/restaurant/promotions" class="action-card">
-  <div class="action-icon">🎉</div>
-  <span>Promotions</span>
-</router-link>
+            <router-link :to="{ name: 'MenuManager' }" class="action-card">
+              <div class="action-icon">🍽️</div>
+              <span>Manage Menu</span>
+            </router-link>
+            <router-link to="/restaurant/promotions" class="action-card">
+              <div class="action-icon">🎉</div>
+              <span>Promotions</span>
+            </router-link>
             <router-link to="/restaurant/orders" class="action-card">
-  <div class="action-icon">📋</div>
-  <span>All Orders</span>
-</router-link>
-           <router-link to="/restaurant/earnings" class="action-card">
-  <div class="action-icon">💹</div>
-  <span>Analytics</span>
-</router-link>
+              <div class="action-icon">📋</div>
+              <span>All Orders</span>
+            </router-link>
+            <router-link to="/restaurant/earnings" class="action-card">
+              <div class="action-icon">💹</div>
+              <span>Analytics</span>
+            </router-link>
+          </div>
+        </div>
+
+        <!-- Recent Menu Items -->
+        <div v-if="currentRestaurantDetails?.menus" class="recent-items">
+          <div class="section-header">
+            <h3>Recent Menu Items</h3>
+            <span class="item-count">{{ currentRestaurantDetails.menus.length }} items</span>
+          </div>
+          <div class="items-list">
+            <div 
+              v-for="menu in currentRestaurantDetails.menus.slice(0, 5)" 
+              :key="menu.id" 
+              class="item-row"
+            >
+              <div class="item-info">
+                <span class="item-name">{{ menu.name }}</span>
+                <span class="item-meta">{{ menu.description || 'No description available' }}</span>
+              </div>
+              <div class="item-details">
+                <span class="item-price">PKR {{ formatCurrency(menu.price) }}</span>
+                <span class="item-status" :class="menu.is_available ? 'available' : 'unavailable'">
+                  {{ menu.is_available ? '✅' : '❌' }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Active Promotions -->
+        <span class="promotion-name">20% Off Lunch Combo</span>
         <div class="promotions-container">
           <div class="section-header">
             <h3>Active Promotions</h3>
@@ -229,7 +328,6 @@
           <div class="promotion-list">
             <div class="promotion-item">
               <div class="promotion-info">
-                <span class="promotion-name">20% Off Lunch Combo</span>
                 <span class="promotion-expiry">Expires in 3 days</span>
               </div>
               <span class="promotion-status active">Active</span>
@@ -252,29 +350,19 @@
         </div>
       </div>
     </div>
-    
-
+  </div>
 </template>
-// Only script section changes for RestaurantDashboard.vue
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: "RestaurantDashboard",
-  components: {
-  
-  },
   data() {
     return {
       currentPeriod: "7D",
       refreshInterval: null,
-      stats: {
-        revenue: 24580,
-        orders: 127,
-        customers: 2849,
-        rating: 4.8,
-      },
+      currentSelectedRestaurant: null, // Track selected restaurant
       promotions: [
         {
           name: "20% Off Lunch Combo",
@@ -303,32 +391,53 @@ export default {
       'getAllRestaurants',
       'getRestaurantsLoading',
       'getRestaurantsError',
-      // Add new getters for details and stats
       'getRestaurantDetails',
       'getRestaurantStats',
       'getDetailsLoading',
       'getDetailsError'
     ]),
     
-    // Use store data for template (enhanced with details and stats)
+    // Use store data for template
     restaurants() {
-      return this.getAllRestaurants.map(restaurant => {
-        const details = this.getRestaurantDetails[restaurant.id] || {}
-        const stats = this.getRestaurantStats[restaurant.id] || {}
-        
-        return {
-          ...restaurant,
-          ...details, // Merge restaurant details
-          apiStats: stats // Keep stats separate to avoid conflicts
-        }
-      })
+      return this.getAllRestaurants;
     },
     
     restaurantsLoading() {
       return this.getRestaurantsLoading;
     },
+    
     restaurantsError() {
       return this.getRestaurantsError;
+    },
+
+    loading() {
+      return this.restaurantsLoading || this.getDetailsLoading;
+    },
+
+    // Get current restaurant details (first restaurant or selected)
+    currentRestaurantDetails() {
+      if (this.currentSelectedRestaurant) {
+        return this.getRestaurantDetails[this.currentSelectedRestaurant.id] || this.currentSelectedRestaurant;
+      }
+      // Default to first restaurant
+      const firstRestaurant = this.restaurants[0];
+      if (firstRestaurant) {
+        return this.getRestaurantDetails[firstRestaurant.id] || firstRestaurant;
+      }
+      return null;
+    },
+
+    // Get current restaurant stats
+    currentRestaurantStats() {
+      if (this.currentSelectedRestaurant) {
+        return this.getRestaurantStats[this.currentSelectedRestaurant.id];
+      }
+      // Default to first restaurant stats
+      const firstRestaurant = this.restaurants[0];
+      if (firstRestaurant) {
+        return this.getRestaurantStats[firstRestaurant.id];
+      }
+      return null;
     }
   },
 
@@ -336,10 +445,10 @@ export default {
     // Fetch restaurants data on component mount
     await this.fetchRestaurants();
     
-    // Auto-refresh data every 30s
+    // Auto-refresh data every 60s (increased from 30s to reduce API calls)
     this.refreshInterval = setInterval(() => {
       this.refreshDashboardData();
-    }, 30000);
+    }, 60000);
   },
   
   beforeUnmount() {
@@ -353,7 +462,7 @@ export default {
       'fetchRestaurantStats',
       'fetchAllRestaurants',
       'fetchRestaurantDetails',
-      'fetchRestaurantWithStats' // Add new action
+      'fetchRestaurantWithStats'
     ]),
 
     // Updated fetchRestaurants method
@@ -362,13 +471,18 @@ export default {
         console.log('🏪 Fetching restaurants via Vuex action...');
         await this.fetchAllRestaurants();
         
-        // After getting restaurants list, fetch details and stats for each
         const restaurants = this.getAllRestaurants;
         console.log('✅ Restaurants loaded from store:', restaurants.length);
         
-        // Fetch details and stats for each restaurant
+        // Fetch details and stats for the first restaurant (or selected one)
         if (restaurants.length > 0) {
-          await this.fetchRestaurantDetailsAndStats(restaurants);
+          const targetRestaurant = this.currentSelectedRestaurant || restaurants[0];
+          await this.fetchRestaurantDetailsAndStats([targetRestaurant]);
+          
+          // Set default selected restaurant if none selected
+          if (!this.currentSelectedRestaurant) {
+            this.currentSelectedRestaurant = restaurants[0];
+          }
         }
         
       } catch (error) {
@@ -381,24 +495,33 @@ export default {
       }
     },
 
-    // NEW METHOD: Fetch details and stats for all restaurants
+    // Fetch details and stats for specific restaurants
     async fetchRestaurantDetailsAndStats(restaurants) {
       try {
-        console.log('🔄 Fetching details and stats for all restaurants...');
+        console.log('🔄 Fetching details and stats for restaurants...');
         
-        // Fetch details and stats for each restaurant in parallel
         const promises = restaurants.map(restaurant => 
           this.fetchRestaurantWithStats(restaurant.id).catch(error => {
             console.warn(`Failed to fetch data for restaurant ${restaurant.id}:`, error);
-            return null; // Continue with other restaurants even if one fails
+            return null;
           })
         );
         
         await Promise.all(promises);
-        console.log('✅ All restaurant details and stats loaded');
+        console.log('✅ Restaurant details and stats loaded');
         
       } catch (error) {
         console.error('❌ Error fetching restaurant details:', error);
+      }
+    },
+
+    // Select a restaurant to view its details
+    async selectRestaurant(restaurant) {
+      this.currentSelectedRestaurant = restaurant;
+      
+      // Fetch details and stats for the selected restaurant if not already loaded
+      if (!this.getRestaurantDetails[restaurant.id]) {
+        await this.fetchRestaurantDetailsAndStats([restaurant]);
       }
     },
 
@@ -412,9 +535,8 @@ export default {
       console.log("📊 Changed period to:", period);
     },
 
-    // ENHANCED: Helper method with API stats integration
+    // Helper method for restaurant images
     getRestaurantImage(restaurant) {
-      // Use API details image if available, otherwise fallback
       if (restaurant.image_url || restaurant.image) {
         return restaurant.image_url || restaurant.image;
       }
@@ -429,58 +551,79 @@ export default {
       return fallbackImages[restaurant.id % fallbackImages.length];
     },
 
-    formatRating(rating) {
-      return rating ? parseFloat(rating).toFixed(1) : '4.5';
-    },
-
-    // ENHANCED: Location with API details
     formatLocation(restaurant) {
-      return restaurant.address || restaurant.location || `📍 ${restaurant.city || 'Pakistan'}`;
+      return restaurant.address || `📍 ${restaurant.city || 'Pakistan'}`;
     },
 
-    // ENHANCED: Description with API details
-    getRestaurantDescription(restaurant) {
-      return restaurant.description || restaurant.cuisine_type || 'Delicious food and great ambiance';
+    // Format currency values
+    formatCurrency(value) {
+      if (!value) return '0';
+      return parseFloat(value).toLocaleString();
     },
 
-    // ENHANCED: Stats with API data integration
-    getRestaurantStats(restaurant) {
-      const stats = [];
-      const apiStats = restaurant.apiStats || {};
-      
-      // Use API stats if available, otherwise fallback to restaurant data
-      const rating = apiStats.average_rating || restaurant.rating;
-      const ordersCount = apiStats.orders_count || restaurant.orders_count;
-      const revenue = apiStats.revenue || restaurant.revenue;
-      const customersCount = apiStats.customers_count || restaurant.customers_count;
-      
-      // Rating (priority to API stats)
-      if (rating) {
-        stats.push(`⭐ ${this.formatRating(rating)}`);
-      }
-      
-      // Orders count from API stats
-      if (ordersCount) {
-        stats.push(`📦 ${ordersCount} orders`);
-      } else if (restaurant.seating_capacity) {
-        stats.push(`👥 ${restaurant.seating_capacity} seats`);
-      } else {
-        stats.push(`🍽️ Premium dining`);
-      }
-      
-      // Revenue from API stats
-      if (revenue) {
-        stats.push(`💰 Rs ${revenue.toLocaleString()}`);
-      }
-      
-      // Customers count from API stats
-      if (customersCount) {
-        stats.push(`👥 ${customersCount} customers`);
-      }
-      
-      return stats;
+    // Format dates
+    formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    },
+
+    // Get status display text
+    getStatusDisplay(status) {
+      const statusMap = {
+        'approved': '✅ Approved',
+        'rejected': '❌ Rejected',
+        'pending': '⏳ Pending'
+      };
+      return statusMap[status] || '⏳ Pending';
+    },
+
+    // Get status CSS class
+    getStatusClass(status) {
+      const classMap = {
+        'approved': 'positive',
+        'rejected': 'negative',
+        'pending': 'neutral'
+      };
+      return classMap[status] || 'neutral';
+    },
+
+    // Get status icon
+    getStatusIcon(status) {
+      const iconMap = {
+        'approved': '✓',
+        'rejected': '✗',
+        'pending': '○'
+      };
+      return iconMap[status] || '○';
+    },
+
+    // Get approval status display for gallery
+    getApprovalStatusDisplay(status) {
+      const statusMap = {
+        'approved': '✅ Approved',
+        'rejected': '❌ Rejected',
+        'pending': '⏳ Pending'
+      };
+      return statusMap[status] || '⏳ Pending';
+    },
+
+    // Get order status CSS class
+    getOrderStatusClass(status) {
+      const classMap = {
+        'completed': 'status-completed',
+        'pending': 'status-pending',
+        'cancelled': 'status-cancelled',
+        'processing': 'status-processing'
+      };
+      return classMap[status?.toLowerCase()] || 'status-pending';
     }
-  },
+  }
 };
 </script>
 <style scoped>
@@ -1099,6 +1242,286 @@ export default {
 .promotion-status.ending {
   background: rgba(253, 203, 110, 0.1);
   color: var(--warning-color);
+}
+/* Restaurant Details Section */
+.restaurant-details-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.restaurant-meta {
+  display: flex;
+  gap: 20px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Menu Items Grid */
+.menu-section {
+  margin-top: 24px;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.menu-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  border-left: 4px solid #007bff;
+}
+
+.menu-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.menu-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.menu-price {
+  font-weight: 700;
+  color: #007bff;
+}
+
+.menu-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.menu-description {
+  color: #666;
+  flex: 1;
+}
+
+.menu-availability {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #e9ecef;
+}
+
+/* Orders Section */
+.orders-section {
+  margin-top: 24px;
+}
+
+.orders-list {
+  margin-top: 16px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.order-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.order-id {
+  font-weight: 600;
+  color: #333;
+}
+
+.order-date {
+  font-size: 12px;
+  color: #666;
+}
+
+.order-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.order-total {
+  font-weight: 700;
+  color: #007bff;
+}
+
+.order-status {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-transform: capitalize;
+}
+
+.status-completed { background: #d4edda; color: #155724; }
+.status-pending { background: #fff3cd; color: #856404; }
+.status-cancelled { background: #f8d7da; color: #721c24; }
+.status-processing { background: #cce5ff; color: #004085; }
+
+/* Gallery Selected State */
+.gallery-card.selected {
+  border: 2px solid #007bff;
+  box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+}
+
+.gallery-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.gallery-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+/* Financial Overview */
+.stats-overview {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.financial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.financial-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.financial-label {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.financial-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+}
+
+.financial-value.net-earnings {
+  color: #28a745;
+}
+
+/* Recent Items */
+.recent-items {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.item-count {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.items-list {
+  margin-top: 16px;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.item-row:last-child {
+  border-bottom: none;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.item-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.item-meta {
+  font-size: 12px;
+  color: #666;
+}
+
+.item-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.item-price {
+  font-weight: 700;
+  color: #007bff;
+}
+
+.item-status.available {
+  color: #28a745;
+}
+
+.item-status.unavailable {
+  color: #dc3545;
+}
+
+/* Content Grid Layout */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+@media (max-width: 1200px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Responsive Design */
