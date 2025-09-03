@@ -1,5 +1,5 @@
 <template>
-  <div class="login-page">
+  <div class="register-page">
     <!-- Left Side - Image Section -->
     <div class="image-section">
       <div class="image-overlay">
@@ -8,7 +8,7 @@
             <span class="brand-icon">🍽️</span>
             FoodieExpress
           </h1>
-          <p class="brand-tagline">Welcome back to delicious experiences</p>
+          <p class="brand-tagline">Delicious food delivered to your doorstep</p>
           <div class="feature-list">
             <div class="feature-item">
               <span class="feature-icon">⚡</span>
@@ -34,22 +34,35 @@
       </div>
     </div>
 
-    <!-- Right Side - Login Form -->
+    <!-- Right Side - Registration Form -->
     <div class="form-section">
-      <div class="login-container">
+      <div class="register-container">
         <div class="form-header">
-          <h2 class="login-title">Welcome Back 👋</h2>
-          <p class="login-subtitle">Sign in to continue your culinary journey</p>
+          <h2 class="register-title">Create Account ✨</h2>
+          <p class="register-subtitle">Join thousands of food lovers and start your culinary journey</p>
         </div>
 
-        <form @submit.prevent="onSubmit" class="login-form">
+        <form @submit.prevent="onSubmit" class="register-form">
+          <div class="input-group">
+            <div class="input-wrapper">
+              <span class="input-icon">👤</span>
+              <input
+                v-model="form.name"
+                type="text"
+                placeholder="Full Name"
+                required
+                class="input-field"
+              />
+            </div>
+          </div>
+
           <div class="input-group">
             <div class="input-wrapper">
               <span class="input-icon">📧</span>
               <input
                 v-model="form.email"
-                type="text"
-                placeholder="Email or Username"
+                type="email"
+                placeholder="Email Address"
                 required
                 class="input-field"
               />
@@ -62,7 +75,7 @@
               <input
                 v-model="form.password"
                 type="password"
-                placeholder="Password"
+                placeholder="Password (min 6 characters)"
                 required
                 class="input-field"
               />
@@ -73,17 +86,17 @@
             <div class="input-wrapper">
               <span class="input-icon">🎭</span>
               <select v-model="form.role" required class="input-field select-field">
-                <option disabled value="">Select Role</option>
-                <option value="admin">👑 Admin - Full Access</option>
-                <option value="restaurant">🏪 Restaurant - Manage Orders</option>
-                <option value="rider">🏍️ Delivery Rider - Earn Money</option>
+                <option disabled value="">Select Your Role</option>
                 <option value="customer">🛒 Customer - Order Food</option>
+                <option disabled value="restaurant">🏪 Restaurant - Coming Soon</option>
+                <option value="rider">🏍️ Delivery Rider - Earn Money</option>
+                <option disabled value="admin">👑 Admin - Restricted</option>
               </select>
             </div>
           </div>
 
-          <button type="submit" class="login-btn">
-            <span class="btn-text">Sign In</span>
+          <button type="submit" class="register-btn">
+            <span class="btn-text">Create My Account</span>
             <span class="btn-icon">🚀</span>
           </button>
         </form>
@@ -95,13 +108,11 @@
           </p>
         </div>
 
-        <!-- Home Link -->
-        <div class="home-section">
-          <p class="home-link">
-            <router-link to="/" class="home-anchor">
-              <span class="home-icon">🏠</span>
-              Go back to Home
-            </router-link>
+        <!-- Login link -->
+        <div class="login-section">
+          <p class="login-link">
+            Already part of our foodie family?
+            <router-link to="/auth/login" class="login-anchor">Sign In</router-link>
           </p>
         </div>
 
@@ -109,15 +120,15 @@
         <div class="trust-indicators">
           <div class="trust-item">
             <span class="trust-icon">🔐</span>
-            <span>Secure Login</span>
+            <span>Secure & Safe</span>
           </div>
           <div class="trust-item">
             <span class="trust-icon">⭐</span>
-            <span>Trusted Platform</span>
+            <span>5-Star Rated</span>
           </div>
           <div class="trust-item">
-            <span class="trust-icon">🎯</span>
-            <span>Quick Access</span>
+            <span class="trust-icon">👥</span>
+            <span>10K+ Users</span>
           </div>
         </div>
       </div>
@@ -127,14 +138,14 @@
 
 <script setup>
 import { reactive, ref } from "vue"
-import { useStore } from "vuex"
 import { useRouter } from "vue-router"
+import api from "boot/axios" // Axios instance with /api baseURL
 
-const store = useStore()
 const router = useRouter()
 const error = ref("")
 
 const form = reactive({
+  name: "",
   email: "",
   password: "",
   role: "",
@@ -143,43 +154,14 @@ const form = reactive({
 const onSubmit = async () => {
   error.value = ""
   try {
-    const res = await store.dispatch("auth/login", form)
-    let user = res.user
+    const res = await api.post("/auth/register", form) // ✅ relative path
+    console.log("✅ Registration Success:", res.data)
 
-    if (!user) {
-      throw new Error("Invalid login response")
-    }
-
-    // Normalize role
-    let role = user.role
-    if (!role && user.roles && user.roles.length > 0) {
-      role = user.roles[0].name
-    }
-
-    if (!role) {
-      throw new Error("User role not found")
-    }
-
-    // Role-based redirect
-    switch (role) {
-      case "admin":
-        router.push("/admin/dashboard")
-        break
-      case "restaurant":
-        router.push("/restaurant/dashboard")
-        break
-      case "rider":
-        router.push("/riders")
-        break
-      case "customer":
-        router.push("/restaurants")
-        break
-      default:
-        router.push("/")
-    }
+    // Redirect user after register
+    router.push("/auth/login")
   } catch (err) {
-    console.error("Login error:", err)
-    error.value = "Invalid login credentials or role"
+    console.error("❌ Registration failed:", err)
+    error.value = err.response?.data?.message || "Something went wrong!"
   }
 }
 </script>
@@ -189,7 +171,7 @@ const onSubmit = async () => {
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 /* Main Layout */
-.login-page {
+.register-page {
   min-height: 100vh;
   display: flex;
   font-family: "Poppins", sans-serif;
@@ -198,7 +180,7 @@ const onSubmit = async () => {
 
 /* Left Side - Image Section */
 .image-section {
-  flex: 0.8;
+  flex: 1.2;
   position: relative;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6a11cb 100%);
   display: flex;
@@ -322,7 +304,7 @@ const onSubmit = async () => {
 
 /* Right Side - Form Section */
 .form-section {
-  flex: 1.2;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -330,13 +312,13 @@ const onSubmit = async () => {
   padding: 2rem;
 }
 
-.login-container {
+.register-container {
   background: rgba(255, 255, 255, 0.95);
   padding: 3rem 2.5rem;
   border-radius: 2rem;
   width: 100%;
   max-width: 450px;
-  box-shadow: 
+  box-shadow:
     0 20px 40px rgba(106, 17, 203, 0.1),
     0 0 0 1px rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(20px);
@@ -346,7 +328,7 @@ const onSubmit = async () => {
   overflow: hidden;
 }
 
-.login-container::before {
+.register-container::before {
   content: '';
   position: absolute;
   top: 0;
@@ -362,7 +344,7 @@ const onSubmit = async () => {
   margin-bottom: 2rem;
 }
 
-.login-title {
+.register-title {
   font-size: 2.2rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
@@ -373,7 +355,7 @@ const onSubmit = async () => {
   letter-spacing: -0.5px;
 }
 
-.login-subtitle {
+.register-subtitle {
   font-size: 1rem;
   color: #64748b;
   margin-bottom: 0;
@@ -382,7 +364,7 @@ const onSubmit = async () => {
 }
 
 /* Enhanced Form Styling */
-.login-form {
+.register-form {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -422,7 +404,7 @@ const onSubmit = async () => {
 
 .input-field:focus {
   border-color: #6a11cb;
-  box-shadow: 
+  box-shadow:
     0 0 0 3px rgba(106, 17, 203, 0.1),
     0 8px 25px rgba(106, 17, 203, 0.15);
   transform: translateY(-2px);
@@ -433,7 +415,6 @@ const onSubmit = async () => {
 .input-wrapper:hover .input-icon {
   opacity: 1;
   transform: scale(1.1);
-  color: #6a11cb;
 }
 
 .select-field {
@@ -452,7 +433,7 @@ const onSubmit = async () => {
 }
 
 /* Enhanced Button */
-.login-btn {
+.register-btn {
   width: 100%;
   padding: 1.2rem 2rem;
   background: linear-gradient(135deg, #6a11cb 0%, #2575fc 50%, #667eea 100%);
@@ -474,7 +455,7 @@ const onSubmit = async () => {
   box-shadow: 0 8px 25px rgba(106, 17, 203, 0.3);
 }
 
-.login-btn::before {
+.register-btn::before {
   content: '';
   position: absolute;
   top: 0;
@@ -485,16 +466,16 @@ const onSubmit = async () => {
   transition: left 0.5s ease;
 }
 
-.login-btn:hover::before {
+.register-btn:hover::before {
   left: 100%;
 }
 
-.login-btn:hover {
+.register-btn:hover {
   transform: translateY(-3px);
   box-shadow: 0 15px 35px rgba(106, 17, 203, 0.4);
 }
 
-.login-btn:active {
+.register-btn:active {
   transform: translateY(-1px);
 }
 
@@ -507,7 +488,7 @@ const onSubmit = async () => {
   transition: transform 0.3s ease;
 }
 
-.login-btn:hover .btn-icon {
+.register-btn:hover .btn-icon {
   transform: scale(1.2) rotate(15deg);
 }
 
@@ -535,48 +516,48 @@ const onSubmit = async () => {
   font-size: 1.1rem;
 }
 
-/* Home Section */
-.home-section {
+/* Login Section */
+.login-section {
   margin-top: 2rem;
   text-align: center;
   padding-top: 1.5rem;
   border-top: 1px solid #e2e8f0;
 }
 
-.home-link {
+.login-link {
   font-size: 0.95rem;
+  color: #64748b;
   margin: 0;
+  font-weight: 400;
 }
 
-.home-anchor {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+.login-anchor {
   color: #6a11cb;
   font-weight: 600;
   text-decoration: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 1rem;
+  margin-left: 0.5rem;
   transition: all 0.3s ease;
-  background: rgba(106, 17, 203, 0.05);
-  border: 1px solid rgba(106, 17, 203, 0.1);
+  position: relative;
 }
 
-.home-anchor:hover {
+.login-anchor:hover {
   color: #2575fc;
-  background: rgba(37, 117, 252, 0.1);
-  border-color: rgba(37, 117, 252, 0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(106, 17, 203, 0.2);
+  text-decoration: none;
 }
 
-.home-icon {
-  font-size: 1.1rem;
-  transition: transform 0.3s ease;
+.login-anchor::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #6a11cb, #2575fc);
+  transition: width 0.3s ease;
 }
 
-.home-anchor:hover .home-icon {
-  transform: scale(1.2);
+.login-anchor:hover::after {
+  width: 100%;
 }
 
 /* Trust Indicators */
@@ -661,25 +642,26 @@ const onSubmit = async () => {
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .login-page {
+  .register-page {
     flex-direction: column;
   }
-  
+
   .image-section {
-    display: none;
+    flex: none;
+    min-height: 40vh;
   }
-  
+
   .brand-title {
     font-size: 2.5rem;
   }
-  
+
   .feature-list {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
     gap: 1rem;
   }
-  
+
   .feature-item {
     flex: 1;
     min-width: 140px;
@@ -689,51 +671,47 @@ const onSubmit = async () => {
 }
 
 @media (max-width: 768px) {
-  .image-section {
-    display: none;
-  }
-  
   .form-section {
     padding: 1rem;
   }
-  
-  .login-container {
+
+  .register-container {
     padding: 2rem 1.5rem;
     margin: 0;
     border-radius: 1.5rem;
   }
-  
-  .login-title {
+
+  .register-title {
     font-size: 1.8rem;
   }
-  
+
   .input-field {
     padding: 0.9rem 0.9rem 0.9rem 2.8rem;
     font-size: 0.95rem;
   }
-  
+
   .input-icon {
     font-size: 1rem;
     left: 0.8rem;
   }
-  
+
   .brand-title {
     font-size: 2rem;
   }
-  
+
   .brand-tagline {
     font-size: 1.1rem;
   }
-  
+
   .floating-food {
     font-size: 2rem;
   }
-  
+
   .trust-indicators {
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .trust-item {
     flex-direction: row;
     justify-content: center;
@@ -744,20 +722,20 @@ const onSubmit = async () => {
   .image-section {
     min-height: 30vh;
   }
-  
-  .login-container {
+
+  .register-container {
     padding: 1.5rem 1rem;
   }
-  
+
   .input-field {
     padding: 0.8rem 0.8rem 0.8rem 2.5rem;
   }
-  
-  .login-btn {
+
+  .register-btn {
     padding: 1rem 1.5rem;
     font-size: 1rem;
   }
-  
+
   .feature-item {
     font-size: 0.85rem;
     padding: 0.6rem 0.8rem;
@@ -765,7 +743,7 @@ const onSubmit = async () => {
 }
 
 /* Enhanced Glassmorphism Effect */
-.login-container {
+.register-container {
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -784,7 +762,7 @@ const onSubmit = async () => {
 }
 
 /* Loading state for button */
-.login-btn:disabled {
+.register-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
@@ -797,14 +775,14 @@ const onSubmit = async () => {
 }
 
 /* Enhanced gradient backgrounds */
-.login-page::before {
+.register-page::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
+  background:
     radial-gradient(circle at 20% 50%, rgba(106, 17, 203, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(37, 117, 252, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 40% 80%, rgba(102, 126, 234, 0.1) 0%, transparent 50%);
