@@ -1,6 +1,6 @@
 <template>
   <div class="restaurant-layout">
-    <!-- Simple Header -->
+    <!-- Animated Header -->
     <header class="restaurant-header">
       <h2>🍽️ TasteCraft Manager</h2>
     </header>
@@ -10,13 +10,15 @@
       <router-view />
     </main>
 
-    <!-- Footer -->
+    <!-- Fancy Footer -->
     <footer class="restaurant-footer">
       <div class="footer-top">
         <!-- About Section -->
         <div class="footer-section about">
           <h3>TasteCraft</h3>
-          <p>Delivering exquisite dining experiences with the finest dishes crafted daily by our master chefs.</p>
+          <p>
+            Delivering exquisite dining experiences with the finest dishes crafted daily by our master chefs.
+          </p>
         </div>
 
         <!-- Quick Links -->
@@ -66,40 +68,121 @@ export default {
 </script>
 
 <style scoped>
+/* Layout */
 .restaurant-layout {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   background: #f5f6fa;
-  font-family: 'Arial', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
+/* ================= HEADER ================= */
 .restaurant-header {
-  background: #2d3436;
+  background: linear-gradient(135deg, #6c5ce7, #0984e3);
   color: white;
-  padding: 1rem;
+  padding: 1.5rem;
   text-align: center;
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Floating gradient animation */
+.restaurant-header::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 10%, transparent 40%);
+  animation: header-glow 6s infinite linear;
+}
+
+@keyframes header-glow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* HEADER TEXT ANIMATION */
+.restaurant-header h2 {
+  position: relative;
+  animation: slide-in 1.2s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes slide-in {
+  0% {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+}
+
+/* ================= CONTENT ================= */
 .restaurant-content {
   flex: 1;
   padding: 1.5rem;
 }
 
-/* Footer Styling */
+/* ================= FOOTER ================= */
 .restaurant-footer {
-  background: #1e272e;
+  background: linear-gradient(135deg, #2c2c54, #341f97);
   color: #dcdde1;
   padding: 3rem 2rem 1rem;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Floating particles in footer */
+.restaurant-footer::before,
+.restaurant-footer::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  animation: float-particles 12s infinite ease-in-out;
+}
+
+.restaurant-footer::before {
+  width: 120px;
+  height: 120px;
+  bottom: 20px;
+  left: 20px;
+}
+
+.restaurant-footer::after {
+  width: 200px;
+  height: 200px;
+  top: 10px;
+  right: 30px;
+}
+
+@keyframes float-particles {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(-20px) translateX(20px);
+  }
 }
 
 .footer-top {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
+  gap: 2.5rem;
   justify-content: space-between;
   margin-bottom: 2rem;
 }
@@ -107,24 +190,31 @@ export default {
 .footer-section {
   flex: 1 1 200px;
   min-width: 180px;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.footer-section:hover {
+  transform: translateY(-5px);
 }
 
 .footer-section h3 {
   color: #ffffff;
   margin-bottom: 1rem;
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1.3rem;
+  font-weight: 700;
   border-bottom: 2px solid #6c5ce7;
   display: inline-block;
-  padding-bottom: 0.25rem;
+  padding-bottom: 0.3rem;
+  text-shadow: 0px 0px 6px rgba(108, 92, 231, 0.7);
 }
 
-.footer-section p, 
-.footer-section ul, 
+.footer-section p,
+.footer-section ul,
 .footer-section a {
   color: #dcdde1;
   text-decoration: none;
   line-height: 1.6;
+  transition: color 0.3s ease;
 }
 
 .footer-section ul {
@@ -133,49 +223,57 @@ export default {
 }
 
 .footer-section ul li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .footer-section ul li a:hover {
-  color: #6c5ce7;
+  color: #74b9ff;
   text-decoration: underline;
 }
 
+/* Social icons */
 .social-icons a {
   display: inline-block;
-  margin-right: 1rem;
-  background: #2d3436;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
+  margin-right: 0.8rem;
+  background: linear-gradient(135deg, #0984e3, #6c5ce7);
+  padding: 0.5rem 1rem;
+  border-radius: 30px;
+  color: #fff;
   transition: all 0.3s ease;
+  box-shadow: 0px 4px 10px rgba(108, 92, 231, 0.5);
 }
 
 .social-icons a:hover {
-  background: #6c5ce7;
-  color: #fff;
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, #6c5ce7, #00cec9);
+  transform: scale(1.1) translateY(-3px);
 }
 
+/* Footer bottom */
 .footer-bottom {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid #353b48;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
   padding-top: 1rem;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.8rem;
 }
 
 .footer-bottom span {
-  color: #7f8c8d;
+  color: #b2bec3;
+  transition: color 0.3s ease;
 }
 
-/* Responsive Footer */
+.footer-bottom span:hover {
+  color: #ffffff;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .footer-top {
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.8rem;
   }
   .footer-bottom {
     flex-direction: column;
