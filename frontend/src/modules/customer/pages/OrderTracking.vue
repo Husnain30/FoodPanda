@@ -17,14 +17,21 @@
         <q-card-section>
           <div class="text-h6">Order #{{ order.id }}</div>
           <div><strong>Status:</strong> {{ order.status }}</div>
-          <div><strong>Total:</strong> {{ order.total }} PKR</div>
+          <div><strong>Total:</strong> {{ order.total_price }} PKR</div>
+          <div><strong>Rider Fee:</strong> {{ order.rider_fee }} PKR</div>
+          <div>
+            <small>Placed: {{ new Date(order.created_at).toLocaleString() }}</small>
+          </div>
+          <div>
+            <small>Updated: {{ new Date(order.updated_at).toLocaleString() }}</small>
+          </div>
         </q-card-section>
 
         <q-separator />
 
         <q-card-section>
           <div class="text-subtitle1 q-mb-sm">Items</div>
-          <q-list bordered separator>
+          <q-list v-if="order.items && order.items.length" bordered separator>
             <q-item v-for="item in order.items" :key="item.id">
               <q-item-section>
                 <div>{{ item.name }}</div>
@@ -35,6 +42,9 @@
               </q-item-section>
             </q-item>
           </q-list>
+          <div v-else class="text-grey text-italic">
+            No items available
+          </div>
         </q-card-section>
       </q-card>
 
@@ -63,7 +73,7 @@ export default {
   name: "OrderTracking",
   data() {
     return {
-      step: 1, // default step
+      step: 1,
     };
   },
   computed: {
@@ -116,4 +126,5 @@ export default {
   },
 };
 </script>
+
 

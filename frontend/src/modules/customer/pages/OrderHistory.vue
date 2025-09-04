@@ -6,11 +6,17 @@
       <div class="text-h5">Your Orders</div>
     </div>
 
-    <!-- Orders List -->
+    <!-- Loader -->
     <div v-if="loading" class="row justify-center q-mt-lg">
       <q-spinner-dots size="40px" color="primary" />
     </div>
 
+    <!-- Error -->
+    <div v-else-if="error" class="text-negative text-center q-mt-lg">
+      {{ error }}
+    </div>
+
+    <!-- Orders List -->
     <div v-else>
       <q-card
         v-for="order in orders"
@@ -20,10 +26,13 @@
         <q-card-section>
           <div class="text-h6">Order #{{ order.id }}</div>
           <div class="text-caption text-grey">
-            Status: 
+            Status:
             <q-badge :color="statusColor(order.status)" class="q-ml-xs">
               {{ order.status }}
             </q-badge>
+          </div>
+          <div class="text-caption">
+            Placed on: {{ formatDate(order.created_at) }}
           </div>
         </q-card-section>
 
@@ -34,10 +43,14 @@
           <q-item v-for="item in order.items" :key="item.id">
             <q-item-section>
               <q-item-label>{{ item.name }}</q-item-label>
-              <q-item-label caption>{{ item.quantity }} × {{ item.price }} PKR</q-item-label>
+              <q-item-label caption>
+                {{ item.quantity }} × {{ item.price }} PKR
+              </q-item-label>
             </q-item-section>
             <q-item-section side>
-              <div class="text-weight-bold">{{ item.quantity * item.price }} PKR</div>
+              <div class="text-weight-bold">
+                {{ item.quantity * item.price }} PKR
+              </div>
             </q-item-section>
           </q-item>
         </q-list>
@@ -51,6 +64,12 @@
           </div>
         </q-card-actions>
       </q-card>
+
+      <!-- No Orders -->
+      <div v-if="!orders.length" class="text-center q-mt-lg">
+        <q-icon name="shopping_bag" size="40px" color="grey" />
+        <div class="text-grey q-mt-sm">You have no past orders</div>
+      </div>
     </div>
 
   </q-page>
@@ -63,13 +82,14 @@ export default {
   name: "OrdersPage",
 
   computed: {
-    ...mapState("customer", ["orders", "loading"]),
+    ...mapState("customer", ["orders", "loading", "error"]),
   },
 
   methods: {
     ...mapActions("customer", ["fetchOrders"]),
 
     calculateTotal(items) {
+      if (!items) return 0;
       return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     },
 
@@ -85,6 +105,12 @@ export default {
           return "grey";
       }
     },
+
+    formatDate(dateStr) {
+      if (!dateStr) return "-";
+      const date = new Date(dateStr);
+      return date.toLocaleString();
+    },
   },
 
   mounted() {
@@ -99,4 +125,6 @@ export default {
   margin: 0 auto;
 }
 </style>
+
+
 

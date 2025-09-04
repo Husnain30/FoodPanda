@@ -1,5 +1,5 @@
 <template>
-  <q-header elevated class=" text-white" style="background: linear-gradient(135deg, #6a11cb, #2575fc);">
+  <q-header elevated class=" text-white" style="background: #1e272e">
     <q-toolbar>
       <!-- Logo -->
       <q-avatar square size="42px" class="q-mr-md">

@@ -18,27 +18,29 @@ const getters = {
 };
 
 const actions = {
-  async updateStatus({ commit }, status) {
-    try {
-      commit("setLoading", true);
-      await api.post("/riders/status", { status });
-      commit("setStatus", status);
-    } catch (error) {
-      commit(
-        "setError",
-        error.response?.data?.message || "Failed to update status"
-      );
-    } finally {
-      commit("setLoading", false);
-    }
-  },
+async updateStatus({ commit }, status) {
+  try {
+    commit("setLoading", true);
+    await api.post("/riders/status", { status });
+    commit("setStatus", status);
+  } catch (error) {
+    commit(
+      "setError",
+      error.response?.data?.message || "Failed to update status"
+    );
+  } finally {
+    commit("setLoading", false);
+  }
+},
+
+
 
   // ✅ fetch all orders
   async fetchOrders({ commit }) {
     try {
       commit("setLoading", true);
       const { data } = await api.get("/riders/orders"); // plural ✅
-      commit("setOrders", data);
+      commit("setOrders", data.data.orders);
     } catch (error) {
       commit(
         "setError",
@@ -65,20 +67,24 @@ const actions = {
     }
   },
 
-  async fetchEarnings({ commit }) {
-    try {
-      commit("setLoading", true);
-      const { data } = await api.get("/riders/earnings");
-      commit("setEarnings", data.earnings);
-    } catch (error) {
-      commit(
-        "setError",
-        error.response?.data?.message || "Failed to fetch earnings"
-      );
-    } finally {
-      commit("setLoading", false);
-    }
-  },
+async fetchEarnings({ commit }) {
+  try {
+    commit("setLoading", true);
+    const { data } = await api.get("/riders/earnings");
+
+    // ✅ Save full earnings data from API
+    commit("setEarnings", data.data);
+  } catch (error) {
+    commit(
+      "setError",
+      error.response?.data?.message || "Failed to fetch earnings"
+    );
+  } finally {
+    commit("setLoading", false);
+  }
+},
+
+
 
   async logout({ commit }) {
     try {

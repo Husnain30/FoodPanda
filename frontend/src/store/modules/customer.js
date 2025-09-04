@@ -37,10 +37,10 @@ const actions = {
   },
 
   // ✅ fetch single restaurant menu
-  async fetchMenu({ commit }, restaurantId) {
+  async fetchMenu({ commit },) {
     try {
       commit("setLoading", true);
-      const { data } = await api.get(`customer/restaurants/${restaurantId}/menu`);
+      const { data } = await api.get(`customer/restaurants/1/menu`);
       commit("setMenu", data);
     } catch (error) {
       commit("setError", error.response?.data?.message || "Failed to load menu");
@@ -54,7 +54,7 @@ const actions = {
     try {
       commit("setLoading", true);
       const { data } = await api.post("customer/orders", orderData);
-      commit("addOrder", data);
+      commit("addOrder", data.data);
       commit("clearCart");
       return data;
     } catch (error) {
@@ -65,25 +65,27 @@ const actions = {
     }
   },
 
-  // ✅ fetch all orders (for /orders page)
-  async fetchOrders({ commit }) {
-    try {
-      commit("setLoading", true);
-      const { data } = await api.get("customer/orders");
-      commit("setOrders", data);
-    } catch (error) {
-      commit("setError", error.response?.data?.message || "Failed to load orders");
-    } finally {
-      commit("setLoading", false);
-    }
-  },
+
+  // ✅ fetch order history
+async fetchOrders({ commit }) {
+  try {
+    commit("setLoading", true);
+    const { data } = await api.get("customer/orders"); // orderHistory endpoint
+    commit("setOrders", data.data);
+  } catch (error) {
+    commit("setError", error.response?.data?.message || "Failed to load orders");
+  } finally {
+    commit("setLoading", false);
+  }
+},
+
 
   // ✅ track single order
   async trackOrder({ commit }, orderId) {
     try {
       commit("setLoading", true);
       const { data } = await api.get(`customer/orders/${orderId}`);
-      commit("setCurrentOrder", data);
+      commit("setCurrentOrder", data.data);
     } catch (error) {
       commit("setError", error.response?.data?.message || "Failed to track order");
     } finally {
@@ -95,7 +97,7 @@ const actions = {
     try {
       commit("setLoading", true);
       const { data } = await api.put(`customer/reviews/${id}`, reviewData);
-      commit("updateReview", data);
+      commit("updateReview", data.data);
     } catch (error) {
       commit("setError", error.response?.data?.message || "Failed to update review");
     } finally {
@@ -121,7 +123,7 @@ const actions = {
     try {
       commit("setLoading", true);
       const { data } = await api.post("customer/reviews", reviewData);
-      commit("addReview", data);
+      commit("addReview", data.data);
     } catch (error) {
       commit("setError", error.response?.data?.message || "Failed to post review");
     } finally {
@@ -142,7 +144,7 @@ const actions = {
 };
 
 const mutations = {
-  setRestaurants: (state, restaurants) => (state.restaurants = restaurants),
+ setRestaurants: (state, restaurants) => (state.restaurants = restaurants),
   setMenu: (state, menu) => (state.menu = menu),
 
   addOrder: (state, order) => state.orders.push(order),
