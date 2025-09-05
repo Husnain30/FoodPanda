@@ -1,9 +1,13 @@
 <template>
   <div class="restaurant-layout">
     <!-- Animated Header -->
-    <header class="restaurant-header">
-      <h2>🍽️ TasteCraft Manager</h2>
-    </header>
+  <header class="restaurant-header">
+  <h2>🍽️ TasteCraft Manager</h2>
+
+  <button class="logout-btn" @click="logoutToHome">
+    🚪 Logout
+  </button>
+</header>
 
     <!-- Main Content -->
     <main class="restaurant-content">
@@ -62,13 +66,70 @@
 </template>
 
 <script>
+import { useStore } from "vuex"
+import { useRouter } from "vue-router"
+
 export default {
   name: "RestaurantLayout",
-};
+  setup() {
+    const store = useStore()
+    const router = useRouter()
+
+    const logoutToHome = () => {
+      store.dispatch("auth/logout")
+      router.push("/") // 👈 Home page redirect
+    }
+
+    return {
+      logoutToHome
+    }
+  }
+}
 </script>
 
 <style scoped>
 /* Layout */
+
+
+.restaurant-header {
+  background: linear-gradient(135deg, #6c5ce7, #0984e3);
+  color: white;
+
+  height: 70px;               /* 🔹 Fixed navbar height */
+  padding: 0 1.5rem;          /* 🔹 sirf left/right padding */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  font-size: 1.2rem;          /* 🔹 smaller text */
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.restaurant-header h2 {
+  margin: 0;                  /* 🔹 extra space hatao */
+  font-size: 1.2rem;          /* 🔹 same as header */
+  font-weight: 600;
+}
+
+.logout-btn {
+  background: #e63946;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: #d62828;
+}
+
 .restaurant-layout {
   display: flex;
   flex-direction: column;
@@ -78,17 +139,7 @@ export default {
 }
 
 /* ================= HEADER ================= */
-.restaurant-header {
-  background: linear-gradient(135deg, #6c5ce7, #0984e3);
-  color: white;
-  padding: 1.5rem;
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  position: relative;
-  overflow: hidden;
-}
+
 
 /* Floating gradient animation */
 .restaurant-header::before {

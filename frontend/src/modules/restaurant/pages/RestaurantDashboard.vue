@@ -100,9 +100,9 @@
       <div v-if="currentRestaurantDetails.menus && currentRestaurantDetails.menus.length > 0" class="menu-section">
         <h3>Current Menu Items ({{ currentRestaurantDetails.menus.length }})</h3>
         <div class="menu-grid">
-          <div 
-            v-for="menu in currentRestaurantDetails.menus" 
-            :key="menu.id" 
+          <div
+            v-for="menu in currentRestaurantDetails.menus"
+            :key="menu.id"
             class="menu-card"
           >
             <div class="menu-info">
@@ -121,9 +121,9 @@
       <div v-if="currentRestaurantDetails.orders && currentRestaurantDetails.orders.length > 0" class="orders-section">
         <h3>Recent Orders ({{ currentRestaurantDetails.orders.length }})</h3>
         <div class="orders-list">
-          <div 
-            v-for="order in currentRestaurantDetails.orders.slice(0, 5)" 
-            :key="order.id" 
+          <div
+            v-for="order in currentRestaurantDetails.orders.slice(0, 5)"
+            :key="order.id"
             class="order-item"
           >
             <div class="order-info">
@@ -172,16 +172,16 @@
 
       <!-- Gallery Grid with Dynamic Data -->
       <div v-else class="gallery-grid">
-        <div 
-          v-for="restaurant in restaurants" 
-          :key="restaurant.id" 
+        <div
+          v-for="restaurant in restaurants"
+          :key="restaurant.id"
           class="gallery-card"
           @click="selectRestaurant(restaurant)"
           :class="{ 'selected': currentSelectedRestaurant?.id === restaurant.id }"
         >
-          <img 
-            :src="getRestaurantImage(restaurant)" 
-            :alt="restaurant.name || 'Restaurant Image'" 
+          <img
+            :src="getRestaurantImage(restaurant)"
+            :alt="restaurant.name || 'Restaurant Image'"
             class="gallery-image"
             @error="$event.target.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop&crop=center'"
           >
@@ -299,9 +299,9 @@
             <span class="item-count">{{ currentRestaurantDetails.menus.length }} items</span>
           </div>
           <div class="items-list">
-            <div 
-              v-for="menu in currentRestaurantDetails.menus.slice(0, 5)" 
-              :key="menu.id" 
+            <div
+              v-for="menu in currentRestaurantDetails.menus.slice(0, 5)"
+              :key="menu.id"
               class="item-row"
             >
               <div class="item-info">
@@ -318,36 +318,7 @@
           </div>
         </div>
 
-        <!-- Active Promotions -->
-        <div class="promotions-container">
-          <div class="section-header">
-            <h3>Active Promotions</h3>
-            <span class="promotion-count">3 active</span>
-          </div>
-          <div class="promotion-list">
-            <div class="promotion-item">
-              <div class="promotion-info">
-                <span class="promotion-name">20% Off Lunch Combo</span>
-                <span class="promotion-expiry">Expires in 3 days</span>
-              </div>
-              <span class="promotion-status active">Active</span>
-            </div>
-            <div class="promotion-item">
-              <div class="promotion-info">
-                <span class="promotion-name">Free Delivery Weekend</span>
-                <span class="promotion-expiry">Expires tomorrow</span>
-              </div>
-              <span class="promotion-status ending">Ending Soon</span>
-            </div>
-            <div class="promotion-item">
-              <div class="promotion-info">
-                <span class="promotion-name">Buy 2 Get 1 Free Pizza</span>
-                <span class="promotion-expiry">Expires in 5 days</span>
-              </div>
-              <span class="promotion-status active">Active</span>
-            </div>
-          </div>
-        </div>
+ 
       </div>
     </div>
   </div>
@@ -382,7 +353,7 @@ export default {
       ],
     };
   },
-  
+
   computed: {
     ...mapGetters('restaurant', [
       'getDashboardStats',
@@ -396,16 +367,16 @@ export default {
       'getDetailsLoading',
       'getDetailsError'
     ]),
-    
+
     // Use store data for template
     restaurants() {
       return this.getAllRestaurants;
     },
-    
+
     restaurantsLoading() {
       return this.getRestaurantsLoading;
     },
-    
+
     restaurantsError() {
       return this.getRestaurantsError;
     },
@@ -444,19 +415,19 @@ export default {
   async mounted() {
     // Fetch restaurants data on component mount
     await this.fetchRestaurants();
-    
+
     // Auto-refresh data every 60s (increased from 30s to reduce API calls)
     this.refreshInterval = setInterval(() => {
       this.refreshDashboardData();
     }, 60000);
   },
-  
+
   beforeUnmount() {
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
   },
-  
+
   methods: {
     ...mapActions('restaurant', [
       'fetchRestaurantStats',
@@ -470,21 +441,21 @@ export default {
       try {
         console.log('🏪 Fetching restaurants via Vuex action...');
         await this.fetchAllRestaurants();
-        
+
         const restaurants = this.getAllRestaurants;
         console.log('✅ Restaurants loaded from store:', restaurants.length);
-        
+
         // Fetch details and stats for the first restaurant (or selected one)
         if (restaurants.length > 0) {
           const targetRestaurant = this.currentSelectedRestaurant || restaurants[0];
           await this.fetchRestaurantDetailsAndStats([targetRestaurant]);
-          
+
           // Set default selected restaurant if none selected
           if (!this.currentSelectedRestaurant) {
             this.currentSelectedRestaurant = restaurants[0];
           }
         }
-        
+
       } catch (error) {
         console.error('❌ Error in fetchRestaurants:', error);
         this.$q?.notify?.({
@@ -499,17 +470,17 @@ export default {
     async fetchRestaurantDetailsAndStats(restaurants) {
       try {
         console.log('🔄 Fetching details and stats for restaurants...');
-        
-        const promises = restaurants.map(restaurant => 
+
+        const promises = restaurants.map(restaurant =>
           this.fetchRestaurantWithStats(restaurant.id).catch(error => {
             console.warn(`Failed to fetch data for restaurant ${restaurant.id}:`, error);
             return null;
           })
         );
-        
+
         await Promise.all(promises);
         console.log('✅ Restaurant details and stats loaded');
-        
+
       } catch (error) {
         console.error('❌ Error fetching restaurant details:', error);
       }
@@ -518,7 +489,7 @@ export default {
     // Select a restaurant to view its details
     async selectRestaurant(restaurant) {
       this.currentSelectedRestaurant = restaurant;
-      
+
       // Fetch details and stats for the selected restaurant if not already loaded
       if (!this.getRestaurantDetails[restaurant.id]) {
         await this.fetchRestaurantDetailsAndStats([restaurant]);
@@ -529,7 +500,7 @@ export default {
       console.log("🔄 Refreshing dashboard data...");
       this.fetchRestaurants();
     },
-    
+
     changePeriod(period) {
       this.currentPeriod = period;
       console.log("📊 Changed period to:", period);
@@ -540,14 +511,14 @@ export default {
       if (restaurant.image_url || restaurant.image) {
         return restaurant.image_url || restaurant.image;
       }
-      
+
       const fallbackImages = [
         'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop&crop=center',
         'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=400&h=300&fit=crop&crop=center',
         'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop&crop=center',
         'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop&crop=center'
       ];
-      
+
       return fallbackImages[restaurant.id % fallbackImages.length];
     },
 
@@ -1530,11 +1501,11 @@ export default {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  
+
   .metrics-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .gallery-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
@@ -1545,43 +1516,43 @@ export default {
   .dashboard {
     padding: 1rem;
   }
-  
+
   .dashboard-header {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
   }
-  
+
   .header-actions {
     justify-content: stretch;
   }
-  
+
   .btn-primary, .btn-secondary {
     flex: 1;
     justify-content: center;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .page-title {
     font-size: 2rem;
   }
-  
+
   .stat-value {
     font-size: 2rem;
   }
-  
+
   .metrics-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .actions-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .chart-header {
     flex-direction: column;
     gap: 1rem;
@@ -1593,16 +1564,16 @@ export default {
   .stat-card {
     padding: 1.5rem;
   }
-  
+
   .chart-wrapper {
     height: 250px;
     padding: 1rem;
   }
-  
+
   .section-header {
     padding: 1rem 1.5rem;
   }
-  
+
   .promotion-list {
     padding: 1rem 1.5rem 1.5rem;
   }
