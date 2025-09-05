@@ -95,7 +95,7 @@ export default {
   background: linear-gradient(135deg, #6c5ce7, #0984e3);
   color: white;
 
-  height: 60px;               /* 🔹 Fixed navbar height */
+  height: 70px;               /* 🔹 Fixed navbar height */
   padding: 0 1.5rem;          /* 🔹 sirf left/right padding */
   display: flex;
   justify-content: space-between;
