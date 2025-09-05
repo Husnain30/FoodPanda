@@ -18,7 +18,7 @@
         class="navbar-tabs"
       >
         <q-route-tab to="/restaurants" name="restaurants" label="Browse Restaurants" />
-        <q-route-tab to="/cart" name="cart" label="Cart" />
+        <q-route-tab to="/carts" name="cart" label="Cart" />
         <q-route-tab to="/checkout" name="checkout" label="Checkout" />
         <q-route-tab to="/orders" name="placeOrder" label="Order History" />
         <q-route-tab to="/orders/1" name="trackOrder" label="Order Tracking" />
@@ -51,8 +51,10 @@ function handleLogout() {
 <style scoped>
 /* Navbar background */
 .navbar-header {
-background: #1e272e;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
   height: 72px; /* 👈 smaller & cleaner navbar */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Toolbar adjustments */

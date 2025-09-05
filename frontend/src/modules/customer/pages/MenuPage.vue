@@ -75,12 +75,14 @@ export default {
   },
   methods: {
     ...mapActions("customer", ["fetchMenu", "fetchRestaurant"]),
-    addToCart(item) {
+    async addToCart(item) {
       this.$store.dispatch("customer/addToCart", item);
       this.$q.notify({
         type: "positive",
         message: `${item.name} added to cart!`,
       });
+      // ✅ redirect to cart page
+      this.$router.push("/carts");
     },
   },
 };
@@ -97,6 +99,8 @@ export default {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
 }
 </style>
+
+
 
 
 

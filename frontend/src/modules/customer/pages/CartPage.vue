@@ -1,110 +1,175 @@
 <template>
-  <q-page padding>
-    <h1 class="page-title"> Your Cart</h1>
+  <q-page class="cart-page q-pa-md">
+    <div class="text-h5 q-mb-md">🛒 Your Cart</div>
 
-    <q-card class="cart-card q-pa-md">
-      <q-list bordered separator>
-        <q-item v-for="n in 8" :key="n" class="cart-item">
-          <q-item-section>
-            <div class="item-name">Dish {{ n }}</div>
-            <div class="item-price">$ {{ (10 * n).toFixed(2) }}</div>
-          </q-item-section>
-          <q-item-section side>
-            <q-btn flat class="delete-btn" icon="delete" />
-          </q-item-section>
-        </q-item>
-      </q-list>
+    <!-- Loading -->
+    <div v-if="loading" class="text-center q-my-lg">
+      <q-spinner color="primary" size="40px" />
+      <p>Loading your cart...</p>
+    </div>
 
-      <div class="total-section q-mt-md">
-        <div class="total-text">
-          Total: <strong>$60.00</strong>
-        </div>
-        <q-btn 
-          class="checkout-btn q-ml-md" 
-          label="Proceed to Checkout" 
-          to="/customer/checkout" 
-        />
+    <!-- Error -->
+    <div v-if="error" class="text-negative text-center q-my-lg">
+      {{ error }}
+    </div>
+
+    <!-- Empty Cart -->
+    <div v-if="!loading && cartItems.length === 0" class="text-center q-my-lg">
+      <q-icon name="remove_shopping_cart" size="48px" color="grey" />
+      <p class="text-grey">Your cart is empty</p>
+    </div>
+
+    <!-- Cart Items -->
+    <div v-if="!loading && cartItems.length > 0" class="row q-col-gutter-md">
+      <div v-for="item in cartItems" :key="item.id" class="col-12 col-md-6">
+        <q-card class="cart-item-card">
+          <q-card-section class="row items-center">
+            <q-img
+              :src="item.image || 'https://source.unsplash.com/100x100/?food'"
+              :alt="item.name"
+              class="cart-img col-3"
+            />
+            <div class="col-6 q-pl-md">
+              <div class="text-h6">{{ item.name }}</div>
+              <div class="text-subtitle2 text-grey">Rs. {{ item.price }}</div>
+              <div class="text-caption">Qty: {{ item.quantity }}</div>
+            </div>
+            <div class="col-3 text-right">
+              <q-btn
+                dense
+                flat
+                round
+                color="negative"
+                icon="delete"
+                @click="removeItem(item)"
+              />
+            </div>
+          </q-card-section>
+        </q-card>
       </div>
-    </q-card>
+    </div>
+
+    <!-- Total & Actions -->
+    <div
+      v-if="cartItems.length > 0"
+      class="q-mt-lg flex justify-between items-center"
+    >
+      <div class="text-h6">
+        Total: Rs. {{ totalPrice }}
+      </div>
+      <div>
+        <q-btn
+          color="negative"
+          flat
+          label="Clear Cart"
+          @click="clearCart"
+          class="q-mr-sm"
+        />
+        <q-btn color="primary" label="Checkout" @click="checkout" />
+      </div>
+    </div>
   </q-page>
 </template>
 
+<script>
+import api from "src/boot/axios";
+
+export default {
+  name: "CartPage",
+  data() {
+    return {
+      cartItems: [],
+      loading: false,
+      error: null,
+    };
+  },
+  computed: {
+    totalPrice() {
+      return this.cartItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+    },
+  },
+  methods: {
+    async fetchCart() {
+      try {
+        this.loading = true;
+        const { data } = await api.get("/carts/1/items"); // ✅ Adjust cartId dynamically if needed
+        this.cartItems = data.data || [];
+      } catch (err) {
+        console.error(err);
+        this.error = err.response?.data?.message || "Failed to load your cart.";
+      } finally {
+        this.loading = false;
+      }
+    },
+    async removeItem(item) {
+      try {
+        await api.delete(`/cart-items/${item.id}`);
+        this.cartItems = this.cartItems.filter((i) => i.id !== item.id);
+      } catch (err) {
+        console.error(err);
+        this.$q.notify({
+          type: "negative",
+          message: "Failed to remove item",
+        });
+      }
+    },
+    async clearCart() {
+      try {
+        for (const item of this.cartItems) {
+          await api.delete(`/cart-items/${item.id}`);
+        }
+        this.cartItems = [];
+        this.$q.notify({ type: "positive", message: "Cart cleared!" });
+      } catch (err) {
+        console.error(err);
+        this.$q.notify({
+          type: "negative",
+          message: "Failed to clear cart",
+        });
+      }
+    },
+    async checkout() {
+      try {
+        await api.post("/orders", {
+          cart_id: 1, // ✅ Replace with dynamic cartId
+          items: this.cartItems,
+        });
+        this.cartItems = [];
+        this.$q.notify({ type: "positive", message: "Order placed successfully!" });
+        this.$router.push("/orders");
+      } catch (err) {
+        console.error(err);
+        this.$q.notify({
+          type: "negative",
+          message: "Checkout failed",
+        });
+      }
+    },
+  },
+  created() {
+    this.fetchCart();
+  },
+};
+</script>
+
 <style scoped>
-/* Title */
-.page-title {
-  
-  font-size: 35px;
-  margin-bottom: 1px;
-  font-weight: 700;
-  color: #333;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-/* Cart Card */
-.cart-card {
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 
-    0 6px 14px rgba(106, 17, 203, 0.15), 
-    0 8px 20px rgba(37, 117, 252, 0.15);
-  transition: transform 0.3s ease;
-}
-.cart-card:hover {
-  transform: translateY(-5px);
-}
-
-/* Items */
-.cart-item {
-  padding: 12px 0;
-}
-.item-name {
-  font-weight: 600;
-  font-size: 17px;
-  color: #444;
-}
-.item-price {
-  font-size: 15px;
-  color: #6a11cb;
-  font-weight: 500;
-}
-
-/* Delete Button */
-.delete-btn {
-  color: #ff4757;
-  transition: all 0.3s ease;
-}
-.delete-btn:hover {
-  background: rgba(255, 71, 87, 0.1);
-  border-radius: 8px;
-}
-
-/* Total */
-.total-section {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  font-size: 18px;
-  font-weight: 600;
-  padding-top: 15px;
-  border-top: 2px solid rgba(0,0,0,0.08);
-}
-.total-text strong {
-  color: #2575fc;
-}
-
-/* Checkout Button */
-.checkout-btn {
-  background: linear-gradient(135deg, #6a11cb, #2575fc);
-  color: #fff;
-  font-weight: 600;
+.cart-item-card {
   border-radius: 12px;
-  padding: 10px 20px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(106, 17, 203, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.checkout-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(37, 117, 252, 0.3);
+.cart-item-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+}
+.cart-img {
+  border-radius: 8px;
+  height: 80px;
+  object-fit: cover;
 }
 </style>
+
+
 

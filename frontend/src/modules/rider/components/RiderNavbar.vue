@@ -1,15 +1,17 @@
 <template>
-  <q-header elevated class=" text-white" style="background: #1e272e">
-    <q-toolbar>
+  <q-header elevated class="text-white navbar-header">
+    <q-toolbar class="navbar-toolbar">
       <!-- Logo -->
-      <q-avatar square size="42px" class="q-mr-md">
-        <q-icon name="delivery_dining" size="32px" />
-      </q-avatar>
+      <div class="flex items-center q-mr-xl">
+        <q-avatar square size="48px" class="navbar-logo">
+          <q-icon name="delivery_dining" size="32px" />
+        </q-avatar>
+        <span class="brand-name">Rider Panel</span>
+      </div>
 
       <!-- Tabs -->
       <q-tabs
         v-model="tab"
-        dense
         align="left"
         active-color="white"
         indicator-color="white"
@@ -27,54 +29,87 @@
       <rider-status-toggle class="q-mr-md" />
 
       <!-- Logout Button -->
-      <q-btn dense class="logout-btn" label="Logout" @click="handleLogout" />
+      <q-btn class="logout-btn" label="Logout" unelevated @click="handleLogout" />
     </q-toolbar>
   </q-header>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
+import RiderStatusToggle from "./RiderStatusToggle.vue";
 
+const tab = ref("/riders");
 const store = useStore();
 const router = useRouter();
-import RiderStatusToggle from './RiderStatusToggle.vue'
-
-const tab = ref('/rider')
 
 function handleLogout() {
   store.dispatch("riders/logout");
-  router.push("/auth/login"); // redirect after logout
+  router.push("/auth/login");
 }
 </script>
 
 <style scoped>
-.navbar-tabs .q-tabs__tab {
+/* Navbar background */
+.navbar-header {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  height: 72px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Toolbar adjustments */
+.navbar-toolbar {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+}
+
+/* Logo & Brand */
+.navbar-logo {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.brand-name {
+  font-size: 18px;
+  font-weight: 700;
+  margin-left: 10px;
+  letter-spacing: 0.5px;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+/* Tabs */
+.navbar-tabs :deep(.q-tab) {
   font-weight: 600;
   font-size: 15px;
-  transition: 0.3s;
-}
-.navbar-tabs .q-tabs__tab:hover {
-  background: rgba(255, 255, 255, 0.15);
+  padding: 10px 18px;
+  transition: all 0.3s ease;
   border-radius: 8px;
 }
-.navbar-tabs .q-tabs__tab--active {
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 8px;
-}
+
+
+/* Logout Button */
 .logout-btn {
-  background-color: #e53935;
+  background: #e53935;
   color: #fff;
   font-weight: 600;
-  border-radius: 12px;
-  padding: 6px 16px;
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-size: 15px;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 .logout-btn:hover {
-  background-color: #d32f2f;
+  background: #c62828;
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.3);
 }
 </style>
+

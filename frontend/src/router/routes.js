@@ -31,7 +31,7 @@ export default [
     { path: '/restaurants/:id/menu', component: () => import('../modules/customer/pages/MenuPage.vue') },
 
     // Cart and Checkout
-    { path: '/cart', component: () => import('../modules/customer/pages/CartPage.vue') },
+    { path: '/carts', component: () => import('../modules/customer/pages/CartPage.vue') },
     { path: '/checkout', component: () => import('../modules/customer/pages/CheckoutPage.vue') },
 
     // Orders
