@@ -9,12 +9,13 @@ import restaurant from './modules/restaurant';
 import rider from "./modules/rider"; // ✅ customer module imported
 
 
+
 export default createStore({
   modules: {
     auth,
     admin,
     customer, 
-    restaurant, 
+    restaurant,
     rider,// ✅ customer module added
   },
 });

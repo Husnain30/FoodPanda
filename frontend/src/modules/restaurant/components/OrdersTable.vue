@@ -6,7 +6,7 @@
     <div v-if="orders.length === 0" class="empty-state">
       <p>No orders found</p>
     </div>
-    
+
     <!-- Orders Table -->
     <table v-else>
       <thead>
@@ -39,21 +39,21 @@
             </span>
           </td>
           <td>
-            <button 
+            <button
               class="btn accept"
               @click="handleStatusUpdate(order.id, 'Accepted')"
               :disabled="!canAccept(order)"
             >
               ✅ Accept
             </button>
-            <button 
+            <button
               class="btn reject"
               @click="handleStatusUpdate(order.id, 'Rejected')"
               :disabled="!canReject(order)"
             >
               ❌ Reject
             </button>
-            <button 
+            <button
               class="btn deliver"
               @click="handleStatusUpdate(order.id, 'Delivered')"
               :disabled="!canDeliver(order)"
@@ -80,55 +80,34 @@ export default {
   },
   emits: ['update-status'],
   setup(props, { emit }) {
-    
+
     // Helper methods to handle different data structures
-    const getCustomerName = (order) => {
-      return order.customer_name || 
-             order.customer?.name || 
-             order.customer || 
-             order.user?.name || 
-             'Unknown Customer'
-    }
+const getCustomerName = (order) => {
+  return `User ID: ${order.user_id}` // Since user name is not in response
+}
+   const getOrderItems = (order) => {
+  return [`Order #${order.id} Items`] // Items details not in current response
+}
 
-    const getOrderItems = (order) => {
-      // Handle different possible structures
-      if (order.items && Array.isArray(order.items)) {
-        return order.items.map(item => 
-          typeof item === 'string' ? item : 
-          item.name || 
-          `${item.menu_item?.name || 'Item'} x${item.quantity || 1}`
-        )
-      }
-      
-      if (order.order_items && Array.isArray(order.order_items)) {
-        return order.order_items.map(item => 
-          `${item.menu_item?.name || item.name || 'Item'} x${item.quantity || 1}`
-        )
-      }
-      
-      // Fallback
-      return [order.item_names || 'Order items']
-    }
 
-    const getOrderAmount = (order) => {
-      return order.total_amount || order.amount || order.total || 0
-    }
+const getOrderAmount = (order) => {
+  const total = parseFloat(order.total_price || 0)
+  const riderFee = parseFloat(order.rider_fee || 0)
+  return (total + riderFee).toFixed(2)
+}
 
-    const getOrderTime = (order) => {
-      if (order.created_at) {
-        return new Date(order.created_at).toLocaleString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        })
-      }
-      return order.time || order.order_time || 'N/A'
-    }
+  const getOrderTime = (order) => {
+  return new Date(order.created_at).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
 
-    const getOrderStatus = (order) => {
-      return order.status || 'Pending'
-    }
+  const getOrderStatus = (order) => {
+  return order.status || 'pending'
+}
 
     const canAccept = (order) => {
       const status = getOrderStatus(order).toLowerCase()

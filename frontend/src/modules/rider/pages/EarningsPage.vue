@@ -1,83 +1,116 @@
 <template>
   <q-page class="q-pa-md earnings-page">
 
-    <!-- Page Header -->
-    <div class="page-header q-mb-lg">
-      <div class="text-h5">Earnings</div>
-      <div class="earnings-caption ">
-        Track your income and completed deliveries
-      </div>
+    <!-- Header -->
+    <div class="page-header text-center q-mb-lg">
+      <q-icon name="attach_money" size="40px" color="green" />
+      <div class="text-h5 text-bold q-mt-sm">My Earnings</div>
+      <div class="text-caption text-grey">Track your completed deliveries and earnings</div>
     </div>
 
     <!-- Summary Cards -->
     <div class="row q-col-gutter-md q-mb-lg">
-      <div class="col-12 col-md-4">
-        <q-card class="summary-card shadow-3">
-          <q-card-section>
-            <div class="card-title">Total Earnings</div>
-            <div class="card-value">${{ riderEarnings.total || 0 }}</div>
+      <div class="col-6 col-md-3">
+        <q-card class="summary-card bg-primary text-white">
+          <q-card-section class="text-center">
+            <div class="text-subtitle1">Total Orders</div>
+            <div class="text-h6 text-bold">{{ earnings.total_orders }}</div>
           </q-card-section>
         </q-card>
       </div>
-      <div class="col-12 col-md-4">
-        <q-card class="summary-card shadow-3">
-          <q-card-section>
-            <div class="card-title">Today's Earnings</div>
-            <div class="card-value">${{ riderEarnings.today || 0 }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
-      <div class="col-12 col-md-4">
-        <q-card class="summary-card shadow-3">
-          <q-card-section>
-            <div class="card-title">Completed Orders</div>
-            <div class="card-value">{{ riderEarnings.completedOrders || 0 }}</div>
+
+      <div class="col-6 col-md-3">
+        <q-card class="summary-card bg-green text-white">
+          <q-card-section class="text-center">
+            <div class="text-subtitle1">Total Earnings</div>
+            <div class="text-h6 text-bold">Rs. {{ earnings.total_earnings }}</div>
           </q-card-section>
         </q-card>
       </div>
     </div>
 
-    <!-- Detailed Earnings Table -->
-    <q-card class="shadow-3 q-pa-md">
-      <div class="text-subtitle2 q-mb-md">Recent Deliveries</div>
+    <!-- Orders List -->
+    <q-card class="orders-card shadow-3">
+      <q-card-section>
+        <div class="text-h6 text-bold q-mb-md">Completed Orders</div>
 
-      <div
-        v-for="earning in riderEarnings.recent || []"
-        :key="earning.id"
-        class="earning-row row items-center hover-row q-py-sm"
-      >
-        <div class="col-3">{{ earning.date }}</div>
-        <div class="col-5">{{ earning.order }}</div>
-        <div class="col-2">${{ earning.amount }}</div>
-        <div class="col-2">{{ earning.status }}</div>
-      </div>
+        <q-list bordered separator>
+          <q-item v-for="order in earnings.orders" :key="order.id" class="order-item">
+            <q-item-section avatar>
+              <q-icon name="receipt_long" color="primary" size="28px" />
+            </q-item-section>
 
-      <div v-if="riderLoading" class="text-center q-mt-md">
-        <q-spinner color="primary" size="2em" />
-      </div>
+            <q-item-section>
+              <div class="text-subtitle1">Order #{{ order.id }}</div>
+              <div class="text-caption text-grey">
+                Status: <span class="text-green text-bold">{{ order.status }}</span>
+              </div>
+              <div class="text-caption text-grey">
+                Created: {{ new Date(order.created_at).toLocaleString() }}
+              </div>
+            </q-item-section>
 
-      <div v-if="riderError" class="text-negative text-center q-mt-md">
-        {{ riderError }}
-      </div>
+            <q-item-section side top>
+              <div class="text-bold">Rs. {{ order.total_price }}</div>
+              <div class="text-caption text-positive">Rider Fee: {{ order.rider_fee }}</div>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card-section>
     </q-card>
 
   </q-page>
 </template>
 
-<script setup>
-import { onMounted } from "vue";
-import { useStore } from "vuex";
-import { computed } from "vue";
+<script>
+import { mapState, mapActions } from "vuex";
 
-const store = useStore();
-
-// map state
-const riderEarnings = computed(() => store.getters["rider/riderEarnings"]);
-const riderLoading = computed(() => store.getters["rider/riderLoading"]);
-const riderError = computed(() => store.getters["rider/riderError"]);
-
-// fetch on page load
-onMounted(() => {
-  store.dispatch("rider/fetchEarnings");
-});
+export default {
+  name: "EarningsPage",
+  computed: {
+    ...mapState("rider", ["earnings", "loading", "error"]),
+  },
+  created() {
+    this.fetchEarnings();
+  },
+  methods: {
+    ...mapActions("rider", ["fetchEarnings"]),
+  },
+};
 </script>
+
+<style scoped>
+.earnings-page {
+  background: #f9fafb;
+}
+
+.page-header {
+  padding: 10px 0;
+}
+
+.summary-card {
+  border-radius: 12px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+}
+
+.orders-card {
+  border-radius: 12px;
+}
+
+.order-item {
+  transition: background 0.2s ease-in-out;
+}
+
+.order-item:hover {
+  background: #f5f5f5;
+  border-left: 4px solid #027be3;
+}
+</style>
+
+
+
+

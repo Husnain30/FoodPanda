@@ -1,85 +1,103 @@
 <template>
-  <q-page padding>
-    <h1 class="page-title">📖 {{ restaurant?.name || "Menu" }}</h1>
-    <div v-if="restaurant?.cuisine" class="text-subtitle2 text-grey q-mb-md">
-      Cuisine: {{ restaurant.cuisine }}
+  <q-page class="menu-page q-pa-md">
+    <!-- Header -->
+    <div class="q-mb-md text-center">
+      <h2 class="text-h5">{{ restaurant?.name || "Restaurant" }} Menu</h2>
+      <p class="text-subtitle2 text-grey">
+        Browse delicious dishes and order easily 🍴
+      </p>
     </div>
 
-    <!-- Loading -->
-    <div v-if="loading" class="q-pa-md text-grey">
-      Loading menu...
+    <!-- Menu Loader -->
+    <div v-if="loading" class="text-center q-my-lg">
+      <q-spinner color="primary" size="40px" />
+      <p>Loading menu...</p>
     </div>
 
     <!-- Error -->
-    <div v-else-if="error" class="q-pa-md text-negative">
+    <div v-if="error" class="text-negative text-center q-my-lg">
       {{ error }}
     </div>
 
-    <!-- Menu Items -->
-    <div v-else class="menu-grid">
-      <MenuItem
+    <!-- Menu Grid -->
+    <div v-if="!loading && !error" class="row q-col-gutter-md">
+      <div
         v-for="item in menu"
         :key="item.id"
-        :item="item"
-        @add-to-cart="addToCart"
-      />
+        class="col-12 col-sm-6 col-md-4"
+      >
+        <q-card class="menu-card">
+          <q-img
+            :src="item.image || 'https://source.unsplash.com/400x200/?food,dish'"
+            height="180px"
+          />
+          <q-card-section>
+            <div class="text-h6">{{ item.name }}</div>
+            <div class="text-subtitle2 text-grey-8">
+              {{ item.description || "Delicious meal" }}
+            </div>
+            <div class="text-bold text-primary q-mt-sm">
+              Rs. {{ item.price }}
+            </div>
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn
+              unelevated
+              color="secondary"
+              icon="add_shopping_cart"
+              label="Add to Cart"
+              @click="addToCart(item)"
+            />
+          </q-card-actions>
+        </q-card>
+      </div>
     </div>
   </q-page>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-import MenuItem from "../components/MenuItem.vue";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "MenuPage",
-  components: { MenuItem },
-  computed: {
-    ...mapGetters("customer", [
-      "restaurantMenu",
-      "customerLoading",
-      "customerError",
-      "allRestaurants",
-    ]),
-    menu() {
-      return this.restaurantMenu;
-    },
-    loading() {
-      return this.customerLoading;
-    },
-    error() {
-      return this.customerError;
-    },
-    restaurant() {
-      const id = this.$route.params.id;
-      return this.allRestaurants.find((r) => r.id == id) || null;
-    },
+  data() {
+    return {
+      restaurant: null,
+    };
   },
-  async mounted() {
-    const id = this.$route.params.id;
-    // ✅ fetch menu from /customer/restaurants/:id/menu
-    await this.$store.dispatch("customer/fetchMenu", id);
+  computed: {
+    ...mapState("customer", ["menu", "loading", "error"]),
+  },
+  created() {
+    const restaurantId = this.$route.params.id;
+    this.fetchMenu(restaurantId);
+    this.fetchRestaurant(restaurantId);
   },
   methods: {
+    ...mapActions("customer", ["fetchMenu", "fetchRestaurant"]),
     addToCart(item) {
       this.$store.dispatch("customer/addToCart", item);
+      this.$q.notify({
+        type: "positive",
+        message: `${item.name} added to cart!`,
+      });
     },
   },
 };
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  margin-bottom: 10px;
-  font-weight: bold;
+.menu-card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.menu-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+.menu-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
 }
 </style>
+
 
 
 
